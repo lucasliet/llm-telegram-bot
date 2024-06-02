@@ -12,11 +12,13 @@ const APP = new Application();
 
 APP.use(oakCors());
 
+BOT.command('start', (ctx) => ctx.reply('Olá, me a chave API do Gemini,ex: `key:123456`, para conseguir a chave acesse https://aistudio.google.com/app/apikey?hl=pt-br'));
+
 BOT.on('message:text', async (ctx) => {
-  const link: string = ctx.msg.text;
-  console.info(`Received message: ${link}`);
+  const msg: string = ctx.msg.text;
+  console.info(`user: ${ctx.msg.from?.id}, message: ${msg}`);
   try {
-    await replyMediaContent(ctx, link);
+    await replyMediaContent(ctx, msg);
   } catch (err) {
     await ctx.reply(`Eita, algo deu errado: ${err.message}`,
         { reply_to_message_id: ctx.msg.message_id })
@@ -28,7 +30,7 @@ APP.use(async (ctx, next) => {
   try {
     if (ctx.request.url.pathname !== '/webhook') {
       ctx.response.status = 200;
-      ctx.response.body = 'Use with https://t.me/instagram_media_retriever_bot';
+      ctx.response.body = 'Use with https://t.me/llm_gemini_bot';
       return;
     }
     await next();
