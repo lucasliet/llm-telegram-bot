@@ -3,6 +3,7 @@ import { oakCors } from 'https://deno.land/x/cors@v1.2.2/mod.ts';
 
 import { Bot, webhookCallback } from 'https://deno.land/x/grammy@v1.17.2/mod.ts';
 import { replyTextContent } from './service/TelegramService.ts';
+import { clearChatHistory } from './repository/ChatRepository.ts';
 
 const TOKEN: string = Deno.env.get('BOT_TOKEN') as string;
 const PORT: number = parseInt(Deno.env.get('PORT') as string) || 80;
@@ -19,6 +20,13 @@ BOT.command('start', (ctx) =>
     'mais informações em http://github.com/lucasliet/gemini-telegram-bot'
   )
 );
+
+BOT.command('clear', async (ctx) => {
+  const userId = ctx.msg.from?.id;
+  const userKey = `user:${userId}`;
+  await clearChatHistory(userKey);
+  await ctx.reply('Histórico de conversa apagado com sucesso!');
+});
 
 BOT.on('message', async (ctx) => {
   console.info(`user: ${ctx.msg.from?.id}, message: ${ctx.message?.text}`);

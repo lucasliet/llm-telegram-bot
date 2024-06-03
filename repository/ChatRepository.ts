@@ -35,3 +35,7 @@ export async function addChatToHistory(history: Content[], userKey: string): Pro
   const compressedChatHistory = compressObject(history);
   await kv.set([userKey, 'chat-history'], compressedChatHistory, { expireIn: oneDayInMillis });
 }
+
+export async function clearChatHistory(userKey: string): Promise<void> {
+  await kv.delete([userKey, 'chat-history']);
+}
