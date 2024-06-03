@@ -5,9 +5,10 @@ acesse o bot via telegram [@llm_gemini_bot](https://t.me/llm_gemini_bot)
 a primeira mensagem que deve ser enviada ao boot após o /start é a sua chave de API do Gemini, no formato `key:<SUA-CHAVE>`
 > ℹ️ na data de hoje o Gemini possui free tier para acesso gratuito de sua API com limitação de uso diário ref: https://ai.google.dev/pricing?hl=pt-br
 
-por ora esse bot utiliza somente o modelo `gemini-1.5-flash` que é o mais barato dos disponiveis, e trabalha somente com mensagens de texto
+por ora esse bot utiliza somente o modelo `gemini-1.5-flash` que é o mais barato dos disponiveis.
+esse modelo pode trabalhar com interpretação de imagens e texto, e esse projeto suporta isso
 
-um histórico da conversa é mantido para mensagens encadiadas, porém com expiração de 1 dia após a ultima mensagem
+um histórico da conversa é mantido para mensagens encadiadas, porém com expiração de 1 dia após a ultima mensagem, também pode ser apagado manualmente com o commando `/clear`
 
 esse projeto utiliza o [Deno deploy](https://deno.com/deploy) e [Deno kv](https://deno.com/kv) para hosting da aplicação e armazenamento persistente de chaves
 

@@ -29,44 +29,44 @@ export default class GeminiService {
       então tentarei manter minhas respostas curtas e diretas para obter melhores resultados. 
       Com o máximo de ${GeminiService.buildGenerationConfig().maxOutputTokens} tokens de saída,
       caso eu pretenda responder mensagens maiores do que isso, terminarei a mensagem com '...' 
-      indicando que a você pedir caso deseja que eu continue a mensagem.
+      indicando que a você pedir caso deseja que eu continue a mensagem.` +
+      
+      // `Considerando que estou hospedado em um bot de mensagens, devo evitar estilizações markdown tradicionais
+      // e usar as do telegram no lugar.
+      // Por exemplo:
+      // *bold* -> **bold**,
+      // _italic_ -> __italic__,
+      // ~strikethrough~ -> ~~strikethrough~~,
+      // hidden message / spoiler -> ||hidden message / spoiler||,
+      // monospace -> \`code\`,
+      // \`\`\`python
+      // code block
+      // \`\`\` -> \`\`\`python
+      // code block
+      // \`\`\`
+      // Se eu tiver dúvidas, consultarei a documentação do markdown do Telegram ou usarei tags HTML.` +
 
-      Considerando que estou hospedado em um bot de mensagens, devo evitar estilizações markdown tradicionais
-      e usar as do telegram no lugar.
-      Por exemplo:
-      *bold* -> **bold**,
-      _italic_ -> __italic__,
-      ~strikethrough~ -> ~~strikethrough~~,
-      hidden message / spoiler -> ||hidden message / spoiler||,
-      monospace -> \`code\`,
-      \`\`\`python
-      code block
-      \`\`\` -> \`\`\`python
-      code block
-      \`\`\`
-      Se eu tiver dúvidas, consultarei a documentação do markdown do Telegram ou usarei tags HTML.
-
-      Usarei à vontade as estilizações de texto e emojis para tornar a conversa mais agradável e natural.
+      `Usarei à vontade as estilizações de texto e emojis para tornar a conversa mais agradável e natural.
       Sempre tentarei terminar as mensagens com emojis.
     `;
   }
 
-  async sendTextMessage(prompt: string): Promise<string> {
+  async sendTextMessage(quote: string = '', prompt: string): Promise<string> {
     const history = await getChatHistory(this.userKey);
     const chat = GeminiService.buildChat(this.model, history);
     
-    const response = (await chat.sendMessage(prompt)).response.text();
+    const response = (await chat.sendMessage([quote, prompt])).response.text();
     await addChatToHistory(await chat.getHistory(), this.userKey);
     return response;
   }
 ; 
-  async sendPhotoMessage(photoUrls: Promise<string>[], prompt: string): Promise<string> {
+  async sendPhotoMessage(quote: string = '', photoUrls: Promise<string>[], prompt: string): Promise<string> {
     const history = await getChatHistory(this.userKey);
     const chat = GeminiService.buildChat(this.model, history);
     const urls = await Promise.all(photoUrls);
     const imageParts = await Promise.all(urls.map(this.fileToGenerativePart));
 
-    const response = (await chat.sendMessage([prompt, ...imageParts])).response.text();
+    const response = (await chat.sendMessage([quote, prompt, ...imageParts])).response.text();
     await addChatToHistory(await chat.getHistory(), this.userKey);
     return response;
   }
@@ -80,7 +80,7 @@ export default class GeminiService {
 
   private static buildGenerationConfig(): GenerationConfig {
     return {
-      maxOutputTokens: 500,
+      maxOutputTokens: 1000,
       topP: 0.9,
       temperature: 0.8
     };
