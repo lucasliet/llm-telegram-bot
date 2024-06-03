@@ -5,6 +5,8 @@ import GeminiService from './GeminiService.ts';
 import { ApiNotFoundError } from '../error/ApiNotFoundError.ts';
 import { PhotoSize } from 'https://deno.land/x/grammy@v1.17.2/types.deno.ts';
 
+const TOKEN = Deno.env.get('BOT_TOKEN') as string;
+
 export async function replyTextContent(ctx: Context) {
   const userId = ctx.from?.id;
   const userKey = `user:${userId}`;
@@ -43,6 +45,7 @@ export async function replyTextContent(ctx: Context) {
 function getPhotos(ctx: Context, photos: PhotoSize[]): Promise<string>[] {
   return photos.map(async photo => {
     const file = await ctx.api.getFile(photo.file_id);
-    return file.file_path!;
+    const url = `https://api.telegram.org/file/bot${TOKEN}/${file.file_path}`;
+    return url;
   })
 }

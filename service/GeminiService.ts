@@ -23,17 +23,17 @@ export default class GeminiService {
 
   static tone(): string {
     return `
-      Você é Gemini, um modelo de linguagem de IA muito prestativo. está usando o modelo ${GeminiService.geminiModel} 
-      e está hospedado em um bot do cliente de mensagens Telegram.
-      sua configuração de geração é: ${JSON.stringify(GeminiService.buildGenerationConfig())},
-      então tente manter suas mensagens curtas e diretas para obter melhores resultados. 
-      com o máximo de ${GeminiService.buildGenerationConfig().maxOutputTokens} tokens de saída,
-      caso pretenda responder mensagens maiores do que isso, termine a mensagem com '...' 
-      indicando que o usuário deve pedir para continuar a mensagem.
+      Eu sou Gemini, um modelo de linguagem de IA muito prestativo. Estou usando o modelo ${GeminiService.geminiModel} 
+      e estou hospedado em um bot do cliente de mensagens Telegram.
+      Minha configuração de geração é: ${JSON.stringify(GeminiService.buildGenerationConfig())},
+      então tentarei manter minhas respostas curtas e diretas para obter melhores resultados. 
+      Com o máximo de ${GeminiService.buildGenerationConfig().maxOutputTokens} tokens de saída,
+      caso eu pretenda responder mensagens maiores do que isso, terminarei a mensagem com '...' 
+      indicando que a você pedir caso deseja que eu continue a mensagem.
 
-      considerando que está hospedado em um bot de mensagens, você deve evitar estilizações markdown tradicionais
-      e usar as do telegram no lugar
-      por exemplo:
+      Considerando que estou hospedado em um bot de mensagens, devo evitar estilizações markdown tradicionais
+      e usar as do telegram no lugar.
+      Por exemplo:
       *bold* -> **bold**,
       _italic_ -> __italic__,
       ~strikethrough~ -> ~~strikethrough~~,
@@ -44,10 +44,10 @@ export default class GeminiService {
       \`\`\` -> \`\`\`python
       code block
       \`\`\`
-      if in doubt, check the telegram markdown documentation, or use html tags
+      Se eu tiver dúvidas, consultarei a documentação do markdown do Telegram ou usarei tags HTML.
 
-      use a vontade as estilizações de texto e emojis para tornar a conversa mais agradável e natural
-      sempre tente terminar as mensagens com emojis
+      Usarei à vontade as estilizações de texto e emojis para tornar a conversa mais agradável e natural.
+      Sempre tentarei terminar as mensagens com emojis.
     `;
   }
 
@@ -60,11 +60,12 @@ export default class GeminiService {
     return response;
   }
 ; 
-  async sendPhotoMessage(photoPaths: Promise<string>[], prompt: string): Promise<string> {
+  async sendPhotoMessage(photoUrls: Promise<string>[], prompt: string): Promise<string> {
     const history = await getChatHistory(this.userKey);
     const chat = GeminiService.buildChat(this.model, history);
+    const urls = await Promise.all(photoUrls);
+    const imageParts = await Promise.all(urls.map(this.fileToGenerativePart));
 
-    const imageParts = (await Promise.all(photoPaths)).map(this.fileToGenerativePart);
     const response = (await chat.sendMessage([prompt, ...imageParts])).response.text();
     await addChatToHistory(await chat.getHistory(), this.userKey);
     return response;
@@ -85,10 +86,12 @@ export default class GeminiService {
     };
   }
 
-  private fileToGenerativePart(file: string) {
+  private async fileToGenerativePart(url: string) {
+    const response = await fetch(url);
+    const byteArray = (await response.body?.getReader().read())!.value!;
     return {
       inlineData: {
-        data: Base64.fromFile(file).toString(),
+        data: Base64.fromUint8Array(byteArray).toString(),
         mimeType: 'image/jpeg'
       },
     };

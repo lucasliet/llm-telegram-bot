@@ -24,7 +24,8 @@ export async function getUserGeminiApiKeys(userKey: string): Promise<string> {
 export async function getChatHistory(userKey: string): Promise<Content[]> {
   const compressedChatHistory = (await kv.get<string>([userKey, 'chat-history'])).value;
   if (!compressedChatHistory) return [
-    { role: 'system', parts: [{ text: GeminiService.tone() }] }
+    { role: 'user', parts: [{ text: '' }] },
+    { role: 'model', parts: [{ text: GeminiService.tone() }] }
   ];
 
   return decompressObject<Content[]>(compressedChatHistory);
