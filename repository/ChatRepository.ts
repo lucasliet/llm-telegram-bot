@@ -6,7 +6,7 @@ import GeminiService from "../service/GeminiService.ts";
 const kv = await Deno.openKv();
 const oneDayInMillis = 60 * 60 * 24 * 1000;
 
-export async function setUserGeminiApiKeysIfAbsent(userKey: string, message: string): Promise<boolean> {
+export async function setUserGeminiApiKeysIfAbsent(userKey: string, message: string | undefined): Promise<boolean> {
   if (message && message.startsWith('key:')) {
     const apiKey = message.replace('key:', '');
     const compressedKey = compressText(apiKey);
@@ -15,7 +15,7 @@ export async function setUserGeminiApiKeysIfAbsent(userKey: string, message: str
   } else return false;
 }
 
-export async function getUserGeminiApiKeys(userKey: string): Promise<string>{  
+export async function getUserGeminiApiKeys(userKey: string): Promise<string> {
   const compressedKey = (await kv.get<string>([userKey, 'api-key'])).value;
   if (!compressedKey) throw new ApiNotFoundError('API key not found');
   return decompressText(compressedKey);
@@ -23,19 +23,14 @@ export async function getUserGeminiApiKeys(userKey: string): Promise<string>{
 
 export async function getChatHistory(userKey: string): Promise<Content[]> {
   const compressedChatHistory = (await kv.get<string>([userKey, 'chat-history'])).value;
-  if(!compressedChatHistory) return [
+  if (!compressedChatHistory) return [
     { role: 'system', parts: [{ text: GeminiService.tone() }] }
   ];
 
   return decompressObject<Content[]>(compressedChatHistory);
 }
 
-export async function addChatToHistory(history: Content[], userKey: string, message: string, response: string): Promise<void> {
-  const newHistory = [
-    ...history,
-    { role: 'user', parts: [{ text: message }] },
-    { role: 'model', parts: [{ text: response }] }
-  ]
-  const compressedChatHistory = compressObject(newHistory);
+export async function addChatToHistory(history: Content[], userKey: string): Promise<void> {
+  const compressedChatHistory = compressObject(history);
   await kv.set([userKey, 'chat-history'], compressedChatHistory, { expireIn: oneDayInMillis });
 }

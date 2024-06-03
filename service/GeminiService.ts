@@ -1,4 +1,5 @@
 import { GoogleGenerativeAI, GenerativeModel, Content, ChatSession, GenerationConfig } from 'npm:@google/generative-ai'
+import { Base64 } from 'https://deno.land/x/bb64/mod.ts';
 import { getChatHistory, getUserGeminiApiKeys } from '../repository/ChatRepository.ts';
 import { addChatToHistory } from '../repository/ChatRepository.ts';
 
@@ -6,11 +7,13 @@ import { addChatToHistory } from '../repository/ChatRepository.ts';
 export default class GeminiService {
   private userKey: string;
   private genAi: GoogleGenerativeAI;
+  private model: GenerativeModel;
   private static geminiModel = 'gemini-1.5-flash';
 
   private constructor(userKey: string, genAi: GoogleGenerativeAI) {
     this.userKey = userKey;
     this.genAi = genAi;
+    this.model = this.genAi.getGenerativeModel({ model: GeminiService.geminiModel });
   }
 
   static async of(userKey: string): Promise<GeminiService> {
@@ -48,12 +51,22 @@ export default class GeminiService {
     `;
   }
 
-  async sendMessage(message: string): Promise<string> {
-    const model = this.genAi.getGenerativeModel({ model: GeminiService.geminiModel });
+  async sendTextMessage(prompt: string): Promise<string> {
     const history = await getChatHistory(this.userKey);
-    const chat = GeminiService.buildChat(model, history);
-    const response = (await chat.sendMessage(message)).response.text();
-    await addChatToHistory(history, this.userKey, message, response);
+    const chat = GeminiService.buildChat(this.model, history);
+    
+    const response = (await chat.sendMessage(prompt)).response.text();
+    await addChatToHistory(await chat.getHistory(), this.userKey);
+    return response;
+  }
+; 
+  async sendPhotoMessage(photoPaths: Promise<string>[], prompt: string): Promise<string> {
+    const history = await getChatHistory(this.userKey);
+    const chat = GeminiService.buildChat(this.model, history);
+
+    const imageParts = (await Promise.all(photoPaths)).map(this.fileToGenerativePart);
+    const response = (await chat.sendMessage([prompt, ...imageParts])).response.text();
+    await addChatToHistory(await chat.getHistory(), this.userKey);
     return response;
   }
 
@@ -69,6 +82,15 @@ export default class GeminiService {
       maxOutputTokens: 500,
       topP: 0.9,
       temperature: 0.8
+    };
+  }
+
+  private fileToGenerativePart(file: string) {
+    return {
+      inlineData: {
+        data: Base64.fromFile(file).toString(),
+        mimeType: 'image/jpeg'
+      },
     };
   }
 }
