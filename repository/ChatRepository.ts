@@ -1,6 +1,6 @@
 import { compressObject, compressText, decompressObject, decompressText } from "https://deno.land/x/textcompress@v1.0.0/mod.ts";
 import { Content } from "npm:@google/generative-ai";
-import ApiNotFoundError from "../error/ApiNotFoundError.ts";
+import { ApiNotFoundError } from "../error/ApiNotFoundError.ts";
 import GeminiService from "../service/GeminiService.ts";
 
 const kv = await Deno.openKv();

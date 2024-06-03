@@ -2,7 +2,7 @@ import { Context } from 'https://deno.land/x/grammy@v1.17.2/context.ts';
 // import { InputMediaBuilder } from 'https://deno.land/x/grammy@v1.17.2/mod.ts';
 import { setUserGeminiApiKeysIfAbsent } from '../repository/ChatRepository.ts';
 import GeminiService from './GeminiService.ts';
-import ApiNotFoundError from '../error/ApiNotFoundError.ts';
+import { ApiNotFoundError } from '../error/ApiNotFoundError.ts';
 import { PhotoSize } from 'https://deno.land/x/grammy@v1.17.2/types.deno.ts';
 
 export async function replyTextContent(ctx: Context) {

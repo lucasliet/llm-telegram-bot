@@ -1,9 +1,6 @@
-class ApiNotFoundError {
+export class ApiNotFoundError extends Error {
   constructor(message: string) {
-    Error.apply(this, [message]);
+    super(message);
+    this.name = 'ApiNotFoundError';
   }
 }
-
-ApiNotFoundError.prototype = Object.create(Error.prototype);
-
-export default ApiNotFoundError;
