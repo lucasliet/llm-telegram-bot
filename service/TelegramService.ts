@@ -8,6 +8,15 @@ import { InputFile, PhotoSize } from 'https://deno.land/x/grammy@v1.17.2/types.d
 const TOKEN = Deno.env.get('BOT_TOKEN') as string;
 
 export default {
+  setWebhook: (): Promise<Response> => fetch(`https://api.telegram.org/bot${TOKEN}/setWebhook`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        url: 'https://gemini-telegram-bot.deno.dev/webhook'
+      })
+    }),
   async replyTextContent(ctx: Context): Promise<void> {
     const userId = ctx.from?.id;
     const userKey = `user:${userId}`;

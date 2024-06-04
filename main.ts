@@ -15,6 +15,10 @@ const APP = new Application();
 
 APP.use(oakCors());
 
+Deno.cron("Configure Telegram bot webhook", "0 0 */2 * *", async () => {
+  await TelegramService.setWebhook();
+});
+
 BOT.command('start', (ctx) =>
   ctx.reply(
     'Olá, me envie a chave API do Gemini, ex: `key:123456`' +

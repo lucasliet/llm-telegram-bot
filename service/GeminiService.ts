@@ -1,8 +1,9 @@
-import { GoogleGenerativeAI, GenerativeModel, Content, ChatSession, GenerationConfig, InlineDataPart } from 'npm:@google/generative-ai'
+import { GoogleGenerativeAI, GenerativeModel, Content, ChatSession, GenerationConfig, InlineDataPart, HarmCategory, SafetySetting } from 'npm:@google/generative-ai'
 import { Base64 } from "https://deno.land/x/bb64@1.1.0/mod.ts";
 import { getChatHistory, getUserGeminiApiKeys } from '../repository/ChatRepository.ts';
 import { addChatToHistory } from '../repository/ChatRepository.ts';
 import { ApiKeyNotFoundError } from '../error/ApiKeyNotFoundError.ts';
+import { HarmBlockThreshold } from 'npm:@google/generative-ai';
 
 const GEMINI_API_KEY = Deno.env.get('GEMINI_API_KEY') as string;
 
@@ -15,7 +16,10 @@ export default class GeminiService {
   private constructor(userKey: string, genAi: GoogleGenerativeAI) {
     this.userKey = userKey;
     this.genAi = genAi;
-    this.model = this.genAi.getGenerativeModel({ model: GeminiService.geminiModel });
+    this.model = this.genAi.getGenerativeModel({
+       model: GeminiService.geminiModel, 
+       safetySettings: GeminiService.buildSafetySettings() 
+    });
   }
 
   static async of(userKey: string): Promise<GeminiService> {
@@ -105,6 +109,27 @@ export default class GeminiService {
       topP: 0.9,
       temperature: 0.8
     };
+  }
+
+  private static buildSafetySettings(): SafetySetting[] {
+    return [
+      {
+        category: HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT,
+        threshold: HarmBlockThreshold.BLOCK_NONE
+      },
+      {
+        category: HarmCategory.HARM_CATEGORY_HARASSMENT,
+        threshold: HarmBlockThreshold.BLOCK_NONE
+      },
+      {
+        category: HarmCategory.HARM_CATEGORY_HATE_SPEECH,
+        threshold: HarmBlockThreshold.BLOCK_NONE
+      },
+      {
+        category: HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT,
+        threshold: HarmBlockThreshold.BLOCK_NONE
+      }
+    ]
   }
 
   private async fileToGenerativePart(url: string): Promise<InlineDataPart> {

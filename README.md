@@ -33,5 +33,5 @@ esse projeto utiliza o [Deno deploy](https://deno.com/deploy) e [Deno kv](https:
   ```
   para
   ```ts
-  BOT.start();
+  Promise.all([APP.listen({ port: PORT }), BOT.start()]);
   ```
