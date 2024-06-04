@@ -37,7 +37,7 @@ BOT.command('clear', async (ctx) => {
 BOT.on('message', async (ctx) => {
   console.info(`user: ${ctx.msg.from?.id}, message: ${ctx.message?.text}`);
   try {
-    if (ctx.message?.text?.startsWith('image:'))
+    if (ctx.message?.text?.toLocaleLowerCase().startsWith('image:'))
       await TelegramService.replyImageContent(ctx);
     else 
       await TelegramService.replyTextContent(ctx);

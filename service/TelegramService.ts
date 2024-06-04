@@ -2,21 +2,24 @@ import { Context } from 'https://deno.land/x/grammy@v1.17.2/context.ts';
 import { setUserGeminiApiKeysIfAbsent } from '../repository/ChatRepository.ts';
 import GeminiService from './GeminiService.ts';
 import CloudFlareService from './CloudFlareService.ts';
+import ChatGPTService from './ChatGPTService.ts';
 import { ApiKeyNotFoundError } from '../error/ApiKeyNotFoundError.ts';
 import { InputFile, PhotoSize } from 'https://deno.land/x/grammy@v1.17.2/types.deno.ts';
+import { InputMediaBuilder } from 'https://deno.land/x/grammy@v1.17.2/mod.ts';
 
 const TOKEN = Deno.env.get('BOT_TOKEN') as string;
+const ADMIN_USER_ID: number = parseInt(Deno.env.get('ADMIN_USER_ID') as string);
 
 export default {
   setWebhook: (): Promise<Response> => fetch(`https://api.telegram.org/bot${TOKEN}/setWebhook`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        url: 'https://gemini-telegram-bot.deno.dev/webhook'
-      })
-    }),
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({
+      url: 'https://gemini-telegram-bot.deno.dev/webhook'
+    })
+  }),
   async replyTextContent(ctx: Context): Promise<void> {
     const userId = ctx.from?.id;
     const userKey = `user:${userId}`;
@@ -24,18 +27,25 @@ export default {
     const photos = ctx.message?.photo;
     const caption = ctx.message?.caption;
     const quote = ctx.message?.reply_to_message?.text;
-  
+
     if (await setUserGeminiApiKeysIfAbsent(userKey, message)) {
       ctx.reply('Chave API do Gemini salva com sucesso!', { reply_to_message_id: ctx.message?.message_id });
       return;
     }
 
-    if(message?.match(/^[a-z]{3,5}:/g) && message.split(':')[0].startsIn('llama', 'sql', 'code')){
-      const output = await callBetaCloudflareTextModel(userKey, quote, message);
-      ctx.reply(output!, { reply_to_message_id: ctx.message?.message_id });
-      return;
+    const isBetaCommand = message?.match(/^[a-zA-Z]{3,8}:/g);
+    if (isBetaCommand && userId === ADMIN_USER_ID) {
+      if (message!.startsIn('llama', 'sql', 'code')) {
+        const output = await callBetaCloudflareTextModel(userKey, quote, message!);
+        ctx.reply(output!, { reply_to_message_id: ctx.message?.message_id });
+        return;
+      }
+      if (message!.startsIn('gpt', 'gptImage')) {
+        await callAdminGPTFunctions(ctx, userKey, message, quote);
+        return;
+      }
     }
-  
+
     try {
       const geminiService = await GeminiService.of(userKey);
       const outputMessage = await getGeminiOutput(geminiService, ctx, message, quote, photos, caption);
@@ -54,7 +64,7 @@ export default {
   },
   async replyImageContent(ctx: Context): Promise<void> {
     const message = ctx.message!.text!;
-  
+
     try {
       const imageArrayBuffer = await CloudFlareService.generateImage(message);
       ctx.replyWithPhoto(new InputFile(new Uint8Array(imageArrayBuffer), 'image/png'), { reply_to_message_id: ctx.message?.message_id });
@@ -86,7 +96,7 @@ function getPhotosUrl(ctx: Context, photos: PhotoSize[]): Promise<string>[] {
   })
 }
 
-async function callBetaCloudflareTextModel(userKey:string, quote: string | undefined, message: string): Promise<string | undefined>{
+async function callBetaCloudflareTextModel(userKey: string, quote: string | undefined, message: string): Promise<string | undefined> {
   const cloudflareCommand = message.split(':')[0];
 
   switch (cloudflareCommand) {
@@ -96,5 +106,19 @@ async function callBetaCloudflareTextModel(userKey:string, quote: string | undef
       return await CloudFlareService.generateSQL(userKey, quote, message.replace('sql:', ''));
     case 'code':
       return await CloudFlareService.generateCode(userKey, quote, message.replace('code:', ''));
+  }
+}
+
+async function callAdminGPTFunctions(ctx: Context, userKey: string, message: string | undefined, quote: string | undefined) {
+  const command = message!.split(':')[0];
+  if (command === 'gpt') {
+    const output = await ChatGPTService.generateTextResponse(userKey, quote, message!.replace('gpt:', ''));
+    ctx.reply(output, { reply_to_message_id: ctx.message?.message_id });
+    return;
+  } else if (command === 'gptImage') {
+    const output = await ChatGPTService.generateImageResponse(userKey, message!.replace('gptImage:', ''));
+    const mediaUrls = output.map(imageUrl => InputMediaBuilder.photo(imageUrl));
+    ctx.replyWithMediaGroup(mediaUrls, { reply_to_message_id: ctx.message?.message_id });
+    return;
   }
 }

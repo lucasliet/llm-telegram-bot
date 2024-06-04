@@ -6,7 +6,7 @@ declare global {
 
 String.prototype.startsIn = function (...args: string[]): boolean {
   for (const arg of args) {
-    if (this.startsWith(arg)) {
+    if (this.toLowerCase().startsWith(arg.toLowerCase())) {
       return true;
     }
   }
