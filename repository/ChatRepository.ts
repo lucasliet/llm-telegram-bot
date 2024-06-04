@@ -1,7 +1,6 @@
 import { compressObject, compressText, decompressObject, decompressText } from "https://deno.land/x/textcompress@v1.0.0/mod.ts";
 import { Content } from "npm:@google/generative-ai";
-import { ApiNotFoundError } from "../error/ApiNotFoundError.ts";
-import GeminiService from "../service/GeminiService.ts";
+import { ApiKeyNotFoundError } from "../error/ApiKeyNotFoundError.ts";
 
 const kv = await Deno.openKv();
 const oneDayInMillis = 60 * 60 * 24 * 1000;
@@ -17,16 +16,13 @@ export async function setUserGeminiApiKeysIfAbsent(userKey: string, message: str
 
 export async function getUserGeminiApiKeys(userKey: string): Promise<string> {
   const compressedKey = (await kv.get<string>([userKey, 'api-key'])).value;
-  if (!compressedKey) throw new ApiNotFoundError('API key not found');
+  if (!compressedKey) throw new ApiKeyNotFoundError('API key not found');
   return decompressText(compressedKey);
 }
 
 export async function getChatHistory(userKey: string): Promise<Content[]> {
   const compressedChatHistory = (await kv.get<string>([userKey, 'chat-history'])).value;
-  if (!compressedChatHistory) return [
-    { role: 'user', parts: [{ text: '' }] },
-    { role: 'model', parts: [{ text: GeminiService.tone() }] }
-  ];
+  if (!compressedChatHistory) return [];
 
   return decompressObject<Content[]>(compressedChatHistory);
 }

@@ -2,7 +2,9 @@ import { GoogleGenerativeAI, GenerativeModel, Content, ChatSession, GenerationCo
 import { Base64 } from 'https://deno.land/x/bb64/mod.ts';
 import { getChatHistory, getUserGeminiApiKeys } from '../repository/ChatRepository.ts';
 import { addChatToHistory } from '../repository/ChatRepository.ts';
+import { ApiKeyNotFoundError } from '../error/ApiKeyNotFoundError.ts';
 
+const GEMINI_API_KEY = Deno.env.get('GEMINI_API_KEY') as string;
 
 export default class GeminiService {
   private userKey: string;
@@ -17,8 +19,19 @@ export default class GeminiService {
   }
 
   static async of(userKey: string): Promise<GeminiService> {
-    const apiKey = await getUserGeminiApiKeys(userKey);
-    return new GeminiService(userKey, new GoogleGenerativeAI(apiKey));
+    try {
+      const apiKey = await getUserGeminiApiKeys(userKey);
+      return new GeminiService(userKey, new GoogleGenerativeAI(apiKey));
+    } catch (err) {
+      if (err instanceof ApiKeyNotFoundError) {
+        return new GeminiService(userKey, new GoogleGenerativeAI(GEMINI_API_KEY));
+      }
+      throw err;
+    }
+  }
+
+  static getModel(): string {
+    return GeminiService.geminiModel;
   }
 
   static tone(): string {
@@ -30,7 +43,7 @@ export default class GeminiService {
       Com o máximo de ${GeminiService.buildGenerationConfig().maxOutputTokens} tokens de saída,
       caso eu pretenda responder mensagens maiores do que isso, terminarei a mensagem com '...' 
       indicando que a você pedir caso deseja que eu continue a mensagem.` +
-      
+
       // `Considerando que estou hospedado em um bot de mensagens, devo evitar estilizações markdown tradicionais
       // e usar as do telegram no lugar.
       // Por exemplo:
@@ -53,15 +66,16 @@ export default class GeminiService {
 
   async sendTextMessage(quote: string = '', prompt: string): Promise<string> {
     const history = await getChatHistory(this.userKey);
+    if (!history.length) history.push(...this.buildFirstHistory());
     const chat = GeminiService.buildChat(this.model, history);
-    
     const response = (await chat.sendMessage([quote, prompt])).response.text();
     await addChatToHistory(await chat.getHistory(), this.userKey);
     return response;
   }
-; 
+  ;
   async sendPhotoMessage(quote: string = '', photoUrls: Promise<string>[], prompt: string): Promise<string> {
     const history = await getChatHistory(this.userKey);
+    if (!history.length) history.push(...this.buildFirstHistory());
     const chat = GeminiService.buildChat(this.model, history);
     const urls = await Promise.all(photoUrls);
     const imageParts = await Promise.all(urls.map(this.fileToGenerativePart));
@@ -78,7 +92,14 @@ export default class GeminiService {
     });
   }
 
-  private static buildGenerationConfig(): GenerationConfig {
+  private buildFirstHistory(): Content[] {
+    return [
+      { role: 'user', parts: [{ text: '' }] },
+      { role: 'model', parts: [{ text: GeminiService.tone() }] }
+    ]
+  }
+
+  static buildGenerationConfig(): GenerationConfig {
     return {
       maxOutputTokens: 1000,
       topP: 0.9,
