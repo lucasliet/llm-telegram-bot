@@ -21,9 +21,9 @@ export default {
       return;
     }
 
-    if(message && message.startsWith('llama:')) {
-      const output = await CloudFlareService.generateText(userKey, quote, message.replace('llama:', ''));
-      ctx.reply(output, { reply_to_message_id: ctx.message?.message_id });
+    if(message?.match(/^[a-z]{3,5}:/g) && message.split(':')[0] in ['llama', 'sql', 'code']){
+      const output = await callBetaCloudflareTextModel(userKey, quote, message);
+      ctx.reply(output!, { reply_to_message_id: ctx.message?.message_id });
       return;
     }
   
@@ -75,4 +75,17 @@ function getPhotosUrl(ctx: Context, photos: PhotoSize[]): Promise<string>[] {
     const url = `https://api.telegram.org/file/bot${TOKEN}/${file.file_path}`;
     return url;
   })
+}
+
+async function callBetaCloudflareTextModel(userKey:string, quote: string | undefined, message: string) {
+  const cloudflareCommand = message.split(':')[0];
+
+  switch (cloudflareCommand) {
+    case 'llama':
+      return await CloudFlareService.generateText(userKey, quote, message.replace('llama:', ''));
+    case 'sql':
+      return await CloudFlareService.generateSQL(userKey, quote, message.replace('sql:', ''));
+    case 'code':
+      return await CloudFlareService.generateCode(userKey, quote, message.replace('code:', ''));
+  }
 }

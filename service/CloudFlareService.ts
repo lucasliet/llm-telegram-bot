@@ -6,7 +6,9 @@ const CLOUDFLARE_ACCOUNT_ID: string = Deno.env.get('CLOUDFLARE_ACCOUNT_ID') as s
 const CLOUDFLARE_API_KEY: string = Deno.env.get('CLOUDFLARE_API_KEY') as string;
 
 const imageModel = '@cf/lykon/dreamshaper-8-lcm';
-const textModel = '@cf/meta/llama-3-8b-instruct'
+const textModel = '@cf/meta/llama-3-8b-instruct';
+const sqlModel = '@cf/defog/sqlcoder-7b-2'
+const codeModel = '@hf/thebloke/deepseek-coder-6.7b-instruct-awq';
 
 const requestOptions = {
   method: 'POST',
@@ -34,10 +36,10 @@ export default {
     }
     return await response.arrayBuffer();
   },
-  async generateText(userKey: string, quote: string = '', prompt: string): Promise<string> {
+  async generateText(userKey: string, quote: string = '', prompt: string, model: string = textModel): Promise<string> {
     const geminiHistory = await getChatHistory(userKey);
   
-    const apiResponse = await fetch(`https://api.cloudflare.com/client/v4/accounts/${CLOUDFLARE_ACCOUNT_ID}/ai/run/${textModel}`, {
+    const apiResponse = await fetch(`https://api.cloudflare.com/client/v4/accounts/${CLOUDFLARE_ACCOUNT_ID}/ai/run/${model}`, {
       ...requestOptions,
       body: JSON.stringify({ 
         messages: [
@@ -53,6 +55,12 @@ export default {
   
     const { result: { response } } = await apiResponse.json();
     return response;
+  },
+  async generateSQL(userKey: string, quote: string = '', prompt: string): Promise<string> {
+    return await this.generateText(userKey, quote, prompt, sqlModel);
+  },
+  async generateCode(userKey: string, quote: string = '', prompt: string): Promise<string> {
+    return await this.generateText(userKey, quote, prompt, codeModel);
   }
 }
 
