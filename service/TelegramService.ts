@@ -8,7 +8,7 @@ import { InputFile, PhotoSize } from 'https://deno.land/x/grammy@v1.17.2/types.d
 const TOKEN = Deno.env.get('BOT_TOKEN') as string;
 
 export default {
-  async replyTextContent(ctx: Context) {
+  async replyTextContent(ctx: Context): Promise<void> {
     const userId = ctx.from?.id;
     const userKey = `user:${userId}`;
     const message = ctx.message?.text;
@@ -21,7 +21,7 @@ export default {
       return;
     }
 
-    if(message?.match(/^[a-z]{3,5}:/g) && message.split(':')[0] in ['llama', 'sql', 'code']){
+    if(message?.match(/^[a-z]{3,5}:/g) && message.split(':')[0].startsIn('llama', 'sql', 'code')){
       const output = await callBetaCloudflareTextModel(userKey, quote, message);
       ctx.reply(output!, { reply_to_message_id: ctx.message?.message_id });
       return;
@@ -43,7 +43,7 @@ export default {
       return;
     }
   },
-  async replyImageContent(ctx: Context) {
+  async replyImageContent(ctx: Context): Promise<void> {
     const message = ctx.message!.text!;
   
     try {
@@ -58,7 +58,7 @@ export default {
   }
 }
 
-async function getGeminiOutput(geminiService: GeminiService, ctx: Context, message: string | undefined, quote: string | undefined, photos: PhotoSize[] | undefined, caption: string | undefined) {
+async function getGeminiOutput(geminiService: GeminiService, ctx: Context, message: string | undefined, quote: string | undefined, photos: PhotoSize[] | undefined, caption: string | undefined): Promise<string> {
   if (message) {
     return await geminiService.sendTextMessage(quote, message);
   } else if (photos && caption) {
@@ -77,7 +77,7 @@ function getPhotosUrl(ctx: Context, photos: PhotoSize[]): Promise<string>[] {
   })
 }
 
-async function callBetaCloudflareTextModel(userKey:string, quote: string | undefined, message: string) {
+async function callBetaCloudflareTextModel(userKey:string, quote: string | undefined, message: string): Promise<string | undefined>{
   const cloudflareCommand = message.split(':')[0];
 
   switch (cloudflareCommand) {

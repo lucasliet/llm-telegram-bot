@@ -1,5 +1,5 @@
-import { GoogleGenerativeAI, GenerativeModel, Content, ChatSession, GenerationConfig } from 'npm:@google/generative-ai'
-import { Base64 } from 'https://deno.land/x/bb64/mod.ts';
+import { GoogleGenerativeAI, GenerativeModel, Content, ChatSession, GenerationConfig, InlineDataPart } from 'npm:@google/generative-ai'
+import { Base64 } from "https://deno.land/x/bb64@1.1.0/mod.ts";
 import { getChatHistory, getUserGeminiApiKeys } from '../repository/ChatRepository.ts';
 import { addChatToHistory } from '../repository/ChatRepository.ts';
 import { ApiKeyNotFoundError } from '../error/ApiKeyNotFoundError.ts';
@@ -107,7 +107,7 @@ export default class GeminiService {
     };
   }
 
-  private async fileToGenerativePart(url: string) {
+  private async fileToGenerativePart(url: string): Promise<InlineDataPart> {
     const response = await fetch(url);
     const byteArray = (await response.body?.getReader().read())!.value!;
     return {

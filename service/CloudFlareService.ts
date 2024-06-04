@@ -10,6 +10,8 @@ const textModel = '@cf/meta/llama-3-8b-instruct';
 const sqlModel = '@cf/defog/sqlcoder-7b-2'
 const codeModel = '@hf/thebloke/deepseek-coder-6.7b-instruct-awq';
 
+const cloudFlareMaxTokens = 140;
+
 const requestOptions = {
   method: 'POST',
   headers: {
@@ -45,7 +47,8 @@ export default {
         messages: [
           { role: "system", content: replaceGeminiConfigFromTone() },
           ...convertGeminiHistoryToCloudflareLlama(geminiHistory),
-          { role: "user", content: `"${quote}" ${prompt}` }]
+          { role: "user", content: `"${quote}" ${prompt}` }
+        ], max_tokens: cloudFlareMaxTokens
        })
     });
   
@@ -64,14 +67,14 @@ export default {
   }
 }
 
-function replaceGeminiConfigFromTone() {
+function replaceGeminiConfigFromTone(): string {
   return GeminiService.tone()
     .replace(/Gemini/gi, 'llama')
     .replace(GeminiService.getModel(), textModel)
-    .replace(`${GeminiService.buildGenerationConfig().maxOutputTokens}`, `140`);
+    .replace(`${GeminiService.buildGenerationConfig().maxOutputTokens}`, `${cloudFlareMaxTokens}`);
 }
 
-function convertGeminiHistoryToCloudflareLlama(history: Content[]) {
+function convertGeminiHistoryToCloudflareLlama(history: Content[]): { role: string, content: string }[]{
   return history.map(content => {
     return {
       role: content.role === 'user' ? 'user' : 'assistant',

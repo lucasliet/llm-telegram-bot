@@ -5,6 +5,8 @@ import { Bot, webhookCallback } from 'https://deno.land/x/grammy@v1.17.2/mod.ts'
 import TelegramService from './service/TelegramService.ts';
 import { clearChatHistory } from './repository/ChatRepository.ts';
 
+import './prototype/StringExtensionPrototype.ts';
+
 const TOKEN: string = Deno.env.get('BOT_TOKEN') as string;
 const PORT: number = parseInt(Deno.env.get('PORT') as string) || 80;
 
