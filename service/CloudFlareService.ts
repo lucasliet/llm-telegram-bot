@@ -5,7 +5,7 @@ import GeminiService from "./GeminiService.ts";
 const CLOUDFLARE_ACCOUNT_ID: string = Deno.env.get('CLOUDFLARE_ACCOUNT_ID') as string;
 const CLOUDFLARE_API_KEY: string = Deno.env.get('CLOUDFLARE_API_KEY') as string;
 
-const imageModel = '@cf/stabilityai/stable-diffusion-xl-base-1.0';
+const imageModel = '@cf/lykon/dreamshaper-8-lcm';
 const textModel = '@cf/meta/llama-3-8b-instruct'
 
 const requestOptions = {
