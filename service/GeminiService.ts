@@ -18,7 +18,8 @@ export default class GeminiService {
     this.genAi = genAi;
     this.model = this.genAi.getGenerativeModel({
        model: GeminiService.geminiModel, 
-       safetySettings: GeminiService.buildSafetySettings() 
+       safetySettings: GeminiService.buildSafetySettings(),
+       systemInstruction: GeminiService.tone()
     });
   }
 
@@ -70,7 +71,6 @@ export default class GeminiService {
 
   async sendTextMessage(quote: string = '', prompt: string): Promise<string> {
     const history = await getChatHistory(this.userKey);
-    if (!history.length) history.push(...this.buildFirstHistory());
     const chat = GeminiService.buildChat(this.model, history);
     const response = (await chat.sendMessage([quote, prompt])).response.text();
     await addChatToHistory(await chat.getHistory(), this.userKey);
@@ -79,7 +79,6 @@ export default class GeminiService {
   ;
   async sendPhotoMessage(quote: string = '', photoUrls: Promise<string>[], prompt: string): Promise<string> {
     const history = await getChatHistory(this.userKey);
-    if (!history.length) history.push(...this.buildFirstHistory());
     const chat = GeminiService.buildChat(this.model, history);
     const urls = await Promise.all(photoUrls);
     const imageParts = await Promise.all(urls.map(this.fileToGenerativePart));
@@ -94,13 +93,6 @@ export default class GeminiService {
       history,
       generationConfig: GeminiService.buildGenerationConfig()
     });
-  }
-
-  private buildFirstHistory(): Content[] {
-    return [
-      { role: 'user', parts: [{ text: '' }] },
-      { role: 'model', parts: [{ text: GeminiService.tone() }] }
-    ]
   }
 
   static buildGenerationConfig(): GenerationConfig {
