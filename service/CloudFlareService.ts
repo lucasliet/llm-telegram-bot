@@ -24,13 +24,13 @@ export default {
     const response = await fetch(
       `https://api.cloudflare.com/client/v4/accounts/${CLOUDFLARE_ACCOUNT_ID}/ai/run/${imageModel}`, {
       ...requestOptions,
-      body: `{"prompt": "${prompt}"}`
+      body: `{"prompt": "${this.escapeMessageQuotes(prompt)}"}`
     });
 
     if (!response.ok) {
       console.error(
         `https://api.cloudflare.com/client/v4/accounts/${CLOUDFLARE_ACCOUNT_ID}/ai/run/${imageModel}`,
-        { ...requestOptions, body: `{"prompt": "${prompt}"}` },
+        { ...requestOptions, body: `{"prompt": "${this.escapeMessageQuotes(prompt)}"}` },
         response.statusText
       )
       throw new Error(`Failed to generate image: ${response.statusText}}`);
@@ -46,7 +46,7 @@ export default {
         messages: [
           { role: "system", content: replaceGeminiConfigFromTone('Llama', textModel, cloudFlareMaxTokens) },
           ...convertGeminiHistoryToGPT(geminiHistory),
-          { role: "user", content: `"${quote}" ${prompt}` }
+          { role: "user", content: `"${this.escapeMessageQuotes(quote)}" ${this.escapeMessageQuotes(prompt)}` }
         ], max_tokens: cloudFlareMaxTokens
       })
     });
@@ -63,5 +63,8 @@ export default {
   },
   async generateCode(userKey: string, quote: string = '', prompt: string): Promise<string> {
     return await this.generateText(userKey, quote, prompt, codeModel);
+  },
+  escapeMessageQuotes(message: string): string {
+    return message.replace(/"/g, '\\"');
   }
 }
