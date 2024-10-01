@@ -4,8 +4,8 @@ import { convertGeminiHistoryToGPT, replaceGeminiConfigFromTone } from "../util/
 const CLOUDFLARE_ACCOUNT_ID: string = Deno.env.get('CLOUDFLARE_ACCOUNT_ID') as string;
 const CLOUDFLARE_API_KEY: string = Deno.env.get('CLOUDFLARE_API_KEY') as string;
 
-const imageModel = '@cf/lykon/dreamshaper-8-lcm';
-const textModel = '@cf/meta/llama-3-8b-instruct';
+const imageModel = '@cf/stabilityai/stable-diffusion-xl-base-1.0';
+const textModel = '@cf/meta/llama-3.2-3b-instruct';
 const sqlModel = '@cf/defog/sqlcoder-7b-2'
 const codeModel = '@hf/thebloke/deepseek-coder-6.7b-instruct-awq';
 
