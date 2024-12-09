@@ -5,7 +5,7 @@ const CLOUDFLARE_ACCOUNT_ID: string = Deno.env.get('CLOUDFLARE_ACCOUNT_ID') as s
 const CLOUDFLARE_API_KEY: string = Deno.env.get('CLOUDFLARE_API_KEY') as string;
 
 const imageModel = '@cf/stabilityai/stable-diffusion-xl-base-1.0';
-const textModel = '@cf/meta/llama-3.2-3b-instruct';
+const textModel = '@cf/meta/llama-3.3-70b-instruct-fp8-fast';
 const sqlModel = '@cf/defog/sqlcoder-7b-2'
 const codeModel = '@hf/thebloke/deepseek-coder-6.7b-instruct-awq';
 
