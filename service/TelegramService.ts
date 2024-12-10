@@ -33,7 +33,7 @@ export default {
       return;
     }
 
-    const isBetaCommand = message?.match(/^[a-zA-Z]{3,8}:/g);
+    const isBetaCommand = message?.match(/^[a-zA-Z]{3,10}:/g);
     if (isBetaCommand && userId === ADMIN_USER_ID) {
       if (message!.startsIn('llama', 'sql', 'code')) {
         await callBetaCloudflareTextModel(ctx, userKey, message!, quote);
@@ -49,7 +49,7 @@ export default {
       }
     }
 
-    const isSetModelCommand = (message && (['/gemini', '/llama', '/gpt']).includes(message));
+    const isSetModelCommand = (message && (['/gemini', '/llama', '/gpt', '/perplexity']).includes(message));
     if (isSetModelCommand && userId === ADMIN_USER_ID) {
       setCurrentModel(userKey, message as ModelCommand);
       ctx.reply(`Novo modelo de inteligência escolhido: ${message}`);
