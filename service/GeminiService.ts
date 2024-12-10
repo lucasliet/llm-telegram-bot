@@ -19,7 +19,7 @@ export default class GeminiService {
     this.model = this.genAi.getGenerativeModel({
        model: GeminiService.geminiModel, 
        safetySettings: GeminiService.buildSafetySettings(),
-       systemInstruction: GeminiService.tone()
+       systemInstruction: GeminiService.tone(GeminiService.geminiModel)
     });
   }
 
@@ -39,15 +39,16 @@ export default class GeminiService {
     return GeminiService.geminiModel;
   }
 
-  static tone(): string {
+  static tone(model: string): string {
     return `
-      Eu sou Gemini, um modelo de linguagem de IA muito prestativo. Estou usando o modelo ${GeminiService.geminiModel} 
+      Eu sou Gemini, um modelo de linguagem de IA muito prestativo. Estou usando o modelo ${model} 
       e estou hospedado em um bot do cliente de mensagens Telegram.
       Minha configuração de geração é: ${JSON.stringify(GeminiService.buildGenerationConfig())},
       então tentarei manter minhas respostas curtas e diretas para obter melhores resultados. 
       Com o máximo de ${GeminiService.buildGenerationConfig().maxOutputTokens} tokens de saída,
       caso eu pretenda responder mensagens maiores do que isso, terminarei a mensagem com '...' 
-      indicando que a você pedir caso deseja que eu continue a mensagem.` +
+      indicando que a você pedir caso deseja que eu continue a mensagem.
+      minhas configurações de sefetismo são: ${JSON.stringify(GeminiService.buildSafetySettings())}.` +
 
       // `Considerando que estou hospedado em um bot de mensagens, devo evitar estilizações markdown tradicionais
       // e usar as do telegram no lugar.

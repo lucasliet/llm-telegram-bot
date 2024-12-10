@@ -12,8 +12,7 @@ export function convertGeminiHistoryToGPT(history: Content[]): OpenAi.Chat.Compl
 }
 
 export function replaceGeminiConfigFromTone(chatName: string, model: string, maxTokens: number): string {
-  return GeminiService.tone()
+  return GeminiService.tone(model)
     .replace(/Gemini/gi, chatName)
-    .replace(GeminiService.getModel(), model)
     .replace(`${GeminiService.buildGenerationConfig().maxOutputTokens}`, `${maxTokens}`);
 }
