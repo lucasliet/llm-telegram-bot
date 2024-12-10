@@ -17,7 +17,7 @@ export default {
       'Content-Type': 'application/json'
     },
     body: JSON.stringify({
-      url: 'https://gemini-telegram-bot.deno.dev/webhook'
+      url: 'https://llm-telegram-bot.deno.dev/webhook'
     })
   }),
   async replyTextContent(ctx: Context): Promise<void> {

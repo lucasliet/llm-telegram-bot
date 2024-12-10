@@ -23,7 +23,7 @@ BOT.command('start', (ctx) =>
   ctx.reply(
     'Olá, me envie a chave API do Gemini, ex: `key:123456`' +
     'para conseguir a chave acesse https://aistudio.google.com/app/apikey?hl=pt-br, ' +
-    'mais informações em http://github.com/lucasliet/gemini-telegram-bot'
+    'mais informações em http://github.com/lucasliet/llm-telegram-bot'
   )
 );
 
