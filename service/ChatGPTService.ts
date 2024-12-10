@@ -2,7 +2,7 @@ import OpenAi from 'npm:openai';
 import { getChatHistory } from '../repository/ChatRepository.ts';
 import { replaceGeminiConfigFromTone, convertGeminiHistoryToGPT } from '../util/ChatConfigUtil.ts';
 
-const gptModel = 'gpt-4o';
+const gptModel = 'gpt-4o-mini';
 const imageModel = 'dall-e-2';
 const gptMaxTokens = 1000;
 const openai = new OpenAi();
