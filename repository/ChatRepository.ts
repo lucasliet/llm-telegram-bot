@@ -5,7 +5,7 @@ import { ApiKeyNotFoundError } from "../error/ApiKeyNotFoundError.ts";
 const kv = await Deno.openKv();
 const oneDayInMillis = 60 * 60 * 24 * 1000;
 
-export type ModelCommand = '/gemini' | '/llama' | '/gpt'
+export type ModelCommand = '/gemini' | '/llama' | '/gpt' | '/perplexity'
 
 export async function setUserGeminiApiKeysIfAbsent(userKey: string, message: string | undefined): Promise<boolean> {
   if (message && message.startsWith('key:')) {

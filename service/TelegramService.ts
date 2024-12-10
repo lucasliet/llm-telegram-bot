@@ -2,7 +2,7 @@ import { Context } from 'https://deno.land/x/grammy@v1.17.2/context.ts';
 import { ModelCommand, setCurrentModel, getCurrentModel, setUserGeminiApiKeysIfAbsent } from '../repository/ChatRepository.ts';
 import GeminiService from './GeminiService.ts';
 import CloudFlareService from './CloudFlareService.ts';
-import ChatGPTService from './ChatGPTService.ts';
+import OpenAiService from './OpenAIService.ts';
 import { ApiKeyNotFoundError } from '../error/ApiKeyNotFoundError.ts';
 import { InputFile, PhotoSize } from 'https://deno.land/x/grammy@v1.17.2/types.deno.ts';
 import { InputMediaBuilder } from 'https://deno.land/x/grammy@v1.17.2/mod.ts';
@@ -40,7 +40,11 @@ export default {
         return;
       }
       if (message!.startsIn('gpt', 'gptImage')) {
-        await callAdminGPTFunctions(ctx, userKey, message, quote);
+        await callOpenAIModels(ctx, userKey, message!, quote);
+        return;
+      }
+      if (message!.startsIn('perplexity')) {
+        await callPerplexityModel(ctx, userKey, message!, quote);
         return;
       }
     }
@@ -59,7 +63,10 @@ export default {
     
     switch (await getCurrentModel(userKey)) {
       case '/gpt':
-        await callAdminGPTFunctions(ctx, userKey, `gpt: ${message}`, quote);
+        await callOpenAIModels(ctx, userKey, `gpt: ${message}`, quote);
+        return;
+      case '/perplexity':
+        await callPerplexityModel(ctx, userKey, `perplexity: ${message}`, quote);
         return;
       case '/llama':
         await callBetaCloudflareTextModel(ctx, userKey, `llama: ${message!}`, quote);
@@ -87,6 +94,47 @@ export default {
   }
 }
 
+async function callBetaCloudflareTextModel(ctx: Context, userKey: string, message: string, quote: string | undefined): Promise<void> {
+  const cloudflareCommand = message.split(':')[0];
+  let output = ""
+  switch (cloudflareCommand) {
+    case 'llama':
+      output = await CloudFlareService.generateText(userKey, quote, message.replace('llama:', ''));
+      break;
+    case 'sql':
+      output = await CloudFlareService.generateSQL(userKey, quote, message.replace('sql:', ''));
+      break;
+    case 'code':
+      output = await CloudFlareService.generateCode(userKey, quote, message.replace('code:', ''));
+      break;
+  }
+  ctx.reply(output!, { reply_to_message_id: ctx.message?.message_id });
+}
+
+async function callPerplexityModel(ctx: Context, userKey: string, message: string, quote: string | undefined): Promise<void> {
+  const openAIService = new OpenAiService('/perplexity');
+
+  const output = await openAIService.generateTextResponse(userKey, quote, message!.replace('perplexity:', ''));
+  ctx.reply(output, { reply_to_message_id: ctx.message?.message_id });
+  return;
+}
+
+async function callOpenAIModels(ctx: Context, userKey: string, message: string, quote: string | undefined): Promise<void> {
+  const command = message.split(':')[0];
+  const openAIService = new OpenAiService('/gpt');
+  
+  if (command === 'gpt') {
+    const output = await openAIService.generateTextResponse(userKey, quote, message!.replace('gpt:', ''));
+    ctx.reply(output, { reply_to_message_id: ctx.message?.message_id });
+    return;
+  } else if (command === 'gptImage') {
+    const output = await openAIService.generateImageResponse(userKey, message!.replace('gptImage:', ''));
+    const mediaUrls = output.map(imageUrl => InputMediaBuilder.photo(imageUrl));
+    ctx.replyWithMediaGroup(mediaUrls, { reply_to_message_id: ctx.message?.message_id });
+    return;
+  }
+}
+
 async function getGeminiOutput(geminiService: GeminiService, ctx: Context, message: string | undefined, quote: string | undefined, photos: PhotoSize[] | undefined, caption: string | undefined): Promise<string> {
   if (message) {
     return await geminiService.sendTextMessage(quote, message);
@@ -105,38 +153,6 @@ function getPhotosUrl(ctx: Context, photos: PhotoSize[]): Promise<string>[] {
     return url;
   })
 }
-
-async function callBetaCloudflareTextModel(ctx: Context, userKey: string, message: string, quote: string | undefined): Promise<string | undefined> {
-  const cloudflareCommand = message.split(':')[0];
-  let output = ""
-  switch (cloudflareCommand) {
-    case 'llama':
-      output = await CloudFlareService.generateText(userKey, quote, message.replace('llama:', ''));
-      break;
-    case 'sql':
-      output = await CloudFlareService.generateSQL(userKey, quote, message.replace('sql:', ''));
-      break;
-    case 'code':
-      output = await CloudFlareService.generateCode(userKey, quote, message.replace('code:', ''));
-      break;
-  }
-  ctx.reply(output!, { reply_to_message_id: ctx.message?.message_id });
-}
-
-async function callAdminGPTFunctions(ctx: Context, userKey: string, message: string | undefined, quote: string | undefined) {
-  const command = message!.split(':')[0];
-  if (command === 'gpt') {
-    const output = await ChatGPTService.generateTextResponse(userKey, quote, message!.replace('gpt:', ''));
-    ctx.reply(output, { reply_to_message_id: ctx.message?.message_id });
-    return;
-  } else if (command === 'gptImage') {
-    const output = await ChatGPTService.generateImageResponse(userKey, message!.replace('gptImage:', ''));
-    const mediaUrls = output.map(imageUrl => InputMediaBuilder.photo(imageUrl));
-    ctx.replyWithMediaGroup(mediaUrls, { reply_to_message_id: ctx.message?.message_id });
-    return;
-  }
-}
-
 
 async function callGeminiModel(userKey: string, ctx: Context, message?: string, quote?: string, photos?: PhotoSize[], caption?: string): Promise<void> {
   try {
@@ -162,6 +178,7 @@ function answerHelpCommands(ctx: Context) {
     /gpt - Faz uma pergunta usando o GPT-4
     /llama - Faz uma pergunta usando o Llama 2
     /gemini - Faz uma pergunta usando o Gemini
+    /perplexity - Faz uma pergunta usando o modelo perplexity.ai
     /clear - Apaga o histórico de conversa
     Comandos inline:
     image: mensagem - Gera imagens com Stable Diffusion
