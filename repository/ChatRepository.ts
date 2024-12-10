@@ -5,6 +5,8 @@ import { ApiKeyNotFoundError } from "../error/ApiKeyNotFoundError.ts";
 const kv = await Deno.openKv();
 const oneDayInMillis = 60 * 60 * 24 * 1000;
 
+export type ModelCommand = '/gemini' | '/llama' | '/gpt'
+
 export async function setUserGeminiApiKeysIfAbsent(userKey: string, message: string | undefined): Promise<boolean> {
   if (message && message.startsWith('key:')) {
     const apiKey = message.replace('key:', '');
@@ -34,4 +36,12 @@ export async function addChatToHistory(history: Content[], userKey: string): Pro
 
 export async function clearChatHistory(userKey: string): Promise<void> {
   await kv.delete([userKey, 'chat-history']);
+}
+
+export async function setCurrentModel(userKey: string, model: ModelCommand = '/gemini'): Promise<void> {
+  await kv.set([userKey, 'current_model'], model);
+}
+
+export async function getCurrentModel(userKey: string): Promise<ModelCommand> {
+  return (await kv.get<ModelCommand>([userKey, 'current_model'])).value || '/llama';
 }

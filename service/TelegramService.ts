@@ -1,5 +1,5 @@
 import { Context } from 'https://deno.land/x/grammy@v1.17.2/context.ts';
-import { setUserGeminiApiKeysIfAbsent } from '../repository/ChatRepository.ts';
+import { ModelCommand, setCurrentModel, getCurrentModel, setUserGeminiApiKeysIfAbsent } from '../repository/ChatRepository.ts';
 import GeminiService from './GeminiService.ts';
 import CloudFlareService from './CloudFlareService.ts';
 import ChatGPTService from './ChatGPTService.ts';
@@ -36,8 +36,7 @@ export default {
     const isBetaCommand = message?.match(/^[a-zA-Z]{3,8}:/g);
     if (isBetaCommand && userId === ADMIN_USER_ID) {
       if (message!.startsIn('llama', 'sql', 'code')) {
-        const output = await callBetaCloudflareTextModel(userKey, quote, message!);
-        ctx.reply(output!, { reply_to_message_id: ctx.message?.message_id });
+        await callBetaCloudflareTextModel(ctx, userKey, message!, quote);
         return;
       }
       if (message!.startsIn('gpt', 'gptImage')) {
@@ -46,20 +45,30 @@ export default {
       }
     }
 
-    try {
-      const geminiService = await GeminiService.of(userKey);
-      const outputMessage = await getGeminiOutput(geminiService, ctx, message, quote, photos, caption);
-      ctx.reply(outputMessage, { reply_to_message_id: ctx.message?.message_id });
+    const isSetModelCommand = (message && (['/gemini', '/llama', '/gpt']).includes(message));
+    if (isSetModelCommand && userId === ADMIN_USER_ID) {
+      setCurrentModel(userKey, message as ModelCommand);
+      ctx.reply(`Novo modelo de inteligência escolhido: ${message}`);
       return;
-    } catch (err) {
-      if (err instanceof ApiKeyNotFoundError) {
-        ctx.reply('Você precisa me enviar a chave API do Gemini para usar este bot, ex: `key:123456`, para conseguir a chave acesse https://aistudio.google.com/app/apikey?hl=pt-br',
-          { reply_to_message_id: ctx.message?.message_id });
+    }
+
+    if("/help" === message && userId === ADMIN_USER_ID) {
+      answerHelpCommands(ctx);
+    }
+    
+    switch (await getCurrentModel(userKey)) {
+      case '/gpt':
+        await callAdminGPTFunctions(ctx, userKey, `gpt: ${message}`, quote);
         return;
-      }
-      ctx.reply(`Eita, algo deu errado: ${err.message}`, { reply_to_message_id: ctx.message?.message_id });
-      console.error(err);
-      return;
+      case '/llama':
+        await callBetaCloudflareTextModel(ctx, userKey, `llama: ${message!}`, quote);
+        return;
+      case '/gemini':
+        await callGeminiModel(userKey, ctx, message, quote, photos, caption);
+        return;
+      default:
+        ctx.reply('Modelo de inteligência não encontrado.', { reply_to_message_id: ctx.message?.message_id });
+        return;
     }
   },
   async replyImageContent(ctx: Context): Promise<void> {
@@ -96,17 +105,21 @@ function getPhotosUrl(ctx: Context, photos: PhotoSize[]): Promise<string>[] {
   })
 }
 
-async function callBetaCloudflareTextModel(userKey: string, quote: string | undefined, message: string): Promise<string | undefined> {
+async function callBetaCloudflareTextModel(ctx: Context, userKey: string, message: string, quote: string | undefined): Promise<string | undefined> {
   const cloudflareCommand = message.split(':')[0];
-
+  let output = ""
   switch (cloudflareCommand) {
     case 'llama':
-      return await CloudFlareService.generateText(userKey, quote, message.replace('llama:', ''));
+      output = await CloudFlareService.generateText(userKey, quote, message.replace('llama:', ''));
+      break;
     case 'sql':
-      return await CloudFlareService.generateSQL(userKey, quote, message.replace('sql:', ''));
+      output = await CloudFlareService.generateSQL(userKey, quote, message.replace('sql:', ''));
+      break;
     case 'code':
-      return await CloudFlareService.generateCode(userKey, quote, message.replace('code:', ''));
+      output = await CloudFlareService.generateCode(userKey, quote, message.replace('code:', ''));
+      break;
   }
+  ctx.reply(output!, { reply_to_message_id: ctx.message?.message_id });
 }
 
 async function callAdminGPTFunctions(ctx: Context, userKey: string, message: string | undefined, quote: string | undefined) {
@@ -121,4 +134,38 @@ async function callAdminGPTFunctions(ctx: Context, userKey: string, message: str
     ctx.replyWithMediaGroup(mediaUrls, { reply_to_message_id: ctx.message?.message_id });
     return;
   }
+}
+
+
+async function callGeminiModel(userKey: string, ctx: Context, message?: string, quote?: string, photos?: PhotoSize[], caption?: string): Promise<void> {
+  try {
+    const geminiService = await GeminiService.of(userKey);
+    const outputMessage = await getGeminiOutput(geminiService, ctx, message, quote, photos, caption);
+    ctx.reply(outputMessage, {reply_to_message_id: ctx.message?.message_id});
+    return;
+  } catch (err) {
+    if (err instanceof ApiKeyNotFoundError) {
+      ctx.reply('Você precisa me enviar a chave API do Gemini para usar este bot, ex: `key:123456`, para conseguir a chave acesse https://aistudio.google.com/app/apikey?hl=pt-br',
+          {reply_to_message_id: ctx.message?.message_id});
+      return;
+    }
+    ctx.reply(`Eita, algo deu errado: ${err.message}`, {reply_to_message_id: ctx.message?.message_id});
+    console.error(err);
+    return;
+  }
+}
+
+function answerHelpCommands(ctx: Context) {
+  ctx.reply(
+    `Comandos disponíveis:
+    /gpt - Faz uma pergunta usando o GPT-4
+    /llama - Faz uma pergunta usando o Llama 2
+    /gemini - Faz uma pergunta usando o Gemini
+    /clear - Apaga o histórico de conversa
+    Comandos inline:
+    image: mensagem - Gera imagens com Stable Diffusion
+    gptImage: mensagem - Gera imagens com DALL-e
+    sql: mensagem - Gera sql com modelo cloudflare
+    code: mensagem - Gera código com modelo cloudflare`
+  )
 }
