@@ -11,7 +11,7 @@ export default class GeminiService {
   private userKey: string;
   private genAi: GoogleGenerativeAI;
   private model: GenerativeModel;
-  private static geminiModel = 'gemini-1.5-flash';
+  private static geminiModel = 'gemini-1.5-flash-8b';
 
   private constructor(userKey: string, genAi: GoogleGenerativeAI) {
     this.userKey = userKey;
