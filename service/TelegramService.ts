@@ -54,6 +54,7 @@ export default {
 
     if("/help" === message && userId === ADMIN_USER_ID) {
       answerHelpCommands(ctx);
+      return;
     }
     
     switch (await getCurrentModel(userKey)) {
