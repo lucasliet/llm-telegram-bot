@@ -35,7 +35,7 @@ export default class OpenAiService {
     });
 
     return completion.choices[0].message.content!;
-  },
+  }
   async generateImageResponse(userKey: string, prompt: string, style: 'vivid' | 'natural' = 'vivid'): Promise<string[]> {
     const response = await this.openai.images.generate({
       model: imageModel,
