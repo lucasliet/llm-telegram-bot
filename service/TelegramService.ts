@@ -82,15 +82,9 @@ export default {
   async replyImageContent(ctx: Context): Promise<void> {
     const message = ctx.message!.text!;
 
-    try {
-      const imageArrayBuffer = await CloudFlareService.generateImage(message);
-      ctx.replyWithPhoto(new InputFile(new Uint8Array(imageArrayBuffer), 'image/png'), { reply_to_message_id: ctx.message?.message_id });
-      return;
-    } catch (err) {
-      ctx.reply(`Eita, algo deu errado: ${err.message}`, { reply_to_message_id: ctx.message?.message_id });
-      console.error(err);
-      return;
-    }
+    const imageArrayBuffer = await CloudFlareService.generateImage(message);
+    ctx.replyWithPhoto(new InputFile(new Uint8Array(imageArrayBuffer), 'image/png'), { reply_to_message_id: ctx.message?.message_id });
+    return;
   }
 }
 
@@ -166,9 +160,7 @@ async function callGeminiModel(userKey: string, ctx: Context, message?: string, 
           {reply_to_message_id: ctx.message?.message_id});
       return;
     }
-    ctx.reply(`Eita, algo deu errado: ${err.message}`, {reply_to_message_id: ctx.message?.message_id});
-    console.error(err);
-    return;
+    throw err;
   }
 }
 

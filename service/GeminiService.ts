@@ -4,6 +4,7 @@ import { getChatHistory, getUserGeminiApiKeys } from '../repository/ChatReposito
 import { addChatToHistory } from '../repository/ChatRepository.ts';
 import { ApiKeyNotFoundError } from '../error/ApiKeyNotFoundError.ts';
 import { HarmBlockThreshold } from 'npm:@google/generative-ai';
+import { geminiModel } from '../config/models.ts';
 
 const GEMINI_API_KEY = Deno.env.get('GEMINI_API_KEY') as string;
 
@@ -11,15 +12,14 @@ export default class GeminiService {
   private userKey: string;
   private genAi: GoogleGenerativeAI;
   private model: GenerativeModel;
-  private static geminiModel = 'gemini-1.5-flash-8b';
 
   private constructor(userKey: string, genAi: GoogleGenerativeAI) {
     this.userKey = userKey;
     this.genAi = genAi;
     this.model = this.genAi.getGenerativeModel({
-       model: GeminiService.geminiModel, 
+       model: geminiModel, 
        safetySettings: GeminiService.buildSafetySettings(),
-       systemInstruction: GeminiService.tone(GeminiService.geminiModel)
+       systemInstruction: GeminiService.tone(geminiModel)
     });
   }
 
@@ -36,7 +36,7 @@ export default class GeminiService {
   }
 
   static getModel(): string {
-    return GeminiService.geminiModel;
+    return geminiModel;
   }
 
   static tone(model: string): string {

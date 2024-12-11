@@ -1,13 +1,12 @@
 import OpenAi from 'npm:openai';
 import { getChatHistory } from '../repository/ChatRepository.ts';
 import { replaceGeminiConfigFromTone, convertGeminiHistoryToGPT } from '../util/ChatConfigUtil.ts';
-
-const gptModel = 'gpt-4o-mini';
-const perplexityModel = 'llama-3.1-sonar-small-128k-online';
-const imageModel = 'dall-e-2';
-const gptMaxTokens = 1000;
+import { perplexityModel, openAIModels } from '../config/models.ts';
 
 const PERPLEXITY_API_KEY: string = Deno.env.get('PERPLEXITY_API_KEY') as string;
+
+const { imageModel, gptModel } = openAIModels;
+const gptMaxTokens = 1000;
 
 export default class OpenAiService {
   private openai: OpenAi;
