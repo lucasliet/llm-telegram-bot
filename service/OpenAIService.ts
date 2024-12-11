@@ -6,17 +6,18 @@ import { perplexityModel, openAIModels } from '../config/models.ts';
 const PERPLEXITY_API_KEY: string = Deno.env.get('PERPLEXITY_API_KEY') as string;
 
 const { imageModel, gptModel } = openAIModels;
-const gptMaxTokens = 1000;
 
 export default class OpenAiService {
   private openai: OpenAi;
   private textModel: string;
+  private maxTokens: number;
 
   public constructor(command: '/gpt' | '/perplexity') {
     this.openai = command === '/perplexity' 
       ? new OpenAi({ apiKey: PERPLEXITY_API_KEY, baseURL: 'https://api.perplexity.ai' })
       : new OpenAi();
     this.textModel = command === '/perplexity' ? perplexityModel : gptModel ;
+    this.maxTokens = command === '/perplexity'? 140 : 1000;
   }
 
 
@@ -26,11 +27,11 @@ export default class OpenAiService {
     const completion = await this.openai.chat.completions.create({
       model: this.textModel,
       messages: [
-        { role: 'system', content: replaceGeminiConfigFromTone('OpenAI', this.textModel, gptMaxTokens) },
+        { role: 'system', content: replaceGeminiConfigFromTone('OpenAI', this.textModel, this.maxTokens) },
         ...convertGeminiHistoryToGPT(geminiHistory),
         { role: 'user', content: `"${quote}" ${prompt}` }
       ],
-      max_tokens: gptMaxTokens,
+      max_tokens: this.maxTokens,
     });
 
     return completion.choices[0].message.content!;
