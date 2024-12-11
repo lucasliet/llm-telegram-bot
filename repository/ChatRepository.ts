@@ -31,7 +31,7 @@ export async function getChatHistory(userKey: string): Promise<Content[]> {
 
 export async function addChatToHistory(history: Content[], userKey: string): Promise<void> {
   const compressedChatHistory = compressObject(history);
-  await kv.set([userKey, 'chat-history'], compressedChatHistory, { expireIn: oneDayInMillis });
+  await kv.set([userKey, 'chat-history'], compressedChatHistory, { expireIn: oneDayInMillis * 30 });
 }
 
 export async function clearChatHistory(userKey: string): Promise<void> {
