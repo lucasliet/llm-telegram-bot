@@ -29,7 +29,13 @@ export async function getChatHistory(userKey: string): Promise<Content[]> {
   return decompressObject<Content[]>(compressedChatHistory);
 }
 
-export async function addChatToHistory(history: Content[], userKey: string): Promise<void> {
+export async function addChatToHistory(history: Content[], quote: string = '', userPrompt: string, modelPrompt: string, userKey: string): Promise<void> {
+  const userPart = quote ? [{ text: quote }, { text: userPrompt }] : [{ text: userPrompt }];
+  history = [ ...history, { role: 'user', parts: userPart }, { role: 'model', parts: [{ text: modelPrompt }] } ]
+  await addContentToChatHistory(history, userKey);
+}
+
+export async function addContentToChatHistory(history: Content[], userKey: string): Promise<void> {
   const compressedChatHistory = compressObject(history);
   await kv.set([userKey, 'chat-history'], compressedChatHistory, { expireIn: oneDayInMillis * 30 });
 }

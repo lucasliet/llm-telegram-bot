@@ -1,4 +1,4 @@
-import { getChatHistory } from "../repository/ChatRepository.ts";
+import { addChatToHistory, getChatHistory } from "../repository/ChatRepository.ts";
 import { convertGeminiHistoryToGPT, replaceGeminiConfigFromTone } from "../util/ChatConfigUtil.ts";
 import { cloudflareModels } from '../config/models.ts'; 
 
@@ -38,13 +38,15 @@ export default {
   async generateText(userKey: string, quote: string = '', prompt: string, model: string = textModel): Promise<string> {
     const geminiHistory = await getChatHistory(userKey);
 
+    const requestPrompt = quote ? `"${this.escapeMessageQuotes(quote)}" ${this.escapeMessageQuotes(prompt)}` : this.escapeMessageQuotes(prompt);
+
     const apiResponse = await fetch(`https://api.cloudflare.com/client/v4/accounts/${CLOUDFLARE_ACCOUNT_ID}/ai/run/${model}`, {
       ...requestOptions,
       body: JSON.stringify({
         messages: [
           { role: "system", content: replaceGeminiConfigFromTone('Llama', textModel, cloudFlareMaxTokens) },
           ...convertGeminiHistoryToGPT(geminiHistory),
-          { role: "user", content: `"${this.escapeMessageQuotes(quote)}" ${this.escapeMessageQuotes(prompt)}` }
+          { role: "user", content: requestPrompt }
         ], max_tokens: cloudFlareMaxTokens
       })
     });
@@ -54,6 +56,9 @@ export default {
     }
 
     const { result: { response } } = await apiResponse.json();
+
+    addChatToHistory(geminiHistory, quote, requestPrompt, response, userKey);
+
     return response;
   },
   async generateSQL(userKey: string, quote: string = '', prompt: string): Promise<string> {

@@ -1,7 +1,7 @@
 import { GoogleGenerativeAI, GenerativeModel, Content, ChatSession, GenerationConfig, InlineDataPart, HarmCategory, SafetySetting } from 'npm:@google/generative-ai'
 import { Base64 } from "https://deno.land/x/bb64@1.1.0/mod.ts";
 import { getChatHistory, getUserGeminiApiKeys } from '../repository/ChatRepository.ts';
-import { addChatToHistory } from '../repository/ChatRepository.ts';
+import { addContentToChatHistory } from '../repository/ChatRepository.ts';
 import { ApiKeyNotFoundError } from '../error/ApiKeyNotFoundError.ts';
 import { HarmBlockThreshold } from 'npm:@google/generative-ai';
 import { geminiModel } from '../config/models.ts';
@@ -75,7 +75,7 @@ export default class GeminiService {
     const chat = GeminiService.buildChat(this.model, history);
     const message = quote ? [quote, prompt] : [prompt];
     const response = (await chat.sendMessage(message)).response.text();
-    await addChatToHistory(await chat.getHistory(), this.userKey);
+    await addContentToChatHistory(await chat.getHistory(), this.userKey);
     return response;
   }
   ;
@@ -86,7 +86,7 @@ export default class GeminiService {
     const imageParts = await Promise.all(urls.map(this.fileToGenerativePart));
 
     const response = (await chat.sendMessage([quote, prompt, ...imageParts])).response.text();
-    await addChatToHistory(await chat.getHistory(), this.userKey);
+    await addContentToChatHistory(await chat.getHistory(), this.userKey);
     return response;
   }
 

@@ -1,5 +1,5 @@
 import OpenAi from 'npm:openai';
-import { getChatHistory } from '../repository/ChatRepository.ts';
+import { getChatHistory, addChatToHistory } from '../repository/ChatRepository.ts';
 import { replaceGeminiConfigFromTone, convertGeminiHistoryToGPT } from '../util/ChatConfigUtil.ts';
 import { perplexityModel, openAIModels } from '../config/models.ts';
 
@@ -24,17 +24,23 @@ export default class OpenAiService {
   async generateTextResponse(userKey: string, quote: string = '', prompt: string): Promise<string> {
     const geminiHistory = await getChatHistory(userKey);
 
+    const requestPrompt = quote ? `"${quote}" ${prompt}`: prompt;
+
     const completion = await this.openai.chat.completions.create({
       model: this.textModel,
       messages: [
         { role: 'system', content: replaceGeminiConfigFromTone('OpenAI', this.textModel, this.maxTokens) },
         ...convertGeminiHistoryToGPT(geminiHistory),
-        { role: 'user', content: `"${quote}" ${prompt}` }
+        { role: 'user', content: requestPrompt }
       ],
       max_tokens: this.maxTokens,
     });
 
-    return completion.choices[0].message.content!;
+    const responsePrompt =  completion.choices[0].message.content!;
+
+    addChatToHistory(geminiHistory, quote, requestPrompt, responsePrompt, userKey);
+
+    return responsePrompt;
   }
   async generateImageResponse(userKey: string, prompt: string, style: 'vivid' | 'natural' = 'vivid'): Promise<string[]> {
     const response = await this.openai.images.generate({
