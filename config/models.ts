@@ -1,4 +1,4 @@
-export const geminiModel = 'gemini-1.5-flash';
+export const geminiModel = 'gemini-2.0-flash-exp';
 
 export const perplexityModel = 'llama-3.1-sonar-small-128k-online';
 

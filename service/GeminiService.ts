@@ -73,7 +73,8 @@ export default class GeminiService {
   async sendTextMessage(quote: string = '', prompt: string): Promise<string> {
     const history = await getChatHistory(this.userKey);
     const chat = GeminiService.buildChat(this.model, history);
-    const response = (await chat.sendMessage([quote, prompt])).response.text();
+    const message = quote ? [quote, prompt] : [prompt];
+    const response = (await chat.sendMessage(message)).response.text();
     await addChatToHistory(await chat.getHistory(), this.userKey);
     return response;
   }
