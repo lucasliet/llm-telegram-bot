@@ -192,7 +192,7 @@ function getTelegramFilesUrl(ctx: Context, photos: PhotoSize[] | Audio[]): Promi
 
 export async function downloadTelegramFile(url: string): Promise<Uint8Array> {
   const response = await fetch(url);
-  return (await response.body?.getReader().read())!.value!;
+  return new Uint8Array(await response.arrayBuffer());
 }
 
 async function transcribeAudio(ctx: Context, audio: Voice): Promise<string> {
