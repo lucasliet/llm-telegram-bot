@@ -4,7 +4,8 @@ export const perplexityModel = 'llama-3.1-sonar-small-128k-online';
 
 export const openAIModels = {
   gptModel: 'gpt-4o-mini',
-  imageModel: 'dall-e-2'
+  imageModel: 'dall-e-2',
+  sttModel: 'whisper-1'
 }
 
 export const cloudflareModels =  {

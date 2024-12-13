@@ -195,25 +195,29 @@ export async function downloadTelegramFile(url: string): Promise<Uint8Array> {
   return new Uint8Array(await response.arrayBuffer());
 }
 
-async function transcribeAudio(ctx: Context, audio: Voice): Promise<string> {
+async function transcribeAudio(userKey: string, ctx: Context, audio: Voice): Promise<string> {
   const audioUrl: string = await getTelegramFilesUrl(ctx, [audio])[0];
+
+  if (gptModelCommand === await getCurrentModel(userKey)) {
+    return new OpenAiService('/gpt').transcribeAudio(audioUrl);
+  }
 
   const audioFile: Uint8Array = await downloadTelegramFile(audioUrl);
 
   return await CloudFlareService.transcribeAudio(audioFile);
 }
 
-async function getTextMessage(ctx: Context): Promise<string | undefined> {
-  const audio = ctx.message?.voice || ctx.message?.audio;
-  return audio ? await transcribeAudio(ctx, audio) : Promise.resolve(ctx.message?.text);
+async function getTextMessage(userKey: string, ctx: Context, audio?: Voice): Promise<string | undefined> {
+  return audio ? await transcribeAudio(userKey, ctx, audio) : Promise.resolve(ctx.message?.text);
 }
 
 async function extractContextKeys(ctx: Context) {
   const userId = ctx.from?.id;
   const userKey = `user:${userId}`;
-  const contextMessage = await getTextMessage(ctx);
+  const audio = ctx.message?.voice || ctx.message?.audio;
+  const contextMessage = await getTextMessage(userKey, ctx, audio);
   const photos = ctx.message?.photo;
   const caption = ctx.message?.caption;
   const quote = ctx.message?.reply_to_message?.text;
-  return { userId, userKey, contextMessage, photos, caption, quote };
+  return { userId, userKey, contextMessage, audio, photos, caption, quote };
 }

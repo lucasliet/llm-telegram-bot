@@ -1,16 +1,18 @@
-import OpenAi from 'npm:openai';
+import OpenAi, { toFile } from 'npm:openai';
 import { getChatHistory, addChatToHistory } from '../repository/ChatRepository.ts';
 import { replaceGeminiConfigFromTone, convertGeminiHistoryToGPT } from '../util/ChatConfigUtil.ts';
 import { perplexityModel, openAIModels } from '../config/models.ts';
+import { downloadTelegramFile } from './TelegramService.ts';
+import * as path from 'jsr:@std/path';
 
 const PERPLEXITY_API_KEY: string = Deno.env.get('PERPLEXITY_API_KEY') as string;
 
-const { imageModel, gptModel } = openAIModels;
+const { imageModel, gptModel, sttModel } = openAIModels;
 
 export default class OpenAiService {
   private openai: OpenAi;
   private model: string;
-  private maxTokens: number;
+  private maxTokens: number;  
 
   public constructor(command: '/gpt' | '/perplexity') {
     this.openai = command === '/perplexity' 
@@ -83,5 +85,14 @@ export default class OpenAiService {
     console.log('dall-e generated images: ', imageUrls);
 
     return imageUrls;
+  }
+
+  async transcribeAudio(audioFileUrl: string): Promise<string> {
+    const response = await this.openai.audio.transcriptions.create({
+      file: await toFile(downloadTelegramFile(audioFileUrl), path.extname(audioFileUrl)),
+      model: sttModel,
+    });
+
+    return response.text; 
   }
 }
