@@ -12,7 +12,7 @@
       "cwd": "${workspaceFolder}",
       "env": {
         "BOT_TOKEN": "${env:TELEGRAM_CHAT_BOT_TOKEN}",
-        "ADMIN_USER_ID": "${env:TELEGRAM_USER_ID}",
+        "ADMIN_USER_IDS": "${env:TELEGRAM_USER_ID}",
         "CLOUDFLARE_API_KEY": "${env:CLOUDFLARE_AI_API_KEY}",
         "CLOUDFLARE_ACCOUNT_ID": "${env:CLOUDFLARE_AI_ACCOUNT_ID}",
         "CLOUDFLARE_ZONE_ID": "${env:CLOUDFLARE_ZONE_ID}"

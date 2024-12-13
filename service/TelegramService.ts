@@ -9,7 +9,7 @@ import { InputFile, PhotoSize } from 'https://deno.land/x/grammy@v1.17.2/types.d
 import { InputMediaBuilder } from 'https://deno.land/x/grammy@v1.17.2/mod.ts';
 
 const TOKEN = Deno.env.get('BOT_TOKEN') as string;
-const ADMIN_USER_ID: number = parseInt(Deno.env.get('ADMIN_USER_ID') as string);
+const ADMIN_USER_IDS: number[] = (Deno.env.get('ADMIN_USER_IDS') as string).split('|').map(parseInt);
 
 export default {
   setWebhook: (): Promise<Response> => fetch(`https://api.telegram.org/bot${TOKEN}/setWebhook`, {
@@ -23,8 +23,8 @@ export default {
   }),
 
   async callAdminModel(ctx: Context, modelCallFunction: (ctx: Context) => Promise<void>): Promise<void> {
-    const userId = ctx.from?.id;
-    if (ADMIN_USER_ID === userId)
+    const userId = ctx.from?.id!;
+    if (ADMIN_USER_IDS.includes(userId))
       await this.callModel(ctx, modelCallFunction);
     else
       await this.callModel(ctx, this.replyTextContent);
