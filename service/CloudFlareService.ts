@@ -18,13 +18,13 @@ const requestOptions = {
 };
 
 export default {
-  async transcribeAudio(audioFile: Uint8Array): Promise<string> {
+  async transcribeAudio(audioFile: Promise<Uint8Array>): Promise<string> {
     const response = await fetch(`https://api.cloudflare.com/client/v4/accounts/${CLOUDFLARE_ACCOUNT_ID}/ai/run/${sttModel}`, {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${CLOUDFLARE_API_KEY}`
       },
-      body: audioFile
+      body: await audioFile
     });
 
     if (!response.ok) {

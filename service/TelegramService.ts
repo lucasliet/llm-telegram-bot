@@ -204,14 +204,15 @@ async function transcribeAudio(userKey: string, ctx: Context, audio: Voice): Pro
   if (transcribedAudioCache.has(cacheKey)) {
     return transcribedAudioCache.get(cacheKey)!;
   }
+  
+  const audioFile: Promise<Uint8Array> = downloadTelegramFile(audioUrl);
 
   if (isGptModelCommand) {
-    const output = await new OpenAiService('/gpt').transcribeAudio(audioUrl);
+    const output = await new OpenAiService('/gpt').transcribeAudio(audioFile, audioUrl);
     transcribedAudioCache.set(cacheKey, output);
     return output;
   }
 
-  const audioFile: Uint8Array = await downloadTelegramFile(audioUrl);
 
   const output = await CloudFlareService.transcribeAudio(audioFile);
   transcribedAudioCache.set(cacheKey, output);

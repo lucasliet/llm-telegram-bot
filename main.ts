@@ -15,7 +15,7 @@ const APP = new Application();
 
 APP.use(oakCors());
 
-Deno.cron("Configure Telegram bot webhook", "0 0 */2 * *", async () => {
+Deno.cron("Configure Telegram bot webhook", "0 0 * * *", async () => {
   await TelegramService.setWebhook();
 });
 
@@ -40,7 +40,7 @@ BOT.hears(/\/help/g, (ctx) => {
     /gpt - Configura modelo de linguagem para o GPT
     /llama - Configura modelo de linguagem para o Llama
     /gemini - Configura modelo de linguagem para o Gemini
-    /perplexity - Configura modelo de linguagem para o perplexity.ai
+    /perplexity - Configura modelo de linguagem para o modelo perplexity.ai
     /clear - Apaga o histórico de conversa
     Comandos inline:
     image: mensagem - Gera imagens com Stable Diffusion
@@ -69,7 +69,7 @@ APP.use(oakCors());
 
 APP.use(async (ctx, next) => {
   try {
-    if (ctx.request.url.pathname !== '/webhook' && !ctx.request.url.pathname.startsWith('/image')) {
+    if (ctx.request.url.pathname !== '/webhook') {
       ctx.response.status = 200;
       ctx.response.body = 'Use with https://t.me/llm_gemini_bot';
       return;
