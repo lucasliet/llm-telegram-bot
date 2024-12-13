@@ -38,7 +38,12 @@ export async function addChatToHistory(history: Content[], quote: string = '', u
   await addContentToChatHistory(history, userKey);
 }
 
+function removeOldMessages<T>(history: Array<T>, maxsize: number) {
+  if (history.length > maxsize) history.splice(0, history.length - maxsize);
+}
+
 export async function addContentToChatHistory(history: Content[], userKey: string): Promise<void> {
+  removeOldMessages(history, 100);
   const compressedChatHistory = compressObject(history);
   await kv.set([userKey, 'chat-history'], compressedChatHistory, { expireIn: oneDayInMillis * 30 });
 }
