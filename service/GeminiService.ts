@@ -86,7 +86,9 @@ export default class GeminiService {
     const urls = await Promise.all(photoUrls);
     const imageParts = await Promise.all(urls.map(this.fileToGenerativePart));
 
-    const response = (await chat.sendMessage([quote, prompt, ...imageParts])).response.text();
+    const message = quote ? [quote, prompt, ...imageParts] : [prompt, ...imageParts];
+
+    const response = (await chat.sendMessage(message)).response.text();
     await addContentToChatHistory(await chat.getHistory(), this.userKey);
     return response;
   }
