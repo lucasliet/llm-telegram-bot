@@ -11,5 +11,6 @@ export const cloudflareModels =  {
   imageModel: '@cf/stabilityai/stable-diffusion-xl-base-1.0',
   textModel: '@cf/meta/llama-3.3-70b-instruct-fp8-fast',
   sqlModel: '@cf/defog/sqlcoder-7b-2',
-  codeModel: '@hf/thebloke/deepseek-coder-6.7b-instruct-awq'
+  codeModel: '@hf/thebloke/deepseek-coder-6.7b-instruct-awq',
+  sttModel: '@cf/openai/whisper'
 }

@@ -5,6 +5,7 @@ import { addContentToChatHistory } from '../repository/ChatRepository.ts';
 import { ApiKeyNotFoundError } from '../error/ApiKeyNotFoundError.ts';
 import { HarmBlockThreshold } from 'npm:@google/generative-ai';
 import { geminiModel } from '../config/models.ts';
+import { downloadTelegramFile } from './TelegramService.ts';
 
 const GEMINI_API_KEY = Deno.env.get('GEMINI_API_KEY') as string;
 
@@ -127,11 +128,9 @@ export default class GeminiService {
   }
 
   private async fileToGenerativePart(url: string): Promise<InlineDataPart> {
-    const response = await fetch(url);
-    const byteArray = (await response.body?.getReader().read())!.value!;
     return {
       inlineData: {
-        data: Base64.fromUint8Array(byteArray).toString(),
+        data: Base64.fromUint8Array(await downloadTelegramFile(url)).toString(),
         mimeType: 'image/jpeg'
       },
     };
