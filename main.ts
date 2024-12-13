@@ -3,7 +3,7 @@ import { oakCors } from 'https://deno.land/x/cors@v1.2.2/mod.ts';
 
 import { Bot, webhookCallback } from 'https://deno.land/x/grammy@v1.17.2/mod.ts';
 import TelegramService from './service/TelegramService.ts';
-import { clearChatHistory } from './repository/ChatRepository.ts';
+import { clearChatHistory, modelCommands } from './repository/ChatRepository.ts';
 
 import './prototype/StringExtensionPrototype.ts';
 
@@ -34,19 +34,38 @@ BOT.command('clear', async (ctx) => {
   await ctx.reply('Histórico de conversa apagado com sucesso!');
 });
 
-BOT.on('message', async (ctx) => {
-  console.info(`user: ${ctx.msg.from?.id}, message: ${ctx.message?.text}`);
-  try {
-    if (ctx.message?.text?.toLocaleLowerCase().startsWith('image:'))
-      await TelegramService.replyImageContent(ctx);
-    else 
-      await TelegramService.replyTextContent(ctx);
-  } catch (err) {
-    await ctx.reply(`Eita, algo deu errado: ${err.message}`,
-      { reply_to_message_id: ctx.msg.message_id })
-    console.error(err);
-  }
+BOT.hears(/\/help/g, (ctx) => {
+  ctx.reply(
+    `Comandos disponíveis:
+    /gpt - Configura modelo de linguagem para o GPT
+    /llama - Configura modelo de linguagem para o Llama
+    /gemini - Configura modelo de linguagem para o Gemini
+    /perplexity - Configura modelo de linguagem para o perplexity.ai
+    /clear - Apaga o histórico de conversa
+    Comandos inline:
+    image: mensagem - Gera imagens com Stable Diffusion
+    gptImage: mensagem - Gera imagens com DALL-e
+    gpt: mensagem - Gera texto com GPT
+    llama: mensagem - Gera texto com o Llama
+    sql: mensagem - Gera sql com modelo cloudflare
+    code: mensagem - Gera código com modelo cloudflare
+    perplexity: mensagem - Faz uma pergunta usando o modelo perplexity.ai
+    search: mensagem - Faz uma pergunta usando o modelo perplexity.ai
+    `
+  );
 });
+
+BOT.hears(/^(llama|sql|code|image):/g, async (ctx) => await TelegramService.callAdminModel(ctx, TelegramService.callCloudflareModel));
+
+BOT.hears(/^(perplexity|search):/g, async (ctx) => await TelegramService.callAdminModel(ctx, TelegramService.callPerplexityModel));
+
+BOT.hears(/^(gpt|gptImage):/g, async (ctx) => await TelegramService.callAdminModel(ctx, TelegramService.callOpenAIModel));
+
+BOT.hears(new RegExp(`^(${modelCommands.join('|')})$`) , async (ctx) => await TelegramService.setCurrentModel(ctx));
+
+BOT.on('message', async (ctx) => await TelegramService.callModel(ctx, TelegramService.replyTextContent));
+
+APP.use(oakCors());
 
 APP.use(async (ctx, next) => {
   try {
