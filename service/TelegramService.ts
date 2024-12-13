@@ -52,13 +52,13 @@ export default {
     
     switch (await getCurrentModel(userKey)) {
       case gptModelCommand:
-        await this.callOpenAIModel(ctx,`gpt: ${message}`);
+        await _callOpenAIModel(ctx,`gpt: ${message}`);
         return;
       case perplexityModelCommand:
-        await this.callPerplexityModel(ctx,`perplexity: ${message}`);
+        await _callPerplexityModel(ctx,`perplexity: ${message}`);
         return;
       case llamaModelCommand:
-        await this.callCloudflareModel(ctx,`llama: ${message!}`);
+        await _callCloudflareModel(ctx,`llama: ${message!}`);
         return;
       case geminiModelCommand:
         await callGeminiModel(ctx);
@@ -70,70 +70,82 @@ export default {
   },
 
   async callPerplexityModel(ctx: Context, commandMessage?: string): Promise<void> {
-    const { userKey, contextMessage, quote } = await extractContextKeys(ctx);
-
-    const message = commandMessage || contextMessage;
-
-    const openAIService = new OpenAiService('/perplexity');
-  
-    const output = await openAIService.generateTextResponse(userKey, quote, message!.replace('perplexity:', ''));
-    ctx.reply(output, { reply_to_message_id: ctx.message?.message_id });
-    return;
+    return await _callPerplexityModel(ctx, commandMessage);
   },
 
   async callOpenAIModel(ctx: Context, commandMessage?: string): Promise<void> {
-    const { userKey, contextMessage, photos, caption, quote } = await extractContextKeys(ctx);
-    const openAIService = new OpenAiService('/gpt');
-
-    if (photos && caption) {
-      const photosUrl = getTelegramFilesUrl(ctx, photos);
-      const output = await openAIService.generateTextResponseFromImage(userKey, quote, photosUrl, caption);
-      ctx.reply(output, { reply_to_message_id: ctx.message?.message_id });
-      return;
-    }
-
-    const message = commandMessage || contextMessage;
-
-    const command = message!.split(':')[0];
-  
-    switch (command) {
-      case 'gpt': {
-          const output = await openAIService.generateTextResponse(userKey, quote, message!.replace('gpt:', ''));
-          ctx.reply(output, { reply_to_message_id: ctx.message?.message_id });
-          return;
-      }
-      case 'gptImage': {
-          const output = await openAIService.generateImageResponse(userKey, message!.replace('gptImage:', ''));
-          const mediaUrls = output.map(imageUrl => InputMediaBuilder.photo(imageUrl));
-          ctx.replyWithMediaGroup(mediaUrls, { reply_to_message_id: ctx.message?.message_id });
-          return;
-      }
-    }
+    return await _callOpenAIModel(ctx, commandMessage);
   },
 
   async callCloudflareModel(ctx: Context, commandMessage?: string): Promise<void> {
-    const { userKey, contextMessage, quote } = await extractContextKeys(ctx);
+    return await _callCloudflareModel(ctx, commandMessage);
+  }
+}
 
-    const message = commandMessage || contextMessage;
+async function _callPerplexityModel(ctx: Context, commandMessage?: string): Promise<void> {
+  const { userKey, contextMessage, quote } = await extractContextKeys(ctx);
 
-    const cloudflareCommand = message!.split(':')[0];
-    let output = ''
-    switch (cloudflareCommand) {
-      case 'llama':
-        output = await CloudFlareService.generateText(userKey, quote, message!.replace('llama:', ''));
-        break;
-      case 'sql':
-        output = await CloudFlareService.generateSQL(userKey, quote, message!.replace('sql:', ''));
-        break;
-      case 'code':
-        output = await CloudFlareService.generateCode(userKey, quote, message!.replace('code:', ''));
-        break;
-      case 'image':
-        ctx.replyWithPhoto(new InputFile(new Uint8Array(await CloudFlareService.generateImage(message!)), 'image/png'), { reply_to_message_id: ctx.message?.message_id });
+  const message = commandMessage || contextMessage;
+
+  const openAIService = new OpenAiService('/perplexity');
+
+  const output = await openAIService.generateTextResponse(userKey, quote, message!.replace('perplexity:', ''));
+  ctx.reply(output, { reply_to_message_id: ctx.message?.message_id });
+  return;
+}
+
+async function _callOpenAIModel(ctx: Context, commandMessage?: string): Promise<void> {
+  const { userKey, contextMessage, photos, caption, quote } = await extractContextKeys(ctx);
+  const openAIService = new OpenAiService('/gpt');
+
+  if (photos && caption) {
+    const photosUrl = getTelegramFilesUrl(ctx, photos);
+    const output = await openAIService.generateTextResponseFromImage(userKey, quote, photosUrl, caption);
+    ctx.reply(output, { reply_to_message_id: ctx.message?.message_id });
+    return;
+  }
+
+  const message = commandMessage || contextMessage;
+
+  const command = message!.split(':')[0];
+
+  switch (command) {
+    case 'gpt': {
+        const output = await openAIService.generateTextResponse(userKey, quote, message!.replace('gpt:', ''));
+        ctx.reply(output, { reply_to_message_id: ctx.message?.message_id });
         return;
     }
-    ctx.reply(output!, { reply_to_message_id: ctx.message?.message_id });
+    case 'gptImage': {
+        const output = await openAIService.generateImageResponse(userKey, message!.replace('gptImage:', ''));
+        const mediaUrls = output.map(imageUrl => InputMediaBuilder.photo(imageUrl));
+        ctx.replyWithMediaGroup(mediaUrls, { reply_to_message_id: ctx.message?.message_id });
+        return;
+    }
   }
+}
+
+async function _callCloudflareModel(ctx: Context, commandMessage?: string): Promise<void> {
+  const { userKey, contextMessage, quote } = await extractContextKeys(ctx);
+
+  const message = commandMessage || contextMessage;
+
+  const cloudflareCommand = message!.split(':')[0];
+  let output = ''
+  switch (cloudflareCommand) {
+    case 'llama':
+      output = await CloudFlareService.generateText(userKey, quote, message!.replace('llama:', ''));
+      break;
+    case 'sql':
+      output = await CloudFlareService.generateSQL(userKey, quote, message!.replace('sql:', ''));
+      break;
+    case 'code':
+      output = await CloudFlareService.generateCode(userKey, quote, message!.replace('code:', ''));
+      break;
+    case 'image':
+      ctx.replyWithPhoto(new InputFile(new Uint8Array(await CloudFlareService.generateImage(message!)), 'image/png'), { reply_to_message_id: ctx.message?.message_id });
+      return;
+  }
+  ctx.reply(output!, { reply_to_message_id: ctx.message?.message_id });
 }
 
 async function callGeminiModel(ctx: Context): Promise<void> {
