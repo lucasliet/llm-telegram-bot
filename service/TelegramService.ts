@@ -82,13 +82,20 @@ export default {
   },
 
   async callOpenAIModel(ctx: Context, commandMessage?: string): Promise<void> {
-    const { userKey, contextMessage, quote } = await extractContextKeys(ctx);
+    const { userKey, contextMessage, photos, caption, quote } = await extractContextKeys(ctx);
+    const openAIService = new OpenAiService('/gpt');
+
+    if (photos && caption) {
+      const photosUrl = getTelegramFilesUrl(ctx, photos);
+      const output = await openAIService.generateTextResponseFromImage(userKey, quote, photosUrl, caption);
+      ctx.reply(output, { reply_to_message_id: ctx.message?.message_id });
+      return;
+    }
 
     const message = commandMessage || contextMessage;
 
     const command = message!.split(':')[0];
-    const openAIService = new OpenAiService('/gpt');
-    
+  
     switch (command) {
       case 'gpt': {
           const output = await openAIService.generateTextResponse(userKey, quote, message!.replace('gpt:', ''));

@@ -9,27 +9,52 @@ const { imageModel, gptModel } = openAIModels;
 
 export default class OpenAiService {
   private openai: OpenAi;
-  private textModel: string;
+  private model: string;
   private maxTokens: number;
 
   public constructor(command: '/gpt' | '/perplexity') {
     this.openai = command === '/perplexity' 
       ? new OpenAi({ apiKey: PERPLEXITY_API_KEY, baseURL: 'https://api.perplexity.ai' })
       : new OpenAi();
-    this.textModel = command === '/perplexity' ? perplexityModel : gptModel ;
+    this.model = command === '/perplexity' ? perplexityModel : gptModel ;
     this.maxTokens = command === '/perplexity'? 140 : 1000;
   }
 
+  async generateTextResponseFromImage(userKey: string, quote: string = '', photosUrl: Promise<string>[], prompt: string): Promise<string> {
+    const geminiHistory = await getChatHistory(userKey);
 
+    const requestPrompt = quote ? `"${quote}" ${prompt}`: prompt;
+
+    const urls = await Promise.all(photosUrl);
+
+    const completion = await this.openai.chat.completions.create({
+      model: this.model,
+      messages: [
+        { role: 'system', content: replaceGeminiConfigFromTone('OpenAI', this.model, this.maxTokens) },
+        ...convertGeminiHistoryToGPT(geminiHistory),
+        { role: 'user', content: [
+          { type: 'text', text: requestPrompt },
+          ...urls.map(photoUrl => ({ type: 'image_url', image_url: { url: photoUrl } }))
+        ] }
+      ],
+      max_tokens: this.maxTokens,
+    });
+
+    const responsePrompt =  completion.choices[0].message.content!;
+
+    addChatToHistory(geminiHistory, quote, requestPrompt, responsePrompt, userKey);
+
+    return responsePrompt;
+  }
   async generateTextResponse(userKey: string, quote: string = '', prompt: string): Promise<string> {
     const geminiHistory = await getChatHistory(userKey);
 
     const requestPrompt = quote ? `"${quote}" ${prompt}`: prompt;
 
     const completion = await this.openai.chat.completions.create({
-      model: this.textModel,
+      model: this.model,
       messages: [
-        { role: 'system', content: replaceGeminiConfigFromTone('OpenAI', this.textModel, this.maxTokens) },
+        { role: 'system', content: replaceGeminiConfigFromTone('OpenAI', this.model, this.maxTokens) },
         ...convertGeminiHistoryToGPT(geminiHistory),
         { role: 'user', content: requestPrompt }
       ],
