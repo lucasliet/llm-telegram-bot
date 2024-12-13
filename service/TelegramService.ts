@@ -195,20 +195,31 @@ export async function downloadTelegramFile(url: string): Promise<Uint8Array> {
   return new Uint8Array(await response.arrayBuffer());
 }
 
+const transcribedAudioCache = new Map<string, string>();
 async function transcribeAudio(userKey: string, ctx: Context, audio: Voice): Promise<string> {
   const audioUrl: string = await getTelegramFilesUrl(ctx, [audio])[0];
+  const isGptModelCommand = gptModelCommand === await getCurrentModel(userKey);
+  const cacheKey = `${userKey}-${audioUrl}-${isGptModelCommand}`;  
 
-  if (gptModelCommand === await getCurrentModel(userKey)) {
-    return new OpenAiService('/gpt').transcribeAudio(audioUrl);
+  if (transcribedAudioCache.has(cacheKey)) {
+    return transcribedAudioCache.get(cacheKey)!;
+  }
+
+  if (isGptModelCommand) {
+    const output = await new OpenAiService('/gpt').transcribeAudio(audioUrl);
+    transcribedAudioCache.set(cacheKey, output);
+    return output;
   }
 
   const audioFile: Uint8Array = await downloadTelegramFile(audioUrl);
 
-  return await CloudFlareService.transcribeAudio(audioFile);
+  const output = await CloudFlareService.transcribeAudio(audioFile);
+  transcribedAudioCache.set(cacheKey, output);
+  return output;
 }
 
-async function getTextMessage(userKey: string, ctx: Context, audio?: Voice): Promise<string | undefined> {
-  return audio ? await transcribeAudio(userKey, ctx, audio) : Promise.resolve(ctx.message?.text);
+function getTextMessage(userKey: string, ctx: Context, audio?: Voice): Promise<string | undefined> {
+  return audio ? transcribeAudio(userKey, ctx, audio) : Promise.resolve(ctx.message?.text);
 }
 
 async function extractContextKeys(ctx: Context) {
