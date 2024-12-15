@@ -83,12 +83,19 @@ export default {
 }
 
 async function _callPerplexityModel(ctx: Context, commandMessage?: string): Promise<void> {
-  const { userKey, contextMessage, quote } = await extractContextKeys(ctx);
-
+  const { userKey, contextMessage, photos, caption, quote } = await extractContextKeys(ctx);
+  
   const message = commandMessage || contextMessage;
 
   const openAIService = new OpenAiService('/perplexity');
 
+  if (photos && caption) {
+    const photosUrl = getTelegramFilesUrl(ctx, photos);
+    const output = await openAIService.generateTextResponseFromImage(userKey, quote, photosUrl, caption);
+    ctx.reply(output, { reply_to_message_id: ctx.message?.message_id });
+    return;
+  }
+  
   const output = await openAIService.generateTextResponse(userKey, quote, message!.replace('perplexity:', ''));
   ctx.reply(output, { reply_to_message_id: ctx.message?.message_id });
   return;
