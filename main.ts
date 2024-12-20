@@ -1,9 +1,7 @@
 import { Application } from 'https://deno.land/x/oak@v12.6.1/mod.ts';
 import { oakCors } from 'https://deno.land/x/cors@v1.2.2/mod.ts';
 
-import { Bot, Context, webhookCallback } from 'https://deno.land/x/grammy@v1.33.0/mod.ts';
-import { hydrateReply, parseMode } from "https://deno.land/x/grammy_parse_mode@1.10.0/mod.ts";
-import type { ParseModeFlavor } from "https://deno.land/x/grammy_parse_mode@1.10.0/mod.ts";
+import { Bot, webhookCallback } from 'https://deno.land/x/grammy@v1.17.2/mod.ts';
 import TelegramService from './service/TelegramService.ts';
 import { clearChatHistory, modelCommands } from './repository/ChatRepository.ts';
 
@@ -12,17 +10,14 @@ import './prototype/StringExtensionPrototype.ts';
 const TOKEN: string = Deno.env.get('BOT_TOKEN') as string;
 const PORT: number = parseInt(Deno.env.get('PORT') as string) || 80;
 
-const BOT = new Bot<ParseModeFlavor<Context>>(TOKEN);
+const BOT = new Bot(TOKEN);
 const APP = new Application();
+
+APP.use(oakCors());
 
 Deno.cron("Configure Telegram bot webhook", "0 0 * * *", async () => {
   await TelegramService.setWebhook();
 });
-
-APP.use(oakCors());
-
-BOT.api.config.use(parseMode('HTML'));
-BOT.use(hydrateReply);
 
 BOT.command('start', (ctx) =>
   ctx.reply(
@@ -86,6 +81,6 @@ APP.use(async (ctx, next) => {
   }
 });
 
-APP.use(webhookCallback<ParseModeFlavor<Context>>(BOT, 'oak'));
+APP.use(webhookCallback(BOT, 'oak'));
 
 APP.listen({ port: PORT });
