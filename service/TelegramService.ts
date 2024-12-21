@@ -42,7 +42,10 @@ export default {
   },
 
   async setCurrentModel(ctx: Context): Promise<void> {
-    const {userKey, contextMessage: message} = await extractContextKeys(ctx);
+    const {userId, userKey, contextMessage: message} = await extractContextKeys(ctx);
+    
+    if (!ADMIN_USER_IDS.includes(userId!) && message !== llamaModelCommand) return;
+    
     await setCurrentModel(userKey, message as ModelCommand);
     ctx.reply(`Novo modelo de inteligência escolhido: ${message}`);
   },
@@ -132,7 +135,14 @@ async function _callOpenAIModel(ctx: Context, commandMessage?: string): Promise<
 }
 
 async function _callCloudflareModel(ctx: Context, commandMessage?: string): Promise<void> {
-  const { userKey, contextMessage, quote } = await extractContextKeys(ctx);
+  const { userKey, contextMessage, photos, caption, quote } = await extractContextKeys(ctx);
+
+  if (photos && caption) {
+    const photoUrl = getTelegramFilesUrl(ctx, photos)[0];
+    const output = await CloudFlareService.generateTextResponseFromImage(userKey, quote, photoUrl, caption);
+    ctx.reply(output, { reply_to_message_id: ctx.message?.message_id });
+    return;
+  }
 
   const message = commandMessage || contextMessage;
 
