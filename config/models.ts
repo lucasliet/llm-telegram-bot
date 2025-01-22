@@ -1,6 +1,6 @@
 export const geminiModel = 'gemini-2.0-flash-exp';
 
-export const perplexityModel = 'llama-3.1-sonar-small-128k-online';
+export const perplexityModel = 'sonar';
 
 export const openAIModels = {
   gptModel: 'gpt-4o-mini',
