@@ -106,7 +106,7 @@ async function _callPerplexityModel(ctx: Context, commandMessage?: string): Prom
 
 async function _callOpenAIModel(ctx: Context, commandMessage?: string): Promise<void> {
   const { userKey, contextMessage, photos, caption, quote } = await extractContextKeys(ctx);
-  const openAIService = new OpenAiService('/gpt');
+  const openAIService = new OpenAiService('/openai');
 
   if (photos && caption) {
     const photosUrl = getTelegramFilesUrl(ctx, photos);
@@ -121,7 +121,7 @@ async function _callOpenAIModel(ctx: Context, commandMessage?: string): Promise<
 
   switch (command) {
     case 'gpt': {
-        const output = await openAIService.generateTextResponse(userKey, quote, message!.replace('gpt:', ''));
+        const output = await new OpenAiService('/github').generateTextResponse(userKey, quote, message!.replace('gpt:', ''));
         ctx.reply(output, { reply_to_message_id: ctx.message?.message_id });
         return;
     }
@@ -225,7 +225,7 @@ async function transcribeAudio(userKey: string, ctx: Context, audio: Voice): Pro
   const audioFile: Promise<Uint8Array> = downloadTelegramFile(audioUrl);
 
   if (isGptModelCommand) {
-    const output = await new OpenAiService('/gpt').transcribeAudio(audioFile, audioUrl);
+    const output = await new OpenAiService('/openai').transcribeAudio(audioFile, audioUrl);
     transcribedAudioCache.set(cacheKey, output);
     return output;
   }

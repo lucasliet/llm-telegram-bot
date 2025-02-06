@@ -5,6 +5,7 @@ import { perplexityModel, openAIModels } from '../config/models.ts';
 import * as path from 'jsr:@std/path';
 
 const PERPLEXITY_API_KEY: string = Deno.env.get('PERPLEXITY_API_KEY') as string;
+const GITHUB_TOKEN: string = Deno.env.get('GITHUB_TOKEN') as string;
 
 const { imageModel, gptModel, sttModel } = openAIModels;
 
@@ -13,10 +14,18 @@ export default class OpenAiService {
   private model: string;
   private maxTokens: number;  
 
-  public constructor(command: '/gpt' | '/perplexity') {
-    this.openai = command === '/perplexity' 
-      ? new OpenAi({ apiKey: PERPLEXITY_API_KEY, baseURL: 'https://api.perplexity.ai' })
-      : new OpenAi();
+  public constructor(command: '/openai' | '/perplexity' | '/github') {
+    switch(command) {
+      case '/openai':
+        this.openai = new OpenAi();
+        break;
+      case '/perplexity':
+        this.openai = new OpenAi({ apiKey: PERPLEXITY_API_KEY, baseURL: 'https://api.perplexity.ai' });
+        break;
+      case '/github':
+        this.openai = new OpenAi({ apiKey: GITHUB_TOKEN , baseURL: 'https://models.inference.ai.azure.com' });
+    }
+   
     this.model = command === '/perplexity' ? perplexityModel : gptModel ;
     this.maxTokens = command === '/perplexity'? 140 : 1000;
   }
