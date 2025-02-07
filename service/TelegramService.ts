@@ -24,7 +24,7 @@ export default {
     })
   }),
 
-  callAdminModel(ctx: Context, modelCallFunction: (ctx: Context) => Promise<void>): Promise<void> {
+  callAdminModel(ctx: Context, modelCallFunction: (ctx: Context) => Promise<void>): void {
     const userId = ctx.from?.id!;
     if (ADMIN_USER_IDS.includes(userId))
       this.callModel(ctx, modelCallFunction);
@@ -32,22 +32,22 @@ export default {
       this.callModel(ctx, this.replyTextContent);
   },
   
-  callModel(ctx: Context, modelCallFunction: (ctx: Context) => Promise<void>): Promise<void> {
+  callModel(ctx: Context, modelCallFunction: (ctx: Context) => Promise<void>): void {
     console.info(`user: ${ctx.msg?.from?.id}, message: ${ctx.message?.text}`);
-    try {
-      const startTime = Date.now();
-      const keepAliveId = keepDenoJobAlive();
-      const timeoutId = replyOnLongAnswer(ctx);
-      modelCallFunction(ctx).then(() => {
-        clearTimeout(timeoutId);
-        clearInterval(keepAliveId);
-        console.log(`Request processed in ${Date.now() - startTime}ms`);
-      });
-    } catch (err) {
+    
+    const startTime = Date.now();
+    const keepAliveId = keepDenoJobAlive();
+    const timeoutId = replyOnLongAnswer(ctx);
+
+    modelCallFunction(ctx).then(() => {
+      clearTimeout(timeoutId);
+      clearInterval(keepAliveId);
+      console.log(`Request processed in ${Date.now() - startTime}ms`);
+    }).catch((err) => {
       console.error(err);
       ctx.reply(`Eita, algo deu errado: ${err.message}`,
         { reply_to_message_id: ctx.msg?.message_id })
-    }
+    });
   },
 
   async setCurrentModel(ctx: Context): Promise<void> {
