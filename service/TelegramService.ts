@@ -207,8 +207,7 @@ async function _callBlackboxModel(ctx: Context, commandMessage?: string): Promis
   }
 
   if(output.length > 4096) {
-    const outputChunks = output.match(/[\s\S]{1,4096}/g)!;
-    outputChunks.forEach((chunk, index) => ctx.reply(`${chunk}${index === outputChunks.length ? '' : '...'}`, { reply_to_message_id: ctx.message?.message_id }));
+    replyInChunks(ctx, output);
     return;
   }
 
@@ -304,10 +303,18 @@ async function extractContextKeys(ctx: Context) {
 function replyOnLongAnswer(ctx: Context): number {
   return setTimeout(() => {
     console.info('Request is longing too much, replying processing message...');
-    ctx.reply('Estou processando sua solicitação, aguarde um momento...');
+    ctx.reply(
+      'Estou processando sua solicitação, aguarde um momento...', 
+      { reply_to_message_id: ctx.message?.message_id }
+    );
   }, 6000);
 }
 
 function keepDenoJobAlive(): number {
   return setInterval(() => true, 2000);
+}
+
+function replyInChunks(ctx: Context, output: string): void {
+  const outputChunks = output.match(/[\s\S]{1,4096}/g)!;
+  outputChunks.forEach((chunk, index) => ctx.reply(`${chunk}${index === outputChunks.length ? '' : '...'}`, { reply_to_message_id: ctx.message?.message_id }));
 }
