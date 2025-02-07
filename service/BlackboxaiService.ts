@@ -44,5 +44,30 @@ export default {
 
   async generateReasoningText(userKey: string, quote: string = '', prompt: string ): Promise<string> {
     return await this.generateText(userKey, quote, prompt, blackboxModels.reasoningModel);
+  },
+
+  async generateImage(prompt: string): Promise<string> {
+    const apiResponse = await fetch(`https://api.blackbox.ai/api/image-generator`, {
+      ...requestOptions,
+      body: JSON.stringify({
+        query: prompt
+      })
+    });
+
+    if (!apiResponse.ok) {
+      throw new Error(`Failed to generate image: ${apiResponse.statusText}`);
+    }
+
+    const { markdown } = await apiResponse.json();
+
+    const imageUrl = markdown.match(/\!\[.*\]\((.*)\)/)[1];
+
+    if (!imageUrl) {
+      throw new Error('Failed to extract image URL from response', markdown);
+    }
+
+    console.log('blackbox generated image: ', imageUrl);
+
+    return imageUrl;
   }
 }

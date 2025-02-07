@@ -117,12 +117,12 @@ async function _callPerplexityModel(ctx: Context, commandMessage?: string): Prom
 
   if (photos && caption) {
     const photosUrl = getTelegramFilesUrl(ctx, photos);
-    const output = await openAIService.generateTextResponseFromImage(userKey, quote, photosUrl, caption);
+    const output = await openAIService.generateTextFromImage(userKey, quote, photosUrl, caption);
     replyInChunks(ctx, output);
     return;
   }
   
-  const output = await openAIService.generateTextResponse(userKey, quote, message!.replace('perplexity:', ''));
+  const output = await openAIService.generateText(userKey, quote, message!.replace('perplexity:', ''));
   replyInChunks(ctx, output);
   return;
 }
@@ -133,7 +133,7 @@ async function _callOpenAIModel(ctx: Context, commandMessage?: string): Promise<
 
   if (photos && caption) {
     const photosUrl = getTelegramFilesUrl(ctx, photos);
-    const output = await openAIService.generateTextResponseFromImage(userKey, quote, photosUrl, caption);
+    const output = await openAIService.generateTextFromImage(userKey, quote, photosUrl, caption);
     replyInChunks(ctx, output);
     return;
   }
@@ -144,12 +144,12 @@ async function _callOpenAIModel(ctx: Context, commandMessage?: string): Promise<
 
   switch (command) {
     case 'gpt': {
-        const output = await new OpenAiService('/github').generateTextResponse(userKey, quote, message!.replace('gpt:', ''));
+        const output = await new OpenAiService('/github').generateText(userKey, quote, message!.replace('gpt:', ''));
         replyInChunks(ctx, output);
-        return;
+        break;
     }
     case 'gptImage': {
-        const output = await openAIService.generateImageResponse(userKey, message!.replace('gptImage:', ''));
+        const output = await openAIService.generateImage(userKey, message!.replace('gptImage:', ''));
         const mediaUrls = output.map(imageUrl => InputMediaBuilder.photo(imageUrl));
         ctx.replyWithMediaGroup(mediaUrls, { reply_to_message_id: ctx.message?.message_id });
         return;
@@ -162,7 +162,7 @@ async function _callCloudflareModel(ctx: Context, commandMessage?: string): Prom
 
   if (photos && caption) {
     const photoUrl = getTelegramFilesUrl(ctx, photos)[0];
-    const output = await CloudFlareService.generateTextResponseFromImage(userKey, quote, photoUrl, caption);
+    const output = await CloudFlareService.generateTextFromImage(userKey, quote, photoUrl, caption);
     replyInChunks(ctx, output);
     return;
   }
@@ -181,7 +181,7 @@ async function _callCloudflareModel(ctx: Context, commandMessage?: string): Prom
     case 'code':
       output = await CloudFlareService.generateCode(userKey, quote, message!.replace('code:', ''));
       break;
-    case 'image':
+    case 'cloudflareImage':
       ctx.replyWithPhoto(new InputFile(new Uint8Array(await CloudFlareService.generateImage(message!)), 'image/png'), { reply_to_message_id: ctx.message?.message_id });
       return;
   }
@@ -201,11 +201,20 @@ async function _callBlackboxModel(ctx: Context, commandMessage?: string): Promis
   const blackBoxCommand = message!.split(':')[0];
 
   let output = '';
-  if(blackBoxCommand === 'deepseek' || blackBoxCommand === 'blackbox') {
-    output = await BlackboxaiService.generateText(userKey, quote, 
-      message!.replace('blackbox:', '').replace('deepseek:', ''));
-  } else if (blackBoxCommand === 'r1') {
-    output = await BlackboxaiService.generateReasoningText(userKey, quote, message!.replace('r1:', ''));
+  switch(blackBoxCommand) {
+    case 'deepseek':
+    case 'blackbox':
+      output = await BlackboxaiService.generateText(userKey, quote, 
+        message!.replace('blackbox:', '').replace('deepseek:', ''));
+      break;
+    case 'r1':
+      output = await BlackboxaiService.generateReasoningText(userKey, quote, message!.replace('r1:', ''));
+      break;
+    case 'image': {
+      const imageUrl = await BlackboxaiService.generateImage(message!.replace('image:', ''));
+      ctx.replyWithPhoto(imageUrl, { reply_to_message_id: ctx.message?.message_id });
+      return;
+    }
   }
 
   replyInChunks(ctx, output);

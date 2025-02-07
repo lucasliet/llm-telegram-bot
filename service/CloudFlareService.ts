@@ -19,7 +19,7 @@ const requestOptions = {
 };
 
 export default {
-  async generateTextResponseFromImage(userKey: string, quote: string = '', photoUrl: Promise<string>, prompt: string): Promise<string> {
+  async generateTextFromImage(userKey: string, quote: string = '', photoUrl: Promise<string>, prompt: string): Promise<string> {
     const geminiHistory = await getChatHistory(userKey);
 
     const requestPrompt = quote ? `"${quote}" ${prompt}`: prompt;

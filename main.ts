@@ -45,7 +45,8 @@ BOT.hears(/\/help/g, (ctx) => {
     /r1 - Configura modelo de linguagem para o Deepseek-R1 pela BlackboxAI
     /clear - Apaga o histórico de conversa
     Comandos inline:
-    image: mensagem - Gera imagens com Stable Diffusion
+    cloudflareImage: mensagem - Gera imagens com Stable Diffusion
+    image: mensagem - Gera imagens com Flux.1
     gptImage: mensagem - Gera imagens com DALL-e
     gpt: mensagem - Gera texto com GPT
     llama: mensagem - Gera texto com o Llama
@@ -60,13 +61,13 @@ BOT.hears(/\/help/g, (ctx) => {
   );
 });
 
-BOT.hears(/^(llama|sql|code|image):/g, async (ctx) => await TelegramService.callAdminModel(ctx, TelegramService.callCloudflareModel));
+BOT.hears(/^(llama|sql|code|cloudflareImage):/g, async (ctx) => await TelegramService.callAdminModel(ctx, TelegramService.callCloudflareModel));
 
 BOT.hears(/^(perplexity|search):/g, async (ctx) => await TelegramService.callAdminModel(ctx, TelegramService.callPerplexityModel));
 
 BOT.hears(/^(gpt|gptImage):/g, async (ctx) => await TelegramService.callAdminModel(ctx, TelegramService.callOpenAIModel));
 
-BOT.hears(/^(blackbox|deepseek|r1):/g, async (ctx) => await TelegramService.callAdminModel(ctx, TelegramService.callBlackboxModel));
+BOT.hears(/^(blackbox|deepseek|r1|image):/g, async (ctx) => await TelegramService.callAdminModel(ctx, TelegramService.callBlackboxModel));
 
 BOT.hears(new RegExp(`^(${modelCommands.join('|')})$`) , async (ctx) => await TelegramService.setCurrentModel(ctx));
 

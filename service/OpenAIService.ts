@@ -30,7 +30,7 @@ export default class OpenAiService {
     this.maxTokens = command === '/perplexity'? 140 : 1000;
   }
 
-  async generateTextResponseFromImage(userKey: string, quote: string = '', photosUrl: Promise<string>[], prompt: string): Promise<string> {
+  async generateTextFromImage(userKey: string, quote: string = '', photosUrl: Promise<string>[], prompt: string): Promise<string> {
     const geminiHistory = await getChatHistory(userKey);
 
     const requestPrompt = quote ? `"${quote}" ${prompt}`: prompt;
@@ -56,7 +56,7 @@ export default class OpenAiService {
 
     return responsePrompt;
   }
-  async generateTextResponse(userKey: string, quote: string = '', prompt: string): Promise<string> {
+  async generateText(userKey: string, quote: string = '', prompt: string): Promise<string> {
     const geminiHistory = await getChatHistory(userKey);
 
     const requestPrompt = quote ? `"${quote}" ${prompt}`: prompt;
@@ -77,7 +77,7 @@ export default class OpenAiService {
 
     return responsePrompt;
   }
-  async generateImageResponse(userKey: string, prompt: string, style: 'vivid' | 'natural' = 'vivid'): Promise<string[]> {
+  async generateImage(userKey: string, prompt: string, style: 'vivid' | 'natural' = 'vivid'): Promise<string[]> {
     const response = await this.openai.images.generate({
       model: imageModel,
       prompt,
