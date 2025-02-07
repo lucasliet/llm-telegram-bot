@@ -16,3 +16,7 @@ export const cloudflareModels =  {
   codeModel: '@hf/thebloke/deepseek-coder-6.7b-instruct-awq',
   sttModel: '@cf/openai/whisper'
 }
+
+export const blackboxModels = {
+  textModel: 'deepseek-ai/DeepSeek-R1',
+}

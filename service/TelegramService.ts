@@ -1,12 +1,14 @@
 import { Context } from 'https://deno.land/x/grammy@v1.17.2/context.ts';
 import { ModelCommand, setCurrentModel, getCurrentModel, setUserGeminiApiKeysIfAbsent, //
-  gptModelCommand, llamaModelCommand, geminiModelCommand, perplexityModelCommand } from '../repository/ChatRepository.ts';
+  gptModelCommand, llamaModelCommand, geminiModelCommand, perplexityModelCommand, 
+  blackboxModelCommand} from '../repository/ChatRepository.ts';
 import GeminiService from './GeminiService.ts';
 import CloudFlareService from './CloudFlareService.ts';
 import OpenAiService from './OpenAIService.ts';
 import { ApiKeyNotFoundError } from '../error/ApiKeyNotFoundError.ts';
 import { Audio, InputFile, PhotoSize, Voice } from 'https://deno.land/x/grammy@v1.17.2/types.deno.ts';
 import { InputMediaBuilder } from 'https://deno.land/x/grammy@v1.17.2/mod.ts';
+import BlackboxaiService from './BlackboxaiService.ts';
 
 const TOKEN = Deno.env.get('BOT_TOKEN') as string;
 const ADMIN_USER_IDS: number[] = (Deno.env.get('ADMIN_USER_IDS') as string).split('|').map(parseInt);
@@ -63,6 +65,9 @@ export default {
       case llamaModelCommand:
         await _callCloudflareModel(ctx,`llama: ${message!}`);
         return;
+      case blackboxModelCommand:
+        await _callBlackboxModel(ctx,`blackbox: ${message}`);
+        return;
       case geminiModelCommand:
         await callGeminiModel(ctx);
         return;
@@ -82,6 +87,10 @@ export default {
 
   async callCloudflareModel(ctx: Context, commandMessage?: string): Promise<void> {
     return await _callCloudflareModel(ctx, commandMessage);
+  },
+
+  async callBlackboxModel(ctx: Context, commandMessage?: string): Promise<void> {
+    return await _callBlackboxModel(ctx, commandMessage);
   }
 }
 
@@ -163,6 +172,21 @@ async function _callCloudflareModel(ctx: Context, commandMessage?: string): Prom
       return;
   }
   ctx.reply(output!, { reply_to_message_id: ctx.message?.message_id });
+}
+
+async function _callBlackboxModel(ctx: Context, commandMessage?: string): Promise<void> {
+  const { userKey, contextMessage, photos, caption, quote } = await extractContextKeys(ctx);
+
+  if (photos && caption) {
+    ctx.reply("esse modelo não suporta leitura de foto", { reply_to_message_id: ctx.message?.message_id });
+    return;
+  }
+  
+  const message = commandMessage || contextMessage;
+
+  const output = await BlackboxaiService.generateText(userKey, quote, 
+    message!.replace('blackbox:', '').replace('deepseek:', ''));
+  ctx.reply(output, { reply_to_message_id: ctx.message?.message_id });
 }
 
 async function callGeminiModel(ctx: Context): Promise<void> {

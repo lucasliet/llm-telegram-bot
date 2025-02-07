@@ -41,6 +41,7 @@ BOT.hears(/\/help/g, (ctx) => {
     /llama - Configura modelo de linguagem para o Llama
     /gemini - Configura modelo de linguagem para o Gemini
     /perplexity - Configura modelo de linguagem para o modelo perplexity.ai
+    /blackbox - Configura modelo de linguagem para o Deepseek-r1 pela BlackboxAI
     /clear - Apaga o histórico de conversa
     Comandos inline:
     image: mensagem - Gera imagens com Stable Diffusion
@@ -51,6 +52,8 @@ BOT.hears(/\/help/g, (ctx) => {
     code: mensagem - Gera código com modelo cloudflare
     perplexity: mensagem - Faz uma pergunta usando o modelo perplexity.ai
     search: mensagem - Faz uma pergunta usando o modelo perplexity.ai
+    blackbox: mensagem - Faz uma pergunta usando o modelo Deepseek-r1 pela BlackboxAI
+    deepseek: mensagem - Faz uma pergunta usando o modelo Deepseek-r1 pela BlackboxAI
     `
   );
 });
@@ -60,6 +63,8 @@ BOT.hears(/^(llama|sql|code|image):/g, async (ctx) => await TelegramService.call
 BOT.hears(/^(perplexity|search):/g, async (ctx) => await TelegramService.callAdminModel(ctx, TelegramService.callPerplexityModel));
 
 BOT.hears(/^(gpt|gptImage):/g, async (ctx) => await TelegramService.callAdminModel(ctx, TelegramService.callOpenAIModel));
+
+BOT.hears(/^(blackbox|deepseek):/g, async (ctx) => await TelegramService.callAdminModel(ctx, TelegramService.callBlackboxModel));
 
 BOT.hears(new RegExp(`^(${modelCommands.join('|')})$`) , async (ctx) => await TelegramService.setCurrentModel(ctx));
 
