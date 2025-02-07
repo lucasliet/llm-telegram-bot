@@ -59,3 +59,12 @@ export async function setCurrentModel(userKey: string, model: ModelCommand = '/g
 export async function getCurrentModel(userKey: string): Promise<ModelCommand> {
   return (await kv.get<ModelCommand>([userKey, 'current_model'])).value || '/blackbox';
 }
+
+export async function cacheTranscribedAudio(keys: string[], audio: string, ): Promise<void> {
+  await kv.set([...keys], compressText(audio), { expireIn: oneDayInMillis / 2 });
+}
+
+export async function getTranscribedAudio(keys: string[]): Promise<string| null> {
+  const cachedAudio = (await kv.get<string>([...keys])).value;
+  return cachedAudio ? decompressText(cachedAudio) : null;
+}

@@ -1,7 +1,9 @@
 import { Context } from 'https://deno.land/x/grammy@v1.17.2/context.ts';
 import { ModelCommand, setCurrentModel, getCurrentModel, setUserGeminiApiKeysIfAbsent, //
   gptModelCommand, llamaModelCommand, geminiModelCommand, perplexityModelCommand, 
-  blackboxModelCommand, blackboxReasoningModelCommand } from '../repository/ChatRepository.ts';
+  blackboxModelCommand, blackboxReasoningModelCommand, 
+  getTranscribedAudio,
+  cacheTranscribedAudio} from '../repository/ChatRepository.ts';
 import GeminiService from './GeminiService.ts';
 import CloudFlareService from './CloudFlareService.ts';
 import OpenAiService from './OpenAIService.ts';
@@ -116,12 +118,12 @@ async function _callPerplexityModel(ctx: Context, commandMessage?: string): Prom
   if (photos && caption) {
     const photosUrl = getTelegramFilesUrl(ctx, photos);
     const output = await openAIService.generateTextResponseFromImage(userKey, quote, photosUrl, caption);
-    ctx.reply(output, { reply_to_message_id: ctx.message?.message_id });
+    replyInChunks(ctx, output);
     return;
   }
   
   const output = await openAIService.generateTextResponse(userKey, quote, message!.replace('perplexity:', ''));
-  ctx.reply(output, { reply_to_message_id: ctx.message?.message_id });
+  replyInChunks(ctx, output);
   return;
 }
 
@@ -132,7 +134,7 @@ async function _callOpenAIModel(ctx: Context, commandMessage?: string): Promise<
   if (photos && caption) {
     const photosUrl = getTelegramFilesUrl(ctx, photos);
     const output = await openAIService.generateTextResponseFromImage(userKey, quote, photosUrl, caption);
-    ctx.reply(output, { reply_to_message_id: ctx.message?.message_id });
+    replyInChunks(ctx, output);
     return;
   }
 
@@ -143,7 +145,7 @@ async function _callOpenAIModel(ctx: Context, commandMessage?: string): Promise<
   switch (command) {
     case 'gpt': {
         const output = await new OpenAiService('/github').generateTextResponse(userKey, quote, message!.replace('gpt:', ''));
-        ctx.reply(output, { reply_to_message_id: ctx.message?.message_id });
+        replyInChunks(ctx, output);
         return;
     }
     case 'gptImage': {
@@ -161,7 +163,7 @@ async function _callCloudflareModel(ctx: Context, commandMessage?: string): Prom
   if (photos && caption) {
     const photoUrl = getTelegramFilesUrl(ctx, photos)[0];
     const output = await CloudFlareService.generateTextResponseFromImage(userKey, quote, photoUrl, caption);
-    ctx.reply(output, { reply_to_message_id: ctx.message?.message_id });
+    replyInChunks(ctx, output);
     return;
   }
 
@@ -183,7 +185,7 @@ async function _callCloudflareModel(ctx: Context, commandMessage?: string): Prom
       ctx.replyWithPhoto(new InputFile(new Uint8Array(await CloudFlareService.generateImage(message!)), 'image/png'), { reply_to_message_id: ctx.message?.message_id });
       return;
   }
-  ctx.reply(output!, { reply_to_message_id: ctx.message?.message_id });
+  replyInChunks(ctx, output);
 }
 
 async function _callBlackboxModel(ctx: Context, commandMessage?: string): Promise<void> {
@@ -206,12 +208,7 @@ async function _callBlackboxModel(ctx: Context, commandMessage?: string): Promis
     output = await BlackboxaiService.generateReasoningText(userKey, quote, message!.replace('r1:', ''));
   }
 
-  if(output.length > 4096) {
-    replyInChunks(ctx, output);
-    return;
-  }
-
-  ctx.reply(output, { reply_to_message_id: ctx.message?.message_id });
+  replyInChunks(ctx, output);
 }
 
 async function callGeminiModel(ctx: Context): Promise<void> {
@@ -225,7 +222,7 @@ async function callGeminiModel(ctx: Context): Promise<void> {
   try {
     const geminiService = await GeminiService.of(userKey);
     const outputMessage = await getGeminiOutput(geminiService, ctx, message, quote, photos, caption);
-    ctx.reply(outputMessage, {reply_to_message_id: ctx.message?.message_id});
+    replyInChunks(ctx, outputMessage);
     return;
   } catch (err) {
     if (err instanceof ApiKeyNotFoundError) {
@@ -261,27 +258,24 @@ export async function downloadTelegramFile(url: string): Promise<Uint8Array> {
   return new Uint8Array(await response.arrayBuffer());
 }
 
-const transcribedAudioCache = new Map<string, string>();
 async function transcribeAudio(userKey: string, ctx: Context, audio: Voice): Promise<string> {
   const audioUrl: string = await getTelegramFilesUrl(ctx, [audio])[0];
   const isGptModelCommand = gptModelCommand === await getCurrentModel(userKey);
-  const cacheKey = `${userKey}-${audioUrl}-${isGptModelCommand}`;  
+  const cacheKey: string[] = [userKey, audioUrl, `${isGptModelCommand}`];
 
-  if (transcribedAudioCache.has(cacheKey)) {
-    return transcribedAudioCache.get(cacheKey)!;
+  const cachedTranscribedAudio = await getTranscribedAudio(cacheKey);
+
+  if (cachedTranscribedAudio) {
+    return cachedTranscribedAudio;
   }
   
   const audioFile: Promise<Uint8Array> = downloadTelegramFile(audioUrl);
 
-  if (isGptModelCommand) {
-    const output = await new OpenAiService('/openai').transcribeAudio(audioFile, audioUrl);
-    transcribedAudioCache.set(cacheKey, output);
-    return output;
-  }
-
-
-  const output = await CloudFlareService.transcribeAudio(audioFile);
-  transcribedAudioCache.set(cacheKey, output);
+  const output = isGptModelCommand 
+    ? await new OpenAiService('/openai').transcribeAudio(audioFile, audioUrl) 
+    : await CloudFlareService.transcribeAudio(audioFile);
+  
+  await cacheTranscribedAudio(cacheKey, output);
   return output;
 }
 
@@ -315,6 +309,11 @@ function keepDenoJobAlive(): number {
 }
 
 function replyInChunks(ctx: Context, output: string): void {
-  const outputChunks = output.match(/[\s\S]{1,4096}/g)!;
-  outputChunks.forEach((chunk, index) => ctx.reply(`${chunk}${index === outputChunks.length ? '' : '...'}`, { reply_to_message_id: ctx.message?.message_id }));
+  if(output.length > 4096) {
+    const outputChunks = output.match(/[\s\S]{1,4096}/g)!;
+    outputChunks.forEach((chunk, index) => ctx.reply(`${chunk}${index === outputChunks.length ? '' : '...'}`, { reply_to_message_id: ctx.message?.message_id }));
+    return;
+  }
+
+  ctx.reply(output, { reply_to_message_id: ctx.message?.message_id });
 }
