@@ -1,7 +1,7 @@
 import { Context } from 'https://deno.land/x/grammy@v1.17.2/context.ts';
 import { ModelCommand, setCurrentModel, getCurrentModel, setUserGeminiApiKeysIfAbsent, //
   gptModelCommand, llamaModelCommand, geminiModelCommand, perplexityModelCommand, 
-  blackboxModelCommand} from '../repository/ChatRepository.ts';
+  blackboxModelCommand, blackboxReasoningModelCommand } from '../repository/ChatRepository.ts';
 import GeminiService from './GeminiService.ts';
 import CloudFlareService from './CloudFlareService.ts';
 import OpenAiService from './OpenAIService.ts';
@@ -12,6 +12,7 @@ import BlackboxaiService from './BlackboxaiService.ts';
 
 const TOKEN = Deno.env.get('BOT_TOKEN') as string;
 const ADMIN_USER_IDS: number[] = (Deno.env.get('ADMIN_USER_IDS') as string).split('|').map(parseInt);
+const WHITELISTED_MODELS: ModelCommand[] = [ llamaModelCommand, blackboxModelCommand, blackboxReasoningModelCommand ];
 
 export default {
   setWebhook: (): Promise<Response> => fetch(`https://api.telegram.org/bot${TOKEN}/setWebhook`, {
@@ -53,8 +54,8 @@ export default {
   async setCurrentModel(ctx: Context): Promise<void> {
     console.info(`user: ${ctx.msg?.from?.id}, message: ${ctx.message?.text}`);
     const {userId, userKey, contextMessage: message} = await extractContextKeys(ctx);
-    
-    if (!ADMIN_USER_IDS.includes(userId!) && message !== llamaModelCommand) return;
+
+    if (!ADMIN_USER_IDS.includes(userId!) && !WHITELISTED_MODELS.includes(message as ModelCommand)) return;
     
     await setCurrentModel(userKey, message as ModelCommand);
     ctx.reply(`Novo modelo de inteligência escolhido: ${message}`);
@@ -75,6 +76,9 @@ export default {
         return;
       case blackboxModelCommand:
         await _callBlackboxModel(ctx,`blackbox: ${message}`);
+        return;
+      case blackboxReasoningModelCommand:
+        await _callBlackboxModel(ctx,`r1: ${message}`);
         return;
       case geminiModelCommand:
         await callGeminiModel(ctx);
@@ -192,8 +196,15 @@ async function _callBlackboxModel(ctx: Context, commandMessage?: string): Promis
   
   const message = commandMessage || contextMessage;
 
-  const output = await BlackboxaiService.generateText(userKey, quote, 
-    message!.replace('blackbox:', '').replace('deepseek:', ''));
+  const blackBoxCommand = message!.split(':')[0];
+
+  let output = '';
+  if(blackBoxCommand === 'deepseek' || blackBoxCommand === 'blackbox') {
+    output = await BlackboxaiService.generateText(userKey, quote, 
+      message!.replace('blackbox:', '').replace('deepseek:', ''));
+  } else if (blackBoxCommand === 'r1') {
+    output = await BlackboxaiService.generateReasoningText(userKey, quote, message!.replace('r1:', ''));
+  }
 
   if(output.length > 4096) {
     const outputChunks = output.match(/[\s\S]{1,4096}/g)!;

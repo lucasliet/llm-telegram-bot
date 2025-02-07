@@ -5,10 +5,10 @@ import { ApiKeyNotFoundError } from "../error/ApiKeyNotFoundError.ts";
 const kv = await Deno.openKv();
 const oneDayInMillis = 60 * 60 * 24 * 1000;
 
-export type ModelCommand = '/gemini' | '/llama' | '/gpt' | '/perplexity' | '/blackbox';
+export type ModelCommand = '/gemini' | '/llama' | '/gpt' | '/perplexity' | '/blackbox' | '/r1';
 
-export const modelCommands: ModelCommand[] = ['/gemini', '/llama', '/gpt', '/perplexity', '/blackbox'];
-export const [ geminiModelCommand, llamaModelCommand, gptModelCommand, perplexityModelCommand, blackboxModelCommand ] = modelCommands;
+export const modelCommands: ModelCommand[] = ['/gemini', '/llama', '/gpt', '/perplexity', '/blackbox', '/r1'];
+export const [ geminiModelCommand, llamaModelCommand, gptModelCommand, perplexityModelCommand, blackboxModelCommand, blackboxReasoningModelCommand ] = modelCommands;
 
 export async function setUserGeminiApiKeysIfAbsent(userKey: string, message: string | undefined): Promise<boolean> {
   if (message && message.startsWith('key:')) {
@@ -57,5 +57,5 @@ export async function setCurrentModel(userKey: string, model: ModelCommand = '/g
 }
 
 export async function getCurrentModel(userKey: string): Promise<ModelCommand> {
-  return (await kv.get<ModelCommand>([userKey, 'current_model'])).value || '/llama';
+  return (await kv.get<ModelCommand>([userKey, 'current_model'])).value || '/blackbox';
 }

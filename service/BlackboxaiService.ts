@@ -3,8 +3,6 @@ import { replaceGeminiConfigFromTone, convertGeminiHistoryToGPT } from "../util/
 
 import { blackboxModels } from "../config/models.ts";
 
-const model = blackboxModels.textModel;
-
 const blackboxMaxTokens = 1000;
 
 const requestOptions = {
@@ -15,7 +13,7 @@ const requestOptions = {
 };
 
 export default {
-  async generateText(userKey: string, quote: string = '', prompt: string): Promise<string> {
+  async generateText(userKey: string, quote: string = '', prompt: string, model = blackboxModels.textModel): Promise<string> {
       const geminiHistory = await getChatHistory(userKey);
   
       const requestPrompt = quote ? `"${quote}" ${prompt}`: prompt;
@@ -42,5 +40,9 @@ export default {
       addChatToHistory(geminiHistory, quote, requestPrompt, response, userKey);
   
       return response;
-    }
+  },
+
+  async generateReasoningText(userKey: string, quote: string = '', prompt: string ): Promise<string> {
+    return await this.generateText(userKey, quote, prompt, blackboxModels.reasoningModel);
+  }
 }
