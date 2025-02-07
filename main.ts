@@ -61,13 +61,13 @@ BOT.hears(/\/help/g, (ctx) => {
   );
 });
 
-BOT.hears(/^(llama|sql|code|cloudflareImage):/g, async (ctx) => await TelegramService.callAdminModel(ctx, TelegramService.callCloudflareModel));
+BOT.hears(/^([Ll]lama|[Ss]ql|[Cc]ode|[Cc]loudflareImage):/g, async (ctx) => await TelegramService.callAdminModel(ctx, TelegramService.callCloudflareModel));
 
-BOT.hears(/^(perplexity|search):/g, async (ctx) => await TelegramService.callAdminModel(ctx, TelegramService.callPerplexityModel));
+BOT.hears(/^([Pp]erplexity|[Ss]earch):/g, async (ctx) => await TelegramService.callAdminModel(ctx, TelegramService.callPerplexityModel));
 
-BOT.hears(/^(gpt|gptImage):/g, async (ctx) => await TelegramService.callAdminModel(ctx, TelegramService.callOpenAIModel));
+BOT.hears(/^([Gg]pt|[Gg]ptImage):/g, async (ctx) => await TelegramService.callAdminModel(ctx, TelegramService.callOpenAIModel));
 
-BOT.hears(/^(blackbox|deepseek|r1|image):/g, async (ctx) => await TelegramService.callAdminModel(ctx, TelegramService.callBlackboxModel));
+BOT.hears(/^([Bb]lackbox|[Dd]eepseek|[Rr]1|[Ii]mage):/g, async (ctx) => await TelegramService.callAdminModel(ctx, TelegramService.callBlackboxModel));
 
 BOT.hears(new RegExp(`^(${modelCommands.join('|')})$`) , async (ctx) => await TelegramService.setCurrentModel(ctx));
 

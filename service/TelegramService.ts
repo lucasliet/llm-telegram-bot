@@ -143,11 +143,13 @@ async function _callOpenAIModel(ctx: Context, commandMessage?: string): Promise<
   const command = message!.split(':')[0];
 
   switch (command) {
+    case 'Gpt':
     case 'gpt': {
         const output = await new OpenAiService('/github').generateText(userKey, quote, message!.replace('gpt:', ''));
         replyInChunks(ctx, output);
         break;
     }
+    case 'GptImage':
     case 'gptImage': {
         const output = await openAIService.generateImage(userKey, message!.replace('gptImage:', ''));
         const mediaUrls = output.map(imageUrl => InputMediaBuilder.photo(imageUrl));
@@ -172,15 +174,19 @@ async function _callCloudflareModel(ctx: Context, commandMessage?: string): Prom
   const cloudflareCommand = message!.split(':')[0];
   let output = ''
   switch (cloudflareCommand) {
+    case 'Llama':
     case 'llama':
       output = await CloudFlareService.generateText(userKey, quote, message!.replace('llama:', ''));
       break;
+    case 'Sql':
     case 'sql':
       output = await CloudFlareService.generateSQL(userKey, quote, message!.replace('sql:', ''));
       break;
+    case 'Code':
     case 'code':
       output = await CloudFlareService.generateCode(userKey, quote, message!.replace('code:', ''));
       break;
+    case 'CloudflareImage':
     case 'cloudflareImage':
       ctx.replyWithPhoto(new InputFile(new Uint8Array(await CloudFlareService.generateImage(message!)), 'image/png'), { reply_to_message_id: ctx.message?.message_id });
       return;
@@ -202,14 +208,18 @@ async function _callBlackboxModel(ctx: Context, commandMessage?: string): Promis
 
   let output = '';
   switch(blackBoxCommand) {
+    case 'Deepseek':
     case 'deepseek':
+    case 'Blackbox':
     case 'blackbox':
       output = await BlackboxaiService.generateText(userKey, quote, 
         message!.replace('blackbox:', '').replace('deepseek:', ''));
       break;
+    case 'R1': 
     case 'r1':
       output = await BlackboxaiService.generateReasoningText(userKey, quote, message!.replace('r1:', ''));
       break;
+    case 'Image':
     case 'image': {
       const imageUrl = await BlackboxaiService.generateImage(message!.replace('image:', ''));
       ctx.replyWithPhoto(imageUrl, { reply_to_message_id: ctx.message?.message_id });
