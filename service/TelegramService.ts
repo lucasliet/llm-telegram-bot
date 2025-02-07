@@ -24,26 +24,34 @@ export default {
     })
   }),
 
-  async callAdminModel(ctx: Context, modelCallFunction: (ctx: Context) => Promise<void>): Promise<void> {
+  callAdminModel(ctx: Context, modelCallFunction: (ctx: Context) => Promise<void>): Promise<void> {
     const userId = ctx.from?.id!;
     if (ADMIN_USER_IDS.includes(userId))
-      await this.callModel(ctx, modelCallFunction);
+      this.callModel(ctx, modelCallFunction);
     else
-      await this.callModel(ctx, this.replyTextContent);
+      this.callModel(ctx, this.replyTextContent);
   },
   
-  async callModel(ctx: Context, modelCallFunction: (ctx: Context) => Promise<void>): Promise<void> {
+  callModel(ctx: Context, modelCallFunction: (ctx: Context) => Promise<void>): Promise<void> {
     console.info(`user: ${ctx.msg?.from?.id}, message: ${ctx.message?.text}`);
     try {
-      await modelCallFunction(ctx);
+      const startTime = Date.now();
+      const keepAliveId = keepDenoJobAlive();
+      const timeoutId = replyOnLongAnswer(ctx);
+      modelCallFunction(ctx).then(() => {
+        clearTimeout(timeoutId);
+        clearInterval(keepAliveId);
+        console.log(`Request processed in ${Date.now() - startTime}ms`);
+      });
     } catch (err) {
       console.error(err);
-      await ctx.reply(`Eita, algo deu errado: ${err.message}`,
+      ctx.reply(`Eita, algo deu errado: ${err.message}`,
         { reply_to_message_id: ctx.msg?.message_id })
     }
   },
 
   async setCurrentModel(ctx: Context): Promise<void> {
+    console.info(`user: ${ctx.msg?.from?.id}, message: ${ctx.message?.text}`);
     const {userId, userKey, contextMessage: message} = await extractContextKeys(ctx);
     
     if (!ADMIN_USER_IDS.includes(userId!) && message !== llamaModelCommand) return;
@@ -186,6 +194,7 @@ async function _callBlackboxModel(ctx: Context, commandMessage?: string): Promis
 
   const output = await BlackboxaiService.generateText(userKey, quote, 
     message!.replace('blackbox:', '').replace('deepseek:', ''));
+
   ctx.reply(output, { reply_to_message_id: ctx.message?.message_id });
 }
 
@@ -273,4 +282,15 @@ async function extractContextKeys(ctx: Context) {
   const caption = ctx.message?.caption;
   const quote = ctx.message?.reply_to_message?.text;
   return { userId, userKey, contextMessage, audio, photos, caption, quote };
+}
+
+function replyOnLongAnswer(ctx: Context): number {
+  return setTimeout(() => {
+    console.info('Request is longing too much, replying processing message...');
+    ctx.reply('Estou processando sua solicitação, aguarde um momento...');
+  }, 6000);
+}
+
+function keepDenoJobAlive(): number {
+  return setInterval(() => true, 2000);
 }
