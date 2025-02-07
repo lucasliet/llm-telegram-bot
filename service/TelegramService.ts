@@ -195,6 +195,12 @@ async function _callBlackboxModel(ctx: Context, commandMessage?: string): Promis
   const output = await BlackboxaiService.generateText(userKey, quote, 
     message!.replace('blackbox:', '').replace('deepseek:', ''));
 
+  if(output.length > 4096) {
+    const outputChunks = output.match(/[\s\S]{1,4096}/g)!;
+    outputChunks.forEach((chunk, index) => ctx.reply(`${chunk}${index === outputChunks.length ? '' : '...'}`, { reply_to_message_id: ctx.message?.message_id }));
+    return;
+  }
+
   ctx.reply(output, { reply_to_message_id: ctx.message?.message_id });
 }
 
