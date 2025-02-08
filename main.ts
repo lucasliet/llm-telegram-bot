@@ -41,6 +41,7 @@ BOT.hears(/\/help/g, (ctx) => {
     /llama - Configura modelo de linguagem para o Llama
     /gemini - Configura modelo de linguagem para o Gemini
     /perplexity - Configura modelo de linguagem para o modelo perplexity.ai
+    /perplexityReasoning - Configura modelo de linguagem para o modelo perplexity.ai usando Deepseek-R1
     /blackbox - Configura modelo de linguagem para o Deepseek-V3 pela BlackboxAI
     /r1 - Configura modelo de linguagem para o Deepseek-R1 pela BlackboxAI
     /clear - Apaga o histórico de conversa
@@ -54,6 +55,7 @@ BOT.hears(/\/help/g, (ctx) => {
     code: mensagem - Gera código com modelo cloudflare
     perplexity: mensagem - Faz uma pergunta usando o modelo perplexity.ai
     search: mensagem - Faz uma pergunta usando o modelo perplexity.ai
+    reasonSearch: mensagem - Faz uma pergunta usando o modelo perplexity.ai com o uso de Deepseek-R1
     blackbox: mensagem - Faz uma pergunta usando o modelo Deepseek-V3 pela BlackboxAI
     deepseek: mensagem - Faz uma pergunta usando o modelo Deepseek-V3 pela BlackboxAI
     r1: mensagem - Faz uma pergunta usando o modelo Deepseek-R1 pela BlackboxAI
@@ -61,13 +63,13 @@ BOT.hears(/\/help/g, (ctx) => {
   );
 });
 
-BOT.hears(/^([Ll]lama|[Ss]ql|[Cc]ode|[Cc]loudflareImage):/g, async (ctx) => await TelegramService.callAdminModel(ctx, TelegramService.callCloudflareModel));
+BOT.hears(/^(llama|sql|code|cloudflareImage):/gi, async (ctx) => await TelegramService.callAdminModel(ctx, TelegramService.callCloudflareModel));
 
-BOT.hears(/^([Pp]erplexity|[Ss]earch):/g, async (ctx) => await TelegramService.callAdminModel(ctx, TelegramService.callPerplexityModel));
+BOT.hears(/^(perplexity|reasonSearch|search):/gi, async (ctx) => await TelegramService.callAdminModel(ctx, TelegramService.callPerplexityModel));
 
-BOT.hears(/^([Gg]pt|[Gg]ptImage):/g, async (ctx) => await TelegramService.callAdminModel(ctx, TelegramService.callOpenAIModel));
+BOT.hears(/^(gpt|gptImage):/gi, async (ctx) => await TelegramService.callAdminModel(ctx, TelegramService.callOpenAIModel));
 
-BOT.hears(/^([Bb]lackbox|[Dd]eepseek|[Rr]1|[Ii]mage):/g, async (ctx) => await TelegramService.callAdminModel(ctx, TelegramService.callBlackboxModel));
+BOT.hears(/^(blackbox|deepseek|r1|image):/gi, async (ctx) => await TelegramService.callAdminModel(ctx, TelegramService.callBlackboxModel));
 
 BOT.hears(new RegExp(`^(${modelCommands.join('|')})$`) , async (ctx) => await TelegramService.setCurrentModel(ctx));
 

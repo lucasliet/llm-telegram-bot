@@ -35,7 +35,7 @@ export default {
         throw new Error(`Failed to generate text: ${apiResponse.statusText}`);
       }
   
-      const response = await apiResponse.text().then(r => r.replace(/<think>[\s\S]*?<\/think>/g, ''));
+      const response = await apiResponse.text().then(r => r.removeThinkingChatCompletion());
   
       addChatToHistory(geminiHistory, quote, requestPrompt, response, userKey);
   

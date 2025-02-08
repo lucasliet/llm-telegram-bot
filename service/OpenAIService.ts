@@ -1,33 +1,37 @@
 import OpenAi, { toFile } from 'npm:openai';
 import { getChatHistory, addChatToHistory } from '../repository/ChatRepository.ts';
 import { replaceGeminiConfigFromTone, convertGeminiHistoryToGPT } from '../util/ChatConfigUtil.ts';
-import { perplexityModel, openAIModels } from '../config/models.ts';
+import { perplexityModels, openAIModels } from '../config/models.ts';
 import * as path from 'jsr:@std/path';
 
 const PERPLEXITY_API_KEY: string = Deno.env.get('PERPLEXITY_API_KEY') as string;
 const GITHUB_TOKEN: string = Deno.env.get('GITHUB_TOKEN') as string;
 
 const { imageModel, gptModel, sttModel } = openAIModels;
+const { textModel, reasoningModel } = perplexityModels;
 
 export default class OpenAiService {
   private openai: OpenAi;
   private model: string;
   private maxTokens: number;  
 
-  public constructor(command: '/openai' | '/perplexity' | '/github') {
+  public constructor(command: '/openai' | '/perplexity' | '/perplexityReasoning' | '/github') {
+    this.model = gptModel;
+    this.openai = new OpenAi({ apiKey: PERPLEXITY_API_KEY, baseURL: 'https://api.perplexity.ai' });
     switch(command) {
       case '/openai':
         this.openai = new OpenAi();
         break;
+      case '/perplexityReasoning':
+        this.model = reasoningModel;
+        break;
       case '/perplexity':
-        this.openai = new OpenAi({ apiKey: PERPLEXITY_API_KEY, baseURL: 'https://api.perplexity.ai' });
+        this.model = textModel;
         break;
       case '/github':
         this.openai = new OpenAi({ apiKey: GITHUB_TOKEN , baseURL: 'https://models.inference.ai.azure.com' });
     }
-   
-    this.model = command === '/perplexity' ? perplexityModel : gptModel ;
-    this.maxTokens = command === '/perplexity'? 140 : 1000;
+    this.maxTokens = command === '/perplexity' ? 140 : 1000;
   }
 
   async generateTextFromImage(userKey: string, quote: string = '', photosUrl: Promise<string>[], prompt: string): Promise<string> {
@@ -71,7 +75,7 @@ export default class OpenAiService {
       max_tokens: this.maxTokens,
     });
 
-    const responsePrompt =  completion.choices[0].message.content!;
+    const responsePrompt =  completion.choices[0].message.content!.removeThinkingChatCompletion();;
 
     addChatToHistory(geminiHistory, quote, requestPrompt, responsePrompt, userKey);
 

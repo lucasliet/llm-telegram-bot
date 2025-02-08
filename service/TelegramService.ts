@@ -1,9 +1,9 @@
 import { Context } from 'https://deno.land/x/grammy@v1.17.2/context.ts';
-import { ModelCommand, setCurrentModel, getCurrentModel, setUserGeminiApiKeysIfAbsent, //
+import { ModelCommand, setCurrentModel, getCurrentModel, setUserGeminiApiKeysIfAbsent,
   gptModelCommand, llamaModelCommand, geminiModelCommand, perplexityModelCommand, 
-  blackboxModelCommand, blackboxReasoningModelCommand, 
-  getTranscribedAudio,
-  cacheTranscribedAudio} from '../repository/ChatRepository.ts';
+  blackboxModelCommand, blackboxReasoningModelCommand, perplexityReasoningModelCommand,
+  getTranscribedAudio, cacheTranscribedAudio,
+  } from '../repository/ChatRepository.ts';
 import GeminiService from './GeminiService.ts';
 import CloudFlareService from './CloudFlareService.ts';
 import OpenAiService from './OpenAIService.ts';
@@ -73,6 +73,9 @@ export default {
       case perplexityModelCommand:
         await _callPerplexityModel(ctx,`perplexity: ${message}`);
         return;
+      case perplexityReasoningModelCommand:
+        await _callPerplexityModel(ctx,`perplexityReasoning: ${message}`);
+        return;
       case llamaModelCommand:
         await _callCloudflareModel(ctx,`llama: ${message!}`);
         return;
@@ -110,10 +113,17 @@ export default {
 
 async function _callPerplexityModel(ctx: Context, commandMessage?: string): Promise<void> {
   const { userKey, contextMessage, photos, caption, quote } = await extractContextKeys(ctx);
-  
+
   const message = commandMessage || contextMessage;
 
-  const openAIService = new OpenAiService('/perplexity');
+  const command = message!.split(':')[0]
+    .replace(/^search$/si, 'perplexity')
+    .replace(/^reasonSearch$/si, 'perplexityReasoning')
+    .toLowerCase();
+
+  const model = `/${command}` as '/perplexity' | '/perplexityReasoning';
+
+  const openAIService = new OpenAiService(model);
 
   if (photos && caption) {
     const photosUrl = getTelegramFilesUrl(ctx, photos);
@@ -140,16 +150,14 @@ async function _callOpenAIModel(ctx: Context, commandMessage?: string): Promise<
 
   const message = commandMessage || contextMessage;
 
-  const command = message!.split(':')[0];
+  const command = message!.split(':')[0].toLowerCase();
 
   switch (command) {
-    case 'Gpt':
     case 'gpt': {
         const output = await new OpenAiService('/github').generateText(userKey, quote, message!.replace('gpt:', ''));
         replyInChunks(ctx, output);
         break;
     }
-    case 'GptImage':
     case 'gptImage': {
         const output = await openAIService.generateImage(userKey, message!.replace('gptImage:', ''));
         const mediaUrls = output.map(imageUrl => InputMediaBuilder.photo(imageUrl));
@@ -171,22 +179,19 @@ async function _callCloudflareModel(ctx: Context, commandMessage?: string): Prom
 
   const message = commandMessage || contextMessage;
 
-  const cloudflareCommand = message!.split(':')[0];
+  const cloudflareCommand = message!.split(':')[0].toLowerCase();
+
   let output = ''
   switch (cloudflareCommand) {
-    case 'Llama':
     case 'llama':
       output = await CloudFlareService.generateText(userKey, quote, message!.replace('llama:', ''));
       break;
-    case 'Sql':
     case 'sql':
       output = await CloudFlareService.generateSQL(userKey, quote, message!.replace('sql:', ''));
       break;
-    case 'Code':
     case 'code':
       output = await CloudFlareService.generateCode(userKey, quote, message!.replace('code:', ''));
       break;
-    case 'CloudflareImage':
     case 'cloudflareImage':
       ctx.replyWithPhoto(new InputFile(new Uint8Array(await CloudFlareService.generateImage(message!)), 'image/png'), { reply_to_message_id: ctx.message?.message_id });
       return;
@@ -204,22 +209,18 @@ async function _callBlackboxModel(ctx: Context, commandMessage?: string): Promis
   
   const message = commandMessage || contextMessage;
 
-  const blackBoxCommand = message!.split(':')[0];
+  const blackBoxCommand = message!.split(':')[0].toLowerCase();
 
   let output = '';
   switch(blackBoxCommand) {
-    case 'Deepseek':
     case 'deepseek':
-    case 'Blackbox':
     case 'blackbox':
       output = await BlackboxaiService.generateText(userKey, quote, 
         message!.replace('blackbox:', '').replace('deepseek:', ''));
       break;
-    case 'R1': 
     case 'r1':
       output = await BlackboxaiService.generateReasoningText(userKey, quote, message!.replace('r1:', ''));
       break;
-    case 'Image':
     case 'image': {
       const imageUrl = await BlackboxaiService.generateImage(message!.replace('image:', ''));
       ctx.replyWithPhoto(imageUrl, { reply_to_message_id: ctx.message?.message_id });
