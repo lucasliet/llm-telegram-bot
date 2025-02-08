@@ -130,7 +130,7 @@ async function _callPerplexityModel(ctx: Context, commandMessage?: string): Prom
     .replace(/^reasonSearch$/si, 'perplexityReasoning')
     .toLowerCase();
 
-  const model = `/${command}` as '/perplexity' | '/perplexityReasoning';
+  const model = `/${command}` as '/perplexity' | '/perplexityreasoning';
 
   const openAIService = new OpenAiService(model);
 
@@ -160,7 +160,7 @@ async function _callOpenAIModel(ctx: Context, commandMessage?: string): Promise<
         replyInChunks(ctx, output);
         break;
     }
-    case 'gptImage': {
+    case 'gptimage': {
         const output = await openAIService.generateImage(userKey, message!.replace('gptImage:', ''));
         const mediaUrls = output.map(imageUrl => InputMediaBuilder.photo(imageUrl));
         ctx.replyWithMediaGroup(mediaUrls, { reply_to_message_id: ctx.message?.message_id });
@@ -194,7 +194,7 @@ async function _callCloudflareModel(ctx: Context, commandMessage?: string): Prom
     case 'code':
       output = await CloudFlareService.generateCode(userKey, quote, message!.replace('code:', ''));
       break;
-    case 'cloudflareImage':
+    case 'cloudflareimage':
       ctx.replyWithPhoto(new InputFile(new Uint8Array(await CloudFlareService.generateImage(message!)), 'image/png'), { reply_to_message_id: ctx.message?.message_id });
       return;
   }
