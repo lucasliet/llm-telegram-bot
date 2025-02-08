@@ -118,6 +118,13 @@ async function _callPerplexityModel(ctx: Context, commandMessage?: string): Prom
 
   const message = commandMessage || contextMessage;
 
+  if (photos && caption) {
+    if (photos && caption) {
+      replyWithVisionNotSupportedByModel(ctx);
+      return;
+    }
+  }
+
   const command = message!.split(':')[0]
     .replace(/^search$/si, 'perplexity')
     .replace(/^reasonSearch$/si, 'perplexityReasoning')
@@ -127,13 +134,6 @@ async function _callPerplexityModel(ctx: Context, commandMessage?: string): Prom
 
   const openAIService = new OpenAiService(model);
 
-  if (photos && caption) {
-    const photosUrl = getTelegramFilesUrl(ctx, photos);
-    const output = await openAIService.generateTextFromImage(userKey, quote, photosUrl, caption);
-    replyInChunks(ctx, output);
-    return;
-  }
-  
   const output = await openAIService.generateText(userKey, quote, message!.replace('perplexity:', ''));
   replyInChunks(ctx, output);
   return;
@@ -205,7 +205,7 @@ async function _callBlackboxModel(ctx: Context, commandMessage?: string): Promis
   const { userKey, contextMessage, photos, caption, quote } = await extractContextKeys(ctx);
 
   if (photos && caption) {
-    ctx.reply("esse modelo não suporta leitura de foto", { reply_to_message_id: ctx.message?.message_id });
+    replyWithVisionNotSupportedByModel(ctx);
     return;
   }
   
@@ -338,4 +338,8 @@ function replyInChunks(ctx: Context, output: string): void {
   }
 
   ctx.reply(output, { reply_to_message_id: ctx.message?.message_id });
+}
+
+function replyWithVisionNotSupportedByModel(ctx: Context): void {
+  ctx.reply("esse modelo não suporta leitura de foto", { reply_to_message_id: ctx.message?.message_id });
 }
