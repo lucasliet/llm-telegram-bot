@@ -86,8 +86,8 @@ export default class OpenAiService {
       model: imageModel,
       prompt,
       quality: 'standard',
-      size: '512x512',
-      n: 3,
+      size: '1024x1024',
+      n: 1,
       response_format: 'url',
       user: userKey, 
       style

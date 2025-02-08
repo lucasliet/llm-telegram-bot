@@ -7,7 +7,7 @@ export const perplexityModels = {
 
 export const openAIModels = {
   gptModel: 'gpt-4o-mini',
-  imageModel: 'dall-e-2',
+  imageModel: 'dall-e-3',
   sttModel: 'whisper-1'
 }
 
