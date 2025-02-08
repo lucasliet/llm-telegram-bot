@@ -283,21 +283,13 @@ export async function downloadTelegramFile(url: string): Promise<Uint8Array> {
 async function transcribeAudio(userId: number, userKey: string, ctx: Context, audio: Voice): Promise<string> {
   const audioUrl: string = await getTelegramFilesUrl(ctx, [audio])[0];
   const isGptModelCommand = gptModelCommand === await getCurrentModel(userKey);
-  const cacheKey: string[] = [userKey, audioUrl, `${isGptModelCommand}`];
 
-  const cachedTranscribedAudio = await getTranscribedAudio(cacheKey);
-
-  if (cachedTranscribedAudio) {
-    return cachedTranscribedAudio;
-  }
-  
   const audioFile: Promise<Uint8Array> = downloadTelegramFile(audioUrl);
 
-  const output = ADMIN_USER_IDS.includes(userId)
+  const output = isGptModelCommand || ADMIN_USER_IDS.includes(userId)
     ? await new OpenAiService('/openai').transcribeAudio(audioFile, audioUrl) 
     : await CloudFlareService.transcribeAudio(audioFile);
   
-  await cacheTranscribedAudio(cacheKey, output);
   return output;
 }
 
