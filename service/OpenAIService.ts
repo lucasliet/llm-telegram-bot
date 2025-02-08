@@ -15,14 +15,14 @@ export default class OpenAiService {
   private model: string;
   private maxTokens: number;  
 
-  public constructor(command: '/openai' | '/perplexity' | '/perplexityReasoning' | '/github') {
+  public constructor(command: '/openai' | '/perplexity' | '/perplexityreasoning' | '/github') {
     this.model = gptModel;
     this.openai = new OpenAi({ apiKey: PERPLEXITY_API_KEY, baseURL: 'https://api.perplexity.ai' });
     switch(command) {
       case '/openai':
         this.openai = new OpenAi();
         break;
-      case '/perplexityReasoning':
+      case '/perplexityreasoning':
         this.model = reasoningModel;
         break;
       case '/perplexity':

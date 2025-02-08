@@ -47,6 +47,8 @@ export default {
       clearInterval(keepAliveId);
       console.log(`Request processed in ${Date.now() - startTime}ms`);
     }).catch((err) => {
+      clearTimeout(timeoutId);
+      clearInterval(keepAliveId);
       console.error(err);
       ctx.reply(`Eita, algo deu errado: ${err.message}`,
         { reply_to_message_id: ctx.msg?.message_id })
