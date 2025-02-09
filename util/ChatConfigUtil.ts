@@ -16,3 +16,9 @@ export function replaceGeminiConfigFromTone(chatName: string, model: string, max
     .replace(/Gemini/gi, chatName)
     .replace(`${GeminiService.buildGenerationConfig().maxOutputTokens}`, `${maxTokens}`);
 }
+
+export interface StreamReplyResponse {
+  reader: ReadableStreamDefaultReader<Uint8Array>;
+  onComplete: (completedAnswer: string) => Promise<void>;
+  responseMap?: (responseBody: string) => string
+}

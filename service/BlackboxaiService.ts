@@ -1,5 +1,5 @@
 import { getChatHistory, addChatToHistory } from "../repository/ChatRepository.ts";
-import { replaceGeminiConfigFromTone, convertGeminiHistoryToGPT } from "../util/ChatConfigUtil.ts";
+import { replaceGeminiConfigFromTone, convertGeminiHistoryToGPT, StreamReplyResponse } from "../util/ChatConfigUtil.ts";
 
 import { blackboxModels } from "../config/models.ts";
 
@@ -13,7 +13,7 @@ const requestOptions = {
 };
 
 export default {
-  async generateText(userKey: string, quote: string = '', prompt: string, model = blackboxModels.textModel): Promise<string> {
+  async generateText(userKey: string, quote: string = '', prompt: string, model = blackboxModels.textModel): Promise<StreamReplyResponse> {
       const geminiHistory = await getChatHistory(userKey);
   
       const requestPrompt = quote ? `"${quote}" ${prompt}`: prompt;
@@ -35,14 +35,14 @@ export default {
         throw new Error(`Failed to generate text: ${apiResponse.statusText}`);
       }
   
-      const response = await apiResponse.text().then(r => r.removeThinkingChatCompletion());
-  
-      addChatToHistory(geminiHistory, quote, requestPrompt, response, userKey);
-  
-      return response;
+      const reader = apiResponse.body!.getReader();
+
+      const onComplete = (completedAnswer: string) => addChatToHistory(geminiHistory, quote, requestPrompt, completedAnswer, userKey);
+
+      return { reader, onComplete };
   },
 
-  async generateReasoningText(userKey: string, quote: string = '', prompt: string ): Promise<string> {
+  async generateReasoningText(userKey: string, quote: string = '', prompt: string ): Promise<StreamReplyResponse>  {
     return await this.generateText(userKey, quote, prompt, blackboxModels.reasoningModel);
   },
 

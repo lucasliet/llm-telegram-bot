@@ -2,7 +2,6 @@ import { Context } from 'https://deno.land/x/grammy@v1.17.2/context.ts';
 import { ModelCommand, setCurrentModel, getCurrentModel, setUserGeminiApiKeysIfAbsent,
   gptModelCommand, llamaModelCommand, geminiModelCommand, perplexityModelCommand, 
   blackboxModelCommand, blackboxReasoningModelCommand, perplexityReasoningModelCommand,
-  getTranscribedAudio, cacheTranscribedAudio,
   } from '../repository/ChatRepository.ts';
 import GeminiService from './GeminiService.ts';
 import CloudFlareService from './CloudFlareService.ts';
@@ -51,7 +50,7 @@ export default {
       clearInterval(keepAliveId);
       console.error(err);
       ctx.reply(`Eita, algo deu errado: ${err.message}`,
-        { reply_to_message_id: ctx.msg?.message_id })
+        { reply_to_message_id: ctx.msg?.message_id });
     });
   },
 
@@ -134,9 +133,8 @@ async function _callPerplexityModel(ctx: Context, commandMessage?: string): Prom
 
   const openAIService = new OpenAiService(model);
 
-  const output = await openAIService.generateText(userKey, quote, message!.replace('perplexity:', ''));
-  replyInChunks(ctx, output);
-  return;
+  const { reader, onComplete, responseMap } = await openAIService.generateText(userKey, quote, message!.replace('perplexity:', ''));
+  streamReply(ctx, reader, onComplete, responseMap);
 }
 
 async function _callOpenAIModel(ctx: Context, commandMessage?: string): Promise<void> {
@@ -145,8 +143,8 @@ async function _callOpenAIModel(ctx: Context, commandMessage?: string): Promise<
 
   if (photos && caption) {
     const photosUrl = getTelegramFilesUrl(ctx, photos);
-    const output = await openAIService.generateTextFromImage(userKey, quote, photosUrl, caption);
-    replyInChunks(ctx, output);
+    const { reader, onComplete, responseMap } = await openAIService.generateTextFromImage(userKey, quote, photosUrl, caption);
+    streamReply(ctx, reader, onComplete, responseMap);
     return;
   }
 
@@ -156,8 +154,8 @@ async function _callOpenAIModel(ctx: Context, commandMessage?: string): Promise<
 
   switch (command) {
     case 'gpt': {
-        const output = await new OpenAiService('/github').generateText(userKey, quote, message!.replace('gpt:', ''));
-        replyInChunks(ctx, output);
+        const { reader, onComplete, responseMap }  = await new OpenAiService('/github').generateText(userKey, quote, message!.replace('gpt:', ''));
+        streamReply(ctx, reader, onComplete, responseMap);
         break;
     }
     case 'gptimage': {
@@ -183,22 +181,26 @@ async function _callCloudflareModel(ctx: Context, commandMessage?: string): Prom
 
   const cloudflareCommand = message!.split(':')[0].toLowerCase();
 
-  let output = ''
   switch (cloudflareCommand) {
-    case 'llama':
-      output = await CloudFlareService.generateText(userKey, quote, message!.replace('llama:', ''));
-      break;
-    case 'sql':
-      output = await CloudFlareService.generateSQL(userKey, quote, message!.replace('sql:', ''));
-      break;
-    case 'code':
-      output = await CloudFlareService.generateCode(userKey, quote, message!.replace('code:', ''));
-      break;
+    case 'llama':{
+      const { reader, onComplete, responseMap } = await CloudFlareService.generateText(userKey, quote, message!.replace('llama:', ''));
+      streamReply(ctx, reader, onComplete, responseMap);
+      return;
+    }
+    case 'sql':{
+      const { reader, onComplete, responseMap } = await CloudFlareService.generateSQL(userKey, quote, message!.replace('sql:', ''));
+      streamReply(ctx, reader, onComplete, responseMap);
+      return;
+    }
+    case 'code':{
+      const { reader, onComplete, responseMap } = await CloudFlareService.generateCode(userKey, quote, message!.replace('code:', ''));
+      streamReply(ctx, reader, onComplete, responseMap);
+      return;
+    }
     case 'cloudflareimage':
       ctx.replyWithPhoto(new InputFile(new Uint8Array(await CloudFlareService.generateImage(message!)), 'image/png'), { reply_to_message_id: ctx.message?.message_id });
       return;
   }
-  replyInChunks(ctx, output);
 }
 
 async function _callBlackboxModel(ctx: Context, commandMessage?: string): Promise<void> {
@@ -213,24 +215,25 @@ async function _callBlackboxModel(ctx: Context, commandMessage?: string): Promis
 
   const blackBoxCommand = message!.split(':')[0].toLowerCase();
 
-  let output = '';
   switch(blackBoxCommand) {
     case 'deepseek':
-    case 'blackbox':
-      output = await BlackboxaiService.generateText(userKey, quote, 
+    case 'blackbox':{
+      const { reader, onComplete } = await BlackboxaiService.generateText(userKey, quote, 
         message!.replace('blackbox:', '').replace('deepseek:', ''));
-      break;
-    case 'r1':
-      output = await BlackboxaiService.generateReasoningText(userKey, quote, message!.replace('r1:', ''));
-      break;
+      streamReply(ctx, reader, onComplete);
+      return;
+    }
+    case 'r1':{
+      const { reader, onComplete } = await BlackboxaiService.generateReasoningText(userKey, quote, message!.replace('r1:', ''));
+      streamReply(ctx, reader, onComplete);
+      return;
+    }
     case 'image': {
       const imageUrl = await BlackboxaiService.generateImage(message!.replace('image:', ''));
       ctx.replyWithPhoto(imageUrl, { reply_to_message_id: ctx.message?.message_id });
       return;
     }
   }
-
-  replyInChunks(ctx, output);
 }
 
 async function callGeminiModel(ctx: Context): Promise<void> {
@@ -297,17 +300,6 @@ function getTextMessage(userId:number, userKey: string, ctx: Context, audio?: Vo
   return audio ? transcribeAudio(userId, userKey, ctx, audio) : Promise.resolve(ctx.message?.text);
 }
 
-async function extractContextKeys(ctx: Context) {
-  const userId = ctx.from?.id!;
-  const userKey = `user:${userId}`;
-  const audio = ctx.message?.voice || ctx.message?.audio;
-  const contextMessage = await getTextMessage(userId, userKey, ctx, audio);
-  const photos = ctx.message?.photo;
-  const caption = ctx.message?.caption;
-  const quote = ctx.message?.reply_to_message?.text;
-  return { userId, userKey, contextMessage, audio, photos, caption, quote };
-}
-
 function replyOnLongAnswer(ctx: Context): number {
   return setTimeout(() => {
     console.info('Request is longing too much, replying processing message...');
@@ -324,7 +316,7 @@ function keepDenoJobAlive(): number {
 
 function replyInChunks(ctx: Context, output: string): void {
   if(output.length > 4096) {
-    const outputChunks = output.match(/[\s\S]{1,4096}/g)!;
+    const outputChunks = output.match(/[\s\S]{1,4093}/g)!;
     outputChunks.forEach((chunk, index) => ctx.reply(`${chunk}${index === outputChunks.length ? '' : '...'}`, { reply_to_message_id: ctx.message?.message_id }));
     return;
   }
@@ -332,6 +324,58 @@ function replyInChunks(ctx: Context, output: string): void {
   ctx.reply(output, { reply_to_message_id: ctx.message?.message_id });
 }
 
+async function streamReply(
+  ctx: Context,
+  reader: ReadableStreamDefaultReader<Uint8Array>,
+  onComplete: (completedAnswer: string) => Promise<void>,
+  responseMap?: (responseBody: string) => string
+): Promise<void> {
+  const { message_id } = await ctx.reply('...', { reply_to_message_id: ctx.message?.message_id });
+  let result = '';
+  let lastUpdate = Date.now();
+  
+  while (true) {
+    const { done, value } = await reader!.read();
+    if (done) break;
+    
+    result += _decodeStreamResponseText(value, responseMap);
+    
+    lastUpdate = await _editMessageWithCompletionEvery3Seconds(ctx, message_id, result, lastUpdate);
+
+    if(result.length > 3500) {
+      result = result.removeThinkingChatCompletion();
+      if(result.length > 3500) return streamReply(ctx, reader, onComplete, responseMap);
+    }
+  }
+  result = result.removeThinkingChatCompletion();
+  ctx.api.editMessageText(ctx.chat!.id, message_id, result);
+  onComplete(result);
+}
+
+function _decodeStreamResponseText(responseMessage: Uint8Array, responseMap?: (responseBody: string) => string): string {
+  const decoder = new TextDecoder();
+  return responseMap ? responseMap(decoder.decode(responseMessage)) : decoder.decode(responseMessage);
+}
+
+async function _editMessageWithCompletionEvery3Seconds(ctx: Context, messageId: number, message: string, lastUpdate: number): Promise<number> {
+  const now = Date.now();
+  if (now - lastUpdate >= 3000) {
+    await ctx.api.editMessageText(ctx.chat!.id, messageId, message + '...');
+    return now;
+  } return lastUpdate;
+}
+
 function replyWithVisionNotSupportedByModel(ctx: Context): void {
   ctx.reply("esse modelo não suporta leitura de foto", { reply_to_message_id: ctx.message?.message_id });
+}
+
+async function extractContextKeys(ctx: Context) {
+  const userId = ctx.from?.id!;
+  const userKey = `user:${userId}`;
+  const audio = ctx.message?.voice || ctx.message?.audio;
+  const contextMessage = await getTextMessage(userId, userKey, ctx, audio);
+  const photos = ctx.message?.photo;
+  const caption = ctx.message?.caption;
+  const quote = ctx.message?.reply_to_message?.text;
+  return { userId, userKey, contextMessage, audio, photos, caption, quote };
 }

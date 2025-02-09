@@ -1,6 +1,6 @@
 import OpenAi, { toFile } from 'npm:openai';
 import { getChatHistory, addChatToHistory } from '../repository/ChatRepository.ts';
-import { replaceGeminiConfigFromTone, convertGeminiHistoryToGPT } from '../util/ChatConfigUtil.ts';
+import { replaceGeminiConfigFromTone, convertGeminiHistoryToGPT, StreamReplyResponse } from '../util/ChatConfigUtil.ts';
 import { perplexityModels, openAIModels } from '../config/models.ts';
 import * as path from 'jsr:@std/path';
 
@@ -34,7 +34,7 @@ export default class OpenAiService {
     this.maxTokens = command === '/perplexity' ? 140 : 1000;
   }
 
-  async generateTextFromImage(userKey: string, quote: string = '', photosUrl: Promise<string>[], prompt: string): Promise<string> {
+  async generateTextFromImage(userKey: string, quote: string = '', photosUrl: Promise<string>[], prompt: string): Promise<StreamReplyResponse>  {
     const geminiHistory = await getChatHistory(userKey);
 
     const requestPrompt = quote ? `"${quote}" ${prompt}`: prompt;
@@ -52,15 +52,16 @@ export default class OpenAiService {
         ] }
       ],
       max_tokens: this.maxTokens,
+      stream: true,
     });
 
-    const responsePrompt =  completion.choices[0].message.content!;
+    const reader = completion.toReadableStream().getReader();
 
-    addChatToHistory(geminiHistory, quote, requestPrompt, responsePrompt, userKey);
+    const onComplete = (completedAnswer: string) => addChatToHistory(geminiHistory, quote, requestPrompt, completedAnswer, userKey);
 
-    return responsePrompt;
+    return { reader, onComplete, responseMap };
   }
-  async generateText(userKey: string, quote: string = '', prompt: string): Promise<string> {
+  async generateText(userKey: string, quote: string = '', prompt: string): Promise<StreamReplyResponse> {
     const geminiHistory = await getChatHistory(userKey);
 
     const requestPrompt = quote ? `"${quote}" ${prompt}`: prompt;
@@ -73,13 +74,14 @@ export default class OpenAiService {
         { role: 'user', content: requestPrompt }
       ],
       max_tokens: this.maxTokens,
+      stream: true,
     });
 
-    const responsePrompt =  completion.choices[0].message.content!.removeThinkingChatCompletion();;
+    const reader = completion.toReadableStream().getReader();
 
-    addChatToHistory(geminiHistory, quote, requestPrompt, responsePrompt, userKey);
+    const onComplete = (completedAnswer: string) => addChatToHistory(geminiHistory, quote, requestPrompt, completedAnswer, userKey);
 
-    return responsePrompt;
+    return { reader, onComplete, responseMap };
   }
   async generateImage(userKey: string, prompt: string, style: 'vivid' | 'natural' = 'vivid'): Promise<string[]> {
     const response = await this.openai.images.generate({
@@ -107,4 +109,8 @@ export default class OpenAiService {
 
     return response.text; 
   }
+}
+
+function responseMap(responseBody: string): string {
+  return JSON.parse(responseBody).choices[0]?.delta?.content || '';
 }

@@ -1,5 +1,5 @@
 import { addChatToHistory, getChatHistory } from "../repository/ChatRepository.ts";
-import { convertGeminiHistoryToGPT, replaceGeminiConfigFromTone } from "../util/ChatConfigUtil.ts";
+import { convertGeminiHistoryToGPT, replaceGeminiConfigFromTone, StreamReplyResponse } from "../util/ChatConfigUtil.ts";
 import { cloudflareModels } from '../config/models.ts'; 
 import { downloadTelegramFile } from "./TelegramService.ts";
 
@@ -44,7 +44,7 @@ export default {
 
     return description;
   },
-  async generateText(userKey: string, quote: string = '', prompt: string, model: string = textModel): Promise<string> {
+  async generateText(userKey: string, quote: string = '', prompt: string, model: string = textModel): Promise<StreamReplyResponse> {
     const geminiHistory = await getChatHistory(userKey);
 
     const requestPrompt = quote ? `"${escapeMessageQuotes(quote)}" ${escapeMessageQuotes(prompt)}` : escapeMessageQuotes(prompt);
@@ -56,7 +56,9 @@ export default {
           { role: "system", content: replaceGeminiConfigFromTone('Llama', textModel, cloudFlareMaxTokens) },
           ...convertGeminiHistoryToGPT(geminiHistory),
           { role: "user", content: requestPrompt }
-        ], max_tokens: cloudFlareMaxTokens
+        ], 
+        max_tokens: cloudFlareMaxTokens,
+        stream: true
       })
     });
 
@@ -64,11 +66,11 @@ export default {
       throw new Error(`Failed to generate text: ${apiResponse.statusText}`);
     }
 
-    const { result: { response } } = await apiResponse.json();
+    const reader = apiResponse.body!.getReader();
 
-    addChatToHistory(geminiHistory, quote, requestPrompt, response, userKey);
+    const onComplete = (completedAnswer: string) => addChatToHistory(geminiHistory, quote, requestPrompt, completedAnswer, userKey);
 
-    return response;
+    return { reader, onComplete, responseMap };
   },
   async generateImage(prompt: string): Promise<ArrayBuffer> {
     const response = await fetch(
@@ -87,10 +89,10 @@ export default {
     }
     return await response.arrayBuffer();
   },
-  async generateSQL(userKey: string, quote: string = '', prompt: string): Promise<string> {
+  async generateSQL(userKey: string, quote: string = '', prompt: string):Promise<StreamReplyResponse> {
     return await this.generateText(userKey, quote, prompt, sqlModel);
   },
-  async generateCode(userKey: string, quote: string = '', prompt: string): Promise<string> {
+  async generateCode(userKey: string, quote: string = '', prompt: string):Promise<StreamReplyResponse> {
     return await this.generateText(userKey, quote, prompt, codeModel);
   },
   async transcribeAudio(audioFile: Promise<Uint8Array>): Promise<string> {
@@ -116,4 +118,8 @@ function escapeMessageQuotes(message: string): string {
   return message.replace(/"/g, '\\"');
 }
 
-
+function responseMap(responseBody: string): string {
+  if(responseBody.startsWith('data: ')) {
+    return JSON.parse(responseBody.split('data: ')[1])?.response || '';
+  } return '';
+}
