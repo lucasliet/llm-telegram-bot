@@ -321,7 +321,7 @@ function replyInChunks(ctx: Context, output: string): void {
     return;
   }
 
-  ctx.reply(output, { reply_to_message_id: ctx.message?.message_id });
+  ctx.reply(output, { reply_to_message_id: ctx.message?.message_id , parse_mode: 'Markdown' });
 }
 
 async function streamReply(
@@ -348,7 +348,7 @@ async function streamReply(
     }
   }
   result = result.removeThinkingChatCompletion();
-  ctx.api.editMessageText(ctx.chat!.id, message_id, result);
+  ctx.api.editMessageText(ctx.chat!.id, message_id, result, { parse_mode: 'Markdown' });
   onComplete(result);
 }
 

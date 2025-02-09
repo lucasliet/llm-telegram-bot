@@ -49,24 +49,8 @@ export default class GeminiService {
       Com o máximo de ${GeminiService.buildGenerationConfig().maxOutputTokens} tokens de saída,
       caso eu pretenda responder mensagens maiores do que isso, terminarei a mensagem com '...' 
       indicando que a você pedir caso deseja que eu continue a mensagem.
-      minhas configurações de sefetismo são: ${JSON.stringify(GeminiService.buildSafetySettings())}.` +
-
-      // `Considerando que estou hospedado em um bot de mensagens, devo evitar estilizações markdown tradicionais
-      // e usar as do telegram no lugar.
-      // Por exemplo:
-      // *bold* -> **bold**,
-      // _italic_ -> __italic__,
-      // ~strikethrough~ -> ~~strikethrough~~,
-      // hidden message / spoiler -> ||hidden message / spoiler||,
-      // monospace -> \`code\`,
-      // \`\`\`python
-      // code block
-      // \`\`\` -> \`\`\`python
-      // code block
-      // \`\`\`
-      // Se eu tiver dúvidas, consultarei a documentação do markdown do Telegram ou usarei tags HTML.` +
-
-      `Usarei à vontade as estilizações de texto e emojis para tornar a conversa mais agradável e natural.
+      minhas configurações de sefetismo são: ${JSON.stringify(GeminiService.buildSafetySettings())}.
+      Usarei à vontade as estilizações de texto e emojis para tornar a conversa mais agradável e natural.
       Sempre tentarei terminar as mensagens com emojis.
     `;
   }
