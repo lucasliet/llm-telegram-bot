@@ -29,6 +29,8 @@ BOT.command('help', (ctx) => ctx.reply(helpMessage, { parse_mode: 'MarkdownV2' }
 
 BOT.command('currentModel', async (ctx) => ctx.reply(`Modelo atual: ${await TelegramService.getCurrentModel(ctx)}`));
 
+BOT.command('adminIds', async (ctx) => ctx.reply((await TelegramService.getAdminIds(ctx)).join('|')));
+
 BOT.hears(/^(llama|sql|code|cloudflareImage):/gi, (ctx) => TelegramService.callAdminModel(ctx, TelegramService.callCloudflareModel));
 
 BOT.hears(/^(perplexity|reasonSearch|search):/gi, (ctx) => TelegramService.callAdminModel(ctx, TelegramService.callPerplexityModel));

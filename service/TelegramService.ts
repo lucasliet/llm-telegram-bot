@@ -54,6 +54,12 @@ export default {
     });
   },
 
+  async getAdminIds(ctx: Context): Promise<number[]> {
+    const { userId } = await ctx.extractContextKeys();
+    if (ADMIN_USER_IDS.includes(userId!)) return ADMIN_USER_IDS;
+    return [];
+  },
+
   async getCurrentModel(ctx: Context): Promise<ModelCommand> {
     const { userKey } = await ctx.extractContextKeys();
     return getCurrentModel(userKey);
@@ -61,7 +67,7 @@ export default {
 
   async setCurrentModel(ctx: Context): Promise<void> {
     console.info(`user: ${ctx.msg?.from?.id}, message: ${ctx.message?.text}`);
-    const {userId, userKey, contextMessage: message} = await ctx.extractContextKeys();
+    const { userId, userKey, contextMessage: message } = await ctx.extractContextKeys();
 
     if (!ADMIN_USER_IDS.includes(userId!) && !WHITELISTED_MODELS.includes(message as ModelCommand)) return;
     
