@@ -11,7 +11,8 @@ declare module 'https://deno.land/x/grammy@v1.17.2/mod.ts' {
     streamReply(
       reader: ReadableStreamDefaultReader<Uint8Array>,
       onComplete: (completedAnswer: string) => Promise<void>,
-      responseMap?: (responseBody: string) => string
+      responseMap?: (responseBody: string) => string,
+      lastResult?: string
     ): Promise<void>;
     extractContextKeys(): Promise<{
       userId: number;
@@ -54,23 +55,28 @@ Context.prototype.streamReply = async function (
   this: Context,
   reader: ReadableStreamDefaultReader<Uint8Array>,
   onComplete: (completedAnswer: string) => Promise<void>,
-  responseMap?: (responseBody: string) => string
+  responseMap?: (responseBody: string) => string,
+  lastResult?: string
 ): Promise<void> {
   const { message_id } = await this.replyWithQuote('processando...');
-  let result = '';
+  let result = lastResult || '';
   let lastUpdate = Date.now();
   
   while (true) {
     const { done, value } = await reader!.read();
     if (done) break;
     
-    result += _decodeStreamResponseText(value, responseMap);
+    const chunk = _decodeStreamResponseText(value, responseMap);
+    result += chunk;
     
     lastUpdate = await _editMessageWithCompletionEvery3Seconds(this, message_id, result, lastUpdate);
 
-    if(result.length > 3500) {
+    if(result.length > 3000) {
       result = result.removeThinkingChatCompletion();
-      if(result.length > 3500) return this.streamReply(reader, onComplete, responseMap);
+      if(result.length > 3000) {
+        _editMessageWithCompletionEvery3Seconds(this, message_id, result, lastUpdate - 3000);
+        return this.streamReply(reader, onComplete, responseMap, chunk);
+      }
     }
   }
   result = result.removeThinkingChatCompletion();
@@ -98,9 +104,12 @@ function _decodeStreamResponseText(responseMessage: Uint8Array, responseMap?: (r
   return responseMap ? responseMap(decoder.decode(responseMessage)) : decoder.decode(responseMessage);
 }
 
+/**
+ * avoid hit telegram api rate limit https://core.telegram.org/bots/faq#broadcasting-to-users
+ */
 async function _editMessageWithCompletionEvery3Seconds(ctx: Context, messageId: number, message: string, lastUpdate: number): Promise<number> {
   const now = Date.now();
-  if (now - lastUpdate >= 3000) {
+  if (now - lastUpdate >= 1000) {
     await ctx.api.editMessageText(ctx.chat!.id, messageId, message + '...');
     return now;
   } return lastUpdate;

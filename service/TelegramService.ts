@@ -12,7 +12,7 @@ import { InputMediaBuilder } from 'https://deno.land/x/grammy@v1.17.2/mod.ts';
 import BlackboxaiService from './BlackboxaiService.ts';
 
 const TOKEN = Deno.env.get('BOT_TOKEN') as string;
-const ADMIN_USER_IDS: number[] = (Deno.env.get('ADMIN_USER_IDS') as string).split('|').map(parseInt);
+const ADMIN_USER_IDS: number[] = (Deno.env.get('ADMIN_USER_IDS') as string).split('|').map(id => parseInt(id));
 const WHITELISTED_MODELS: ModelCommand[] = [ llamaModelCommand, blackboxModelCommand, blackboxReasoningModelCommand ];
 
 export default {
