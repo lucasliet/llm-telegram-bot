@@ -39,7 +39,7 @@ export default {
     
     const startTime = Date.now();
     const keepAliveId = keepDenoJobAlive();
-    const timeoutId = replyOnLongAnswer(ctx);
+    const timeoutId = ctx.replyOnLongAnswer();
 
     modelCallFunction(ctx).then(() => {
       clearTimeout(timeoutId);
@@ -56,7 +56,7 @@ export default {
 
   async setCurrentModel(ctx: Context): Promise<void> {
     console.info(`user: ${ctx.msg?.from?.id}, message: ${ctx.message?.text}`);
-    const {userId, userKey, contextMessage: message} = await extractContextKeys(ctx);
+    const {userId, userKey, contextMessage: message} = await ctx.extractContextKeys();
 
     if (!ADMIN_USER_IDS.includes(userId!) && !WHITELISTED_MODELS.includes(message as ModelCommand)) return;
     
@@ -65,7 +65,7 @@ export default {
   },
 
   async replyTextContent(ctx: Context): Promise<void> {
-    const { userKey, contextMessage: message } = await extractContextKeys(ctx);
+    const { userKey, contextMessage: message } = await ctx.extractContextKeys();
     
     switch (await getCurrentModel(userKey)) {
       case gptModelCommand:
@@ -87,7 +87,7 @@ export default {
         await _callBlackboxModel(ctx,`r1: ${message}`);
         return;
       case geminiModelCommand:
-        await callGeminiModel(ctx);
+        await _callGeminiModel(ctx);
         return;
       default:
         ctx.reply('Modelo de inteligência não encontrado.', { reply_to_message_id: ctx.message?.message_id });
@@ -113,13 +113,13 @@ export default {
 }
 
 async function _callPerplexityModel(ctx: Context, commandMessage?: string): Promise<void> {
-  const { userKey, contextMessage, photos, caption, quote } = await extractContextKeys(ctx);
+  const { userKey, contextMessage, photos, caption, quote } = await ctx.extractContextKeys();
 
   const message = commandMessage || contextMessage;
 
   if (photos && caption) {
     if (photos && caption) {
-      replyWithVisionNotSupportedByModel(ctx);
+      ctx.replyWithVisionNotSupportedByModel();
       return;
     }
   }
@@ -134,17 +134,17 @@ async function _callPerplexityModel(ctx: Context, commandMessage?: string): Prom
   const openAIService = new OpenAiService(model);
 
   const { reader, onComplete, responseMap } = await openAIService.generateText(userKey, quote, message!.replace('perplexity:', ''));
-  streamReply(ctx, reader, onComplete, responseMap);
+  ctx.streamReply(reader, onComplete, responseMap);
 }
 
 async function _callOpenAIModel(ctx: Context, commandMessage?: string): Promise<void> {
-  const { userKey, contextMessage, photos, caption, quote } = await extractContextKeys(ctx);
+  const { userKey, contextMessage, photos, caption, quote } = await ctx.extractContextKeys();
   const openAIService = new OpenAiService('/openai');
 
   if (photos && caption) {
     const photosUrl = getTelegramFilesUrl(ctx, photos);
     const { reader, onComplete, responseMap } = await openAIService.generateTextFromImage(userKey, quote, photosUrl, caption);
-    streamReply(ctx, reader, onComplete, responseMap);
+    ctx.streamReply(reader, onComplete, responseMap);
     return;
   }
 
@@ -155,7 +155,7 @@ async function _callOpenAIModel(ctx: Context, commandMessage?: string): Promise<
   switch (command) {
     case 'gpt': {
         const { reader, onComplete, responseMap }  = await new OpenAiService('/github').generateText(userKey, quote, message!.replace('gpt:', ''));
-        streamReply(ctx, reader, onComplete, responseMap);
+        ctx.streamReply(reader, onComplete, responseMap);
         break;
     }
     case 'gptimage': {
@@ -168,12 +168,12 @@ async function _callOpenAIModel(ctx: Context, commandMessage?: string): Promise<
 }
 
 async function _callCloudflareModel(ctx: Context, commandMessage?: string): Promise<void> {
-  const { userKey, contextMessage, photos, caption, quote } = await extractContextKeys(ctx);
+  const { userKey, contextMessage, photos, caption, quote } = await ctx.extractContextKeys();
 
   if (photos && caption) {
     const photoUrl = getTelegramFilesUrl(ctx, photos)[0];
     const output = await CloudFlareService.generateTextFromImage(userKey, quote, photoUrl, caption);
-    replyInChunks(ctx, output);
+    ctx.replyInChunks(output);
     return;
   }
 
@@ -184,17 +184,17 @@ async function _callCloudflareModel(ctx: Context, commandMessage?: string): Prom
   switch (cloudflareCommand) {
     case 'llama':{
       const { reader, onComplete, responseMap } = await CloudFlareService.generateText(userKey, quote, message!.replace('llama:', ''));
-      streamReply(ctx, reader, onComplete, responseMap);
+      ctx.streamReply(reader, onComplete, responseMap);
       return;
     }
     case 'sql':{
       const { reader, onComplete, responseMap } = await CloudFlareService.generateSQL(userKey, quote, message!.replace('sql:', ''));
-      streamReply(ctx, reader, onComplete, responseMap);
+      ctx.streamReply(reader, onComplete, responseMap);
       return;
     }
     case 'code':{
       const { reader, onComplete, responseMap } = await CloudFlareService.generateCode(userKey, quote, message!.replace('code:', ''));
-      streamReply(ctx, reader, onComplete, responseMap);
+      ctx.streamReply(reader, onComplete, responseMap);
       return;
     }
     case 'cloudflareimage':
@@ -204,10 +204,10 @@ async function _callCloudflareModel(ctx: Context, commandMessage?: string): Prom
 }
 
 async function _callBlackboxModel(ctx: Context, commandMessage?: string): Promise<void> {
-  const { userKey, contextMessage, photos, caption, quote } = await extractContextKeys(ctx);
+  const { userKey, contextMessage, photos, caption, quote } = await ctx.extractContextKeys();
 
   if (photos && caption) {
-    replyWithVisionNotSupportedByModel(ctx);
+    ctx.replyWithVisionNotSupportedByModel();
     return;
   }
   
@@ -220,12 +220,12 @@ async function _callBlackboxModel(ctx: Context, commandMessage?: string): Promis
     case 'blackbox':{
       const { reader, onComplete } = await BlackboxaiService.generateText(userKey, quote, 
         message!.replace('blackbox:', '').replace('deepseek:', ''));
-      streamReply(ctx, reader, onComplete);
+      ctx.streamReply(reader, onComplete);
       return;
     }
     case 'r1':{
       const { reader, onComplete } = await BlackboxaiService.generateReasoningText(userKey, quote, message!.replace('r1:', ''));
-      streamReply(ctx, reader, onComplete);
+      ctx.streamReply(reader, onComplete);
       return;
     }
     case 'image': {
@@ -236,8 +236,8 @@ async function _callBlackboxModel(ctx: Context, commandMessage?: string): Promis
   }
 }
 
-async function callGeminiModel(ctx: Context): Promise<void> {
-  const { userKey, contextMessage: message, photos, caption, quote } = await extractContextKeys(ctx);
+async function _callGeminiModel(ctx: Context): Promise<void> {
+  const { userKey, contextMessage: message, photos, caption, quote } = await ctx.extractContextKeys();
   
   if (await setUserGeminiApiKeysIfAbsent(userKey, message)) {
     ctx.reply('Chave API do Gemini salva com sucesso!', { reply_to_message_id: ctx.message?.message_id });
@@ -247,7 +247,7 @@ async function callGeminiModel(ctx: Context): Promise<void> {
   try {
     const geminiService = await GeminiService.of(userKey);
     const outputMessage = await getGeminiOutput(geminiService, ctx, message, quote, photos, caption);
-    replyInChunks(ctx, outputMessage);
+    ctx.replyInChunks(outputMessage);
     return;
   } catch (err) {
     if (err instanceof ApiKeyNotFoundError) {
@@ -283,7 +283,7 @@ export async function downloadTelegramFile(url: string): Promise<Uint8Array> {
   return new Uint8Array(await response.arrayBuffer());
 }
 
-async function transcribeAudio(userId: number, userKey: string, ctx: Context, audio: Voice): Promise<string> {
+export async function transcribeAudio(userId: number, userKey: string, ctx: Context, audio: Voice): Promise<string> {
   const audioUrl: string = await getTelegramFilesUrl(ctx, [audio])[0];
   const isGptModelCommand = gptModelCommand === await getCurrentModel(userKey);
 
@@ -296,86 +296,6 @@ async function transcribeAudio(userId: number, userKey: string, ctx: Context, au
   return output;
 }
 
-function getTextMessage(userId:number, userKey: string, ctx: Context, audio?: Voice): Promise<string | undefined> {
-  return audio ? transcribeAudio(userId, userKey, ctx, audio) : Promise.resolve(ctx.message?.text);
-}
-
-function replyOnLongAnswer(ctx: Context): number {
-  return setTimeout(() => {
-    console.info('Request is longing too much, replying processing message...');
-    ctx.reply(
-      'Estou processando sua solicitação, aguarde um momento...', 
-      { reply_to_message_id: ctx.message?.message_id }
-    );
-  }, 6000);
-}
-
 function keepDenoJobAlive(): number {
   return setInterval(() => true, 2000);
-}
-
-function replyInChunks(ctx: Context, output: string): void {
-  if(output.length > 4096) {
-    const outputChunks = output.match(/[\s\S]{1,4093}/g)!;
-    outputChunks.forEach((chunk, index) => ctx.reply(`${chunk}${index === outputChunks.length ? '' : '...'}`, { reply_to_message_id: ctx.message?.message_id }));
-    return;
-  }
-
-  ctx.reply(output, { reply_to_message_id: ctx.message?.message_id , parse_mode: 'Markdown' });
-}
-
-async function streamReply(
-  ctx: Context,
-  reader: ReadableStreamDefaultReader<Uint8Array>,
-  onComplete: (completedAnswer: string) => Promise<void>,
-  responseMap?: (responseBody: string) => string
-): Promise<void> {
-  const { message_id } = await ctx.reply('...', { reply_to_message_id: ctx.message?.message_id });
-  let result = '';
-  let lastUpdate = Date.now();
-  
-  while (true) {
-    const { done, value } = await reader!.read();
-    if (done) break;
-    
-    result += _decodeStreamResponseText(value, responseMap);
-    
-    lastUpdate = await _editMessageWithCompletionEvery3Seconds(ctx, message_id, result, lastUpdate);
-
-    if(result.length > 3500) {
-      result = result.removeThinkingChatCompletion();
-      if(result.length > 3500) return streamReply(ctx, reader, onComplete, responseMap);
-    }
-  }
-  result = result.removeThinkingChatCompletion();
-  ctx.api.editMessageText(ctx.chat!.id, message_id, result, { parse_mode: 'Markdown' });
-  onComplete(result);
-}
-
-function _decodeStreamResponseText(responseMessage: Uint8Array, responseMap?: (responseBody: string) => string): string {
-  const decoder = new TextDecoder();
-  return responseMap ? responseMap(decoder.decode(responseMessage)) : decoder.decode(responseMessage);
-}
-
-async function _editMessageWithCompletionEvery3Seconds(ctx: Context, messageId: number, message: string, lastUpdate: number): Promise<number> {
-  const now = Date.now();
-  if (now - lastUpdate >= 3000) {
-    await ctx.api.editMessageText(ctx.chat!.id, messageId, message + '...');
-    return now;
-  } return lastUpdate;
-}
-
-function replyWithVisionNotSupportedByModel(ctx: Context): void {
-  ctx.reply("esse modelo não suporta leitura de foto", { reply_to_message_id: ctx.message?.message_id });
-}
-
-async function extractContextKeys(ctx: Context) {
-  const userId = ctx.from?.id!;
-  const userKey = `user:${userId}`;
-  const audio = ctx.message?.voice || ctx.message?.audio;
-  const contextMessage = await getTextMessage(userId, userKey, ctx, audio);
-  const photos = ctx.message?.photo;
-  const caption = ctx.message?.caption;
-  const quote = ctx.message?.reply_to_message?.text;
-  return { userId, userKey, contextMessage, audio, photos, caption, quote };
 }
