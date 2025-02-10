@@ -3,7 +3,7 @@ import { replaceGeminiConfigFromTone, convertGeminiHistoryToGPT, StreamReplyResp
 
 import { blackboxModels } from "../config/models.ts";
 
-const blackboxMaxTokens = 1000;
+const blackboxMaxTokens = 4000;
 
 const requestOptions = {
   method: 'POST',

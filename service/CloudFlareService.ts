@@ -8,7 +8,7 @@ const CLOUDFLARE_API_KEY: string = Deno.env.get('CLOUDFLARE_API_KEY') as string;
 
 const { imageModel, textModel, visionTextModel, sqlModel, codeModel, sttModel } = cloudflareModels;
 
-const cloudFlareMaxTokens = 1000;
+const cloudFlareMaxTokens = 4000;
 
 const requestOptions = {
   method: 'POST',
@@ -120,6 +120,10 @@ function escapeMessageQuotes(message: string): string {
 
 function responseMap(responseBody: string): string {
   if(responseBody.startsWith('data: ')) {
-    return JSON.parse(responseBody.split('data: ')[1])?.response || '';
+    try {
+      return JSON.parse(responseBody.split('data: ')[1])?.response || '';
+    } catch {
+      return '';
+    }
   } return '';
 }

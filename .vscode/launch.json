@@ -15,7 +15,6 @@
         "ADMIN_USER_IDS": "${env:TELEGRAM_USER_ID}",
         "CLOUDFLARE_API_KEY": "${env:CLOUDFLARE_AI_API_KEY}",
         "CLOUDFLARE_ACCOUNT_ID": "${env:CLOUDFLARE_AI_ACCOUNT_ID}",
-        "CLOUDFLARE_ZONE_ID": "${env:CLOUDFLARE_ZONE_ID}"
       },
       "runtimeExecutable": "/home/lucas/.deno/bin/denon",
       "runtimeArgs": [

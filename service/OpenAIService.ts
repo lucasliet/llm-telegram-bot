@@ -31,7 +31,7 @@ export default class OpenAiService {
       case '/github':
         this.openai = new OpenAi({ apiKey: GITHUB_TOKEN , baseURL: 'https://models.inference.ai.azure.com' });
     }
-    this.maxTokens = command === '/perplexity' ? 140 : 1000;
+    this.maxTokens = 1000;
   }
 
   async generateTextFromImage(userKey: string, quote: string = '', photosUrl: Promise<string>[], prompt: string): Promise<StreamReplyResponse>  {
