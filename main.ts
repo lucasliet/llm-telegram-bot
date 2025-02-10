@@ -6,18 +6,15 @@ import TelegramService from './service/TelegramService.ts';
 import { clearChatHistory, modelCommands } from './repository/ChatRepository.ts';
 
 import './prototype/StringExtensionPrototype.ts';
+import './prototype/ContextExtensionPrototype.ts';
 
 const TOKEN: string = Deno.env.get('BOT_TOKEN') as string;
-const PORT: number = parseInt(Deno.env.get('PORT') as string) || 80;
+const PORT: number = parseInt(Deno.env.get('PORT') as string) || 3333;
 
 const BOT = new Bot(TOKEN);
 const APP = new Application();
 
 APP.use(oakCors());
-
-Deno.cron("Configure Telegram bot webhook", "0 0 * * *", async () => {
-  await TelegramService.setWebhook();
-});
 
 BOT.command('start', (ctx) =>
   ctx.reply(
@@ -34,46 +31,19 @@ BOT.command('clear', async (ctx) => {
   await ctx.reply('Histórico de conversa apagado com sucesso!');
 });
 
-BOT.hears(/\/help/g, (ctx) => {
-  ctx.reply(
-    `Comandos disponíveis:
-    /gpt - Configura modelo de linguagem para o GPT
-    /llama - Configura modelo de linguagem para o Llama
-    /gemini - Configura modelo de linguagem para o Gemini
-    /perplexity - Configura modelo de linguagem para o modelo perplexity.ai
-    /perplexityReasoning - Configura modelo de linguagem para o modelo perplexity.ai usando Deepseek-R1
-    /blackbox - Configura modelo de linguagem para o Deepseek-V3 pela BlackboxAI
-    /r1 - Configura modelo de linguagem para o Deepseek-R1 pela BlackboxAI
-    /clear - Apaga o histórico de conversa
-    Comandos inline:
-    cloudflareImage: mensagem - Gera imagens com Stable Diffusion
-    image: mensagem - Gera imagens com Flux.1
-    gptImage: mensagem - Gera imagens com DALL-e
-    gpt: mensagem - Gera texto com GPT
-    llama: mensagem - Gera texto com o Llama
-    sql: mensagem - Gera sql com modelo cloudflare
-    code: mensagem - Gera código com modelo cloudflare
-    perplexity: mensagem - Faz uma pergunta usando o modelo perplexity.ai
-    search: mensagem - Faz uma pergunta usando o modelo perplexity.ai
-    reasonSearch: mensagem - Faz uma pergunta usando o modelo perplexity.ai com o uso de Deepseek-R1
-    blackbox: mensagem - Faz uma pergunta usando o modelo Deepseek-V3 pela BlackboxAI
-    deepseek: mensagem - Faz uma pergunta usando o modelo Deepseek-V3 pela BlackboxAI
-    r1: mensagem - Faz uma pergunta usando o modelo Deepseek-R1 pela BlackboxAI
-    `
-  );
-});
+BOT.command('help', (ctx) => ctx.reply(helpMessage, { parse_mode: 'MarkdownV2' }));
 
-BOT.hears(/^(llama|sql|code|cloudflareImage):/gi, async (ctx) => await TelegramService.callAdminModel(ctx, TelegramService.callCloudflareModel));
+BOT.hears(/^(llama|sql|code|cloudflareImage):/gi, (ctx) => TelegramService.callAdminModel(ctx, TelegramService.callCloudflareModel));
 
-BOT.hears(/^(perplexity|reasonSearch|search):/gi, async (ctx) => await TelegramService.callAdminModel(ctx, TelegramService.callPerplexityModel));
+BOT.hears(/^(perplexity|reasonSearch|search):/gi, (ctx) => TelegramService.callAdminModel(ctx, TelegramService.callPerplexityModel));
 
-BOT.hears(/^(gpt|gptImage):/gi, async (ctx) => await TelegramService.callAdminModel(ctx, TelegramService.callOpenAIModel));
+BOT.hears(/^(gpt|gptImage):/gi, (ctx) => TelegramService.callAdminModel(ctx, TelegramService.callOpenAIModel));
 
-BOT.hears(/^(blackbox|deepseek|r1|image):/gi, async (ctx) => await TelegramService.callAdminModel(ctx, TelegramService.callBlackboxModel));
+BOT.hears(/^(blackbox|deepseek|r1|image):/gi, (ctx) => TelegramService.callAdminModel(ctx, TelegramService.callBlackboxModel));
 
 BOT.hears(new RegExp(`^(${modelCommands.join('|')})$`) , async (ctx) => await TelegramService.setCurrentModel(ctx));
 
-BOT.on('message', async (ctx) => await TelegramService.callModel(ctx, TelegramService.replyTextContent));
+BOT.on('message', (ctx) => TelegramService.callModel(ctx, TelegramService.replyTextContent));
 
 APP.use(oakCors());
 
@@ -91,6 +61,39 @@ APP.use(async (ctx, next) => {
   }
 });
 
-APP.use(webhookCallback(BOT, 'oak'));
+if(Deno.env.get('DENO_DEPLOYMENT_ID')) {
+  Deno.cron("Configure Telegram bot webhook", "0 0 * * *", async () => {
+    await TelegramService.setWebhook();
+  });
+  
+  APP.use(webhookCallback(BOT, 'oak'));
+  
+  APP.listen({ port: PORT });
+} else {
+  BOT.start();
+}
 
-APP.listen({ port: PORT });
+const helpMessage = `*Comandos disponíveis*:
+/gpt \\- Configura modelo de linguagem para o __GPT__
+/llama \\- Configura modelo de linguagem para o __Llama__
+/gemini \\- Configura modelo de linguagem para o __Gemini__
+/perplexity \\- Configura modelo de linguagem para o modelo perplexity\\.ai
+/perplexityReasoning \\- Configura modelo de linguagem para o modelo perplexity\\.ai usando __Deepseek\\-R1__
+/blackbox \\- Configura modelo de linguagem para o __Deepseek\\-V3__ pela __BlackboxAI__
+/r1 \\- Configura modelo de linguagem para o __Deepseek\\-R1__ pela __BlackboxAI__
+/clear \\- Apaga o histórico de conversa
+
+*Comandos inline*:
+\\- \`cloudflareImage\`: mensagem \\- Gera imagens com __Stable Diffusion__
+\\- \`image\`: mensagem \\- Gera imagens com __Flux\\.1__
+\\- \`gptImage\`: mensagem \\- Gera imagens com __DALL\\-e__
+\\- \`gpt\`: mensagem \\- Gera texto com __GPT__
+\\- \`llama\`: mensagem \\- Gera texto com o __Llama__
+\\- \`sql\`: mensagem \\- Gera sql com modelo __cloudflare__
+\\- \`code\`: mensagem \\- Gera código com modelo __cloudflare__
+\\- \`perplexity\`: mensagem \\- Faz uma pergunta usando o modelo perplexity\\.ai
+\\- \`search\`: mensagem \\- Faz uma pergunta usando o modelo perplexity\\.ai
+\\- \`reasonSearch\`: mensagem \\- Faz uma pergunta usando o modelo perplexity\\.ai com o uso de __Deepseek\\-R1__
+\\- \`blackbox\`: mensagem \\- Faz uma pergunta usando o modelo __Deepseek\\-V3__ pela __BlackboxAI__
+\\- \`deepseek\`: mensagem \\- Faz uma pergunta usando o modelo __Deepseek\\-V3__ pela __BlackboxAI__
+\\- \`r1\`: mensagem \\- Faz uma pergunta usando o modelo __Deepseek\\-R1__ pela __BlackboxAI__`;

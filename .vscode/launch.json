@@ -21,6 +21,7 @@
       "runtimeArgs": [
         "run",
         "--unstable",
+        "--unstable-cron",
         "--inspect-wait",
         "--allow-all",
         "--unstable-kv"
