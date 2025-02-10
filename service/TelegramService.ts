@@ -2,6 +2,7 @@ import { Context } from 'https://deno.land/x/grammy@v1.17.2/context.ts';
 import { ModelCommand, setCurrentModel, getCurrentModel, setUserGeminiApiKeysIfAbsent,
   gptModelCommand, llamaModelCommand, geminiModelCommand, perplexityModelCommand, 
   blackboxModelCommand, blackboxReasoningModelCommand, perplexityReasoningModelCommand,
+  modelCommands,
   } from '../repository/ChatRepository.ts';
 import GeminiService from './GeminiService.ts';
 import CloudFlareService from './CloudFlareService.ts';
@@ -69,10 +70,12 @@ export default {
     console.info(`user: ${ctx.msg?.from?.id}, message: ${ctx.message?.text}`);
     const { userId, userKey, contextMessage: message } = await ctx.extractContextKeys();
 
-    if (!ADMIN_USER_IDS.includes(userId!) && !WHITELISTED_MODELS.includes(message as ModelCommand)) return;
-    
-    await setCurrentModel(userKey, message as ModelCommand);
-    ctx.reply(`Novo modelo de inteligência escolhido: ${message}`);
+    const command = (message || ctx.callbackQuery?.data) as ModelCommand
+
+    if (!modelCommands.includes(command) || !ADMIN_USER_IDS.includes(userId!) && !WHITELISTED_MODELS.includes(command)) return;
+
+    await setCurrentModel(userKey, command);
+    ctx.reply(`Novo modelo de inteligência escolhido: ${command}`);
   },
 
   async replyTextContent(ctx: Context): Promise<void> {
