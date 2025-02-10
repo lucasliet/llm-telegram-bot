@@ -16,13 +16,7 @@ const APP = new Application();
 
 APP.use(oakCors());
 
-BOT.command('start', (ctx) =>
-  ctx.reply(
-    'Olá, me envie a chave API do Gemini, ex: `key:123456`' +
-    'para conseguir a chave acesse https://aistudio.google.com/app/apikey?hl=pt-br, ' +
-    'mais informações em http://github.com/lucasliet/llm-telegram-bot'
-  )
-);
+BOT.command('start', (ctx) => ctx.reply('Olá, me envie uma mensagem para começarmos a conversar!'));
 
 BOT.command('clear', async (ctx) => {
   const userId = ctx.msg.from?.id;
@@ -32,6 +26,8 @@ BOT.command('clear', async (ctx) => {
 });
 
 BOT.command('help', (ctx) => ctx.reply(helpMessage, { parse_mode: 'MarkdownV2' }));
+
+BOT.command('currentModel', async (ctx) => ctx.reply(`Modelo atual: ${await TelegramService.getCurrentModel(ctx)}`));
 
 BOT.hears(/^(llama|sql|code|cloudflareImage):/gi, (ctx) => TelegramService.callAdminModel(ctx, TelegramService.callCloudflareModel));
 
@@ -74,6 +70,7 @@ if(Deno.env.get('DENO_DEPLOYMENT_ID')) {
 }
 
 const helpMessage = `*Comandos disponíveis*:
+/currentModel \\- Mostra o modelo de linguagem selecionado atualmente
 /gpt \\- Configura modelo de linguagem para o __GPT__
 /llama \\- Configura modelo de linguagem para o __Llama__
 /gemini \\- Configura modelo de linguagem para o __Gemini__

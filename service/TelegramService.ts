@@ -54,6 +54,11 @@ export default {
     });
   },
 
+  async getCurrentModel(ctx: Context): Promise<ModelCommand> {
+    const { userKey } = await ctx.extractContextKeys();
+    return getCurrentModel(userKey);
+  },
+
   async setCurrentModel(ctx: Context): Promise<void> {
     console.info(`user: ${ctx.msg?.from?.id}, message: ${ctx.message?.text}`);
     const {userId, userKey, contextMessage: message} = await ctx.extractContextKeys();
