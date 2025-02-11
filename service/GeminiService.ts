@@ -52,6 +52,8 @@ export default class GeminiService {
       minhas configurações de sefetismo são: ${JSON.stringify(GeminiService.buildSafetySettings())}.
       Usarei à vontade as estilizações de texto e emojis para tornar a conversa mais agradável e natural.
       Sempre tentarei terminar as mensagens com emojis.
+
+      SEMPRE INCLUA SUAS FONTES DE PESQUISA NAS RESPOSTAS, COM LINKS ASSOCIADOS
     `;
   }
 

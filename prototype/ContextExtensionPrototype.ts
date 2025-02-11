@@ -71,16 +71,16 @@ Context.prototype.streamReply = async function (
     
     lastUpdate = await _editMessageWithCompletionEvery3Seconds(this, message_id, result, lastUpdate);
 
-    if(result.length > 3000) {
+    if(result.length > 4093) {
       result = result.removeThinkingChatCompletion();
-      if(result.length > 3000) {
+      if(result.length > 4093) {
         _editMessageWithCompletionEvery3Seconds(this, message_id, result, lastUpdate - 3000);
         return this.streamReply(reader, onComplete, responseMap, chunk);
       }
     }
   }
   result = result.removeThinkingChatCompletion();
-  this.api.editMessageText(this.chat!.id, message_id, result, { parse_mode: 'Markdown' });
+  this.api.editMessageText(this.chat!.id, message_id, result, lastResult ? {} : { parse_mode: 'Markdown' });
   onComplete(result);
 }
 
