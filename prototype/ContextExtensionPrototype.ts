@@ -61,26 +61,28 @@ Context.prototype.streamReply = async function (
   const { message_id } = await this.replyWithQuote('processando...');
   let result = lastResult || '';
   let lastUpdate = Date.now();
-  
+
   while (true) {
     const { done, value } = await reader!.read();
     if (done) break;
     
-    const chunk = _decodeStreamResponseText(value, responseMap);
+    let chunk = _decodeStreamResponseText(value, responseMap);
     result += chunk;
     
-    lastUpdate = await _editMessageWithCompletionEvery3Seconds(this, message_id, result, lastUpdate);
-
     if(result.length > 4093) {
       result = result.removeThinkingChatCompletion();
       if(result.length > 4093) {
-        _editMessageWithCompletionEvery3Seconds(this, message_id, result, lastUpdate - 3000);
+        chunk = result.substring(4093, result.length) + chunk;
+        result = result.substring(0, 4093);
+        _editMessageWithCompletionEvery3Seconds(this, message_id, result, lastUpdate - 1000, true);
         return this.streamReply(reader, onComplete, responseMap, chunk);
       }
     }
+    
+    lastUpdate = await _editMessageWithCompletionEvery3Seconds(this, message_id, result, lastUpdate);
   }
   result = result.removeThinkingChatCompletion();
-  this.api.editMessageText(this.chat!.id, message_id, result, lastResult ? {} : { parse_mode: 'Markdown' });
+  this.api.editMessageText(this.chat!.id, message_id, result, { parse_mode: 'Markdown' });
   onComplete(result);
 }
 
@@ -107,10 +109,11 @@ function _decodeStreamResponseText(responseMessage: Uint8Array, responseMap?: (r
 /**
  * avoid hit telegram api rate limit https://core.telegram.org/bots/faq#broadcasting-to-users
  */
-async function _editMessageWithCompletionEvery3Seconds(ctx: Context, messageId: number, message: string, lastUpdate: number): Promise<number> {
+async function _editMessageWithCompletionEvery3Seconds(ctx: Context, messageId: number, message: string, lastUpdate: number, isLastMessage = false): Promise<number> {
   const now = Date.now();
   if (now - lastUpdate >= 1000) {
-    await ctx.api.editMessageText(ctx.chat!.id, messageId, message + '...');
+    message += isLastMessage ? '' : '...'
+    await ctx.api.editMessageText(ctx.chat!.id, messageId, message, isLastMessage ? { parse_mode: 'Markdown' } : {});
     return now;
   } return lastUpdate;
 }
