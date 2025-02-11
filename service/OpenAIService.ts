@@ -71,7 +71,7 @@ export default class OpenAiService {
       messages: [
         { role: 'system', content: replaceGeminiConfigFromTone('OpenAI', this.model, this.maxTokens) },
         ...convertGeminiHistoryToGPT(geminiHistory),
-        { role: 'user', content: requestPrompt }
+        { role: 'user', content: `${requestPrompt}${this.openai.apiKey === PERPLEXITY_API_KEY ? ', indique suas fontes com seus links' : ''}` }
       ],
       max_tokens: this.maxTokens,
       stream: true,
