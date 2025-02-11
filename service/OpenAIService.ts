@@ -37,8 +37,6 @@ export default class OpenAiService {
   async generateTextFromImage(userKey: string, quote: string = '', photosUrl: Promise<string>[], prompt: string): Promise<StreamReplyResponse>  {
     const geminiHistory = await getChatHistory(userKey);
 
-    const requestPrompt = quote ? `"${quote}" ${prompt}`: prompt;
-
     const urls = await Promise.all(photosUrl);
 
     const completion = await this.openai.chat.completions.create({
@@ -46,8 +44,9 @@ export default class OpenAiService {
       messages: [
         { role: 'system', content: replaceGeminiConfigFromTone('OpenAI', this.model, this.maxTokens) },
         ...convertGeminiHistoryToGPT(geminiHistory),
+        { role: 'assistant', content: quote },
         { role: 'user', content: [
-          { type: 'text', text: requestPrompt },
+          { type: 'text', text: prompt },
           ...urls.map(photoUrl => ({ type: 'image_url', image_url: { url: photoUrl } }))
         ] }
       ],
@@ -57,21 +56,21 @@ export default class OpenAiService {
 
     const reader = completion.toReadableStream().getReader();
 
-    const onComplete = (completedAnswer: string) => addChatToHistory(geminiHistory, quote, requestPrompt, completedAnswer, userKey);
+    const onComplete = (completedAnswer: string) => addChatToHistory(geminiHistory, quote, prompt, completedAnswer, userKey);
 
     return { reader, onComplete, responseMap };
   }
   async generateText(userKey: string, quote: string = '', prompt: string): Promise<StreamReplyResponse> {
     const geminiHistory = await getChatHistory(userKey);
 
-    const requestPrompt = quote ? `"${quote}" ${prompt}`: prompt;
-
     const completion = await this.openai.chat.completions.create({
       model: this.model,
       messages: [
         { role: 'system', content: replaceGeminiConfigFromTone('OpenAI', this.model, this.maxTokens) },
         ...convertGeminiHistoryToGPT(geminiHistory),
-        { role: 'user', content: `${requestPrompt}${this.openai.apiKey === PERPLEXITY_API_KEY ? ', indique suas fontes com seus links' : ''}` }
+        { role: 'user', content: 'if there is a quote for me to add to my next message, tell me' },
+        { role: 'assistant', content: quote },
+        { role: 'user', content: `${prompt}${this.openai.apiKey === PERPLEXITY_API_KEY ? ', indique suas fontes com seus links' : ''}` }
       ],
       max_tokens: this.maxTokens,
       stream: true,
@@ -79,7 +78,7 @@ export default class OpenAiService {
 
     const reader = completion.toReadableStream().getReader();
 
-    const onComplete = (completedAnswer: string) => addChatToHistory(geminiHistory, quote, requestPrompt, completedAnswer, userKey);
+    const onComplete = (completedAnswer: string) => addChatToHistory(geminiHistory, quote, prompt, completedAnswer, userKey);
 
     return { reader, onComplete, responseMap };
   }
