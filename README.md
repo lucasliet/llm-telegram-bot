@@ -26,5 +26,5 @@ esse projeto utiliza o [Deno deploy](https://deno.com/deploy) e [Deno kv](https:
 
 - crie um arquivo .env na raiz do projeto e configure as variaveis de ambiente nele, no formato `VARIAVEL=valor`
   ```bash
-  sh devrun.sh
+  ./devrun.sh
   ```
