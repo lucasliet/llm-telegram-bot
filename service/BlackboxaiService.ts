@@ -20,14 +20,15 @@ export default {
 
       const [ id, modelName ] = model.split('/');
   
+      const requestPrompt = quote ? `quote: "${quote}"\n\n${prompt}` : prompt;  
+
       const apiResponse = await fetch(`https://www.blackbox.ai/api/chat`, {
         ...requestOptions,
         body: JSON.stringify({
           messages: [
             { role: "system", content: replaceGeminiConfigFromTone('BlackboxAI', model, blackboxMaxTokens) },
             ...convertGeminiHistoryToGPT(geminiHistory),
-            { role: 'assistant', content: quote },
-            { role: "user", content: prompt }
+            { role: "user", content: requestPrompt }
           ], 
           agentMode: {
             mode: true,
@@ -49,7 +50,7 @@ export default {
   
       const reader = apiResponse.body!.getReader();
 
-      const onComplete = (completedAnswer: string) => addChatToHistory(geminiHistory, quote, prompt, completedAnswer, userKey);
+      const onComplete = (completedAnswer: string) => addChatToHistory(geminiHistory, quote, requestPrompt, completedAnswer, userKey);
 
       return { reader, onComplete };
   },

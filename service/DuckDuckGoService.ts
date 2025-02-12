@@ -23,7 +23,7 @@ export default {
 
     const vqdHeader = await getVqdHeader() || await _fetchVqdHeader();
 
-    const requestPrompt = quote ? `quote: ${quote}\n${prompt}` : prompt;
+    const requestPrompt = quote ? `quote: "${quote}"\n\n${prompt}` : prompt;
 
     const apiResponse = await fetch('https://duckduckgo.com/duckchat/v1/chat', {
       method: 'POST',

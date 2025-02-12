@@ -22,7 +22,7 @@ export default {
   async generateTextFromImage(userKey: string, quote: string = '', photoUrl: Promise<string>, prompt: string): Promise<string> {
     const geminiHistory = await getChatHistory(userKey);
 
-    const requestPrompt = quote ? `"${quote}" ${prompt}`: prompt;
+    const requestPrompt = quote ? `quote: "${quote}"\n\n${prompt}` : prompt;
 
     const photoBinaryArray = await downloadTelegramFile(await photoUrl);
 
@@ -47,14 +47,15 @@ export default {
   async generateText(userKey: string, quote: string = '', prompt: string, model: string = textModel): Promise<StreamReplyResponse> {
     const geminiHistory = await getChatHistory(userKey);
 
+    const requestPrompt = quote ? `quote: "${quote}"\n\n${prompt}` : prompt;
+
     const apiResponse = await fetch(`https://api.cloudflare.com/client/v4/accounts/${CLOUDFLARE_ACCOUNT_ID}/ai/run/${model}`, {
       ...requestOptions,
       body: JSON.stringify({
         messages: [
           { role: "system", content: replaceGeminiConfigFromTone('Llama', textModel, cloudFlareMaxTokens) },
           ...convertGeminiHistoryToGPT(geminiHistory),
-          { role: 'assistant', content: escapeMessageQuotes(quote) },
-          { role: "user", content: escapeMessageQuotes(prompt) }
+          { role: "user", content: requestPrompt }
         ], 
         max_tokens: cloudFlareMaxTokens,
         stream: true
@@ -67,7 +68,7 @@ export default {
 
     const reader = apiResponse.body!.getReader();
 
-    const onComplete = (completedAnswer: string) => addChatToHistory(geminiHistory, quote, prompt, completedAnswer, userKey);
+    const onComplete = (completedAnswer: string) => addChatToHistory(geminiHistory, quote, requestPrompt, completedAnswer, userKey);
 
     return { reader, onComplete, responseMap };
   },
