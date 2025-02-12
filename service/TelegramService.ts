@@ -2,23 +2,19 @@ import { Context } from 'https://deno.land/x/grammy@v1.17.2/context.ts';
 import { ModelCommand, setCurrentModel, getCurrentModel, setUserGeminiApiKeysIfAbsent,
   gptModelCommand, llamaModelCommand, geminiModelCommand, perplexityModelCommand, 
   blackboxModelCommand, blackboxReasoningModelCommand, perplexityReasoningModelCommand,
-  ducko3MiniCommand, duckHaikuCommand, modelCommands,
+  modelCommands,
   } from '../repository/ChatRepository.ts';
-
 import GeminiService from './GeminiService.ts';
 import CloudFlareService from './CloudFlareService.ts';
 import OpenAiService from './OpenAIService.ts';
-import BlackboxaiService from './BlackboxaiService.ts';
-import DuckDuckGoService from './DuckDuckGoService.ts';
-
 import { ApiKeyNotFoundError } from '../error/ApiKeyNotFoundError.ts';
 import { Audio, InputFile, PhotoSize, Voice } from 'https://deno.land/x/grammy@v1.17.2/types.deno.ts';
 import { InputMediaBuilder } from 'https://deno.land/x/grammy@v1.17.2/mod.ts';
+import BlackboxaiService from './BlackboxaiService.ts';
 
 const TOKEN = Deno.env.get('BOT_TOKEN') as string;
 const ADMIN_USER_IDS: number[] = (Deno.env.get('ADMIN_USER_IDS') as string).split('|').map(id => parseInt(id));
-const WHITELISTED_MODELS: ModelCommand[] = 
-  [ llamaModelCommand, blackboxModelCommand, blackboxReasoningModelCommand, ducko3MiniCommand, duckHaikuCommand];
+const WHITELISTED_MODELS: ModelCommand[] = [ llamaModelCommand, blackboxModelCommand, blackboxReasoningModelCommand ];
 
 export default {
   setWebhook: (): Promise<Response> => fetch(`https://api.telegram.org/bot${TOKEN}/setWebhook`, {
@@ -104,12 +100,6 @@ export default {
       case blackboxReasoningModelCommand:
         await _callBlackboxModel(ctx,`r1: ${message}`);
         return;
-      case ducko3MiniCommand:
-        await _callDuckDuckGoModel(ctx, `o3mini: ${message}`);
-        return;
-      case duckHaikuCommand:
-        await _callDuckDuckGoModel(ctx, `haiku: ${message}`);
-        return;
       case geminiModelCommand:
         await _callGeminiModel(ctx);
         return;
@@ -133,11 +123,7 @@ export default {
 
   async callBlackboxModel(ctx: Context, commandMessage?: string): Promise<void> {
     return await _callBlackboxModel(ctx, commandMessage);
-  },
-
-  async callDuckDuckGoModel(ctx: Context, commandMessage?: string): Promise<void> {
-    return await _callDuckDuckGoModel(ctx, commandMessage);
-  },
+  }
 }
 
 async function _callPerplexityModel(ctx: Context, commandMessage?: string): Promise<void> {
@@ -260,32 +246,6 @@ async function _callBlackboxModel(ctx: Context, commandMessage?: string): Promis
       const imageUrl = await BlackboxaiService.generateImage(message!.replace('image:', ''));
       ctx.replyWithPhoto(imageUrl, { reply_to_message_id: ctx.message?.message_id });
       return;
-    }
-  }
-}
-
-async function _callDuckDuckGoModel(ctx: Context, commandMessage?: string): Promise<void> {
-  const { userKey, contextMessage, photos, caption, quote } = await ctx.extractContextKeys();
-
-  if (photos && caption) {
-    ctx.replyWithVisionNotSupportedByModel();
-    return;
-  }
-
-  const message = commandMessage || contextMessage;
-
-  const duckCommand = message!.split(':')[0].toLowerCase();
-
-  switch (duckCommand) {
-    case 'o3mini':{
-      const { reader, onComplete, responseMap } = await DuckDuckGoService.generateText(userKey, quote, message!.replace('o3mini:', ''));
-      ctx.streamReply(reader, onComplete, responseMap);
-      return;
-    }
-    case 'haiku':{
-      const { reader, onComplete, responseMap } = await DuckDuckGoService.generateTextClaude(userKey, quote, message!.replace('haiku:', ''));
-      ctx.streamReply(reader, onComplete, responseMap);
-      return;    
     }
   }
 }

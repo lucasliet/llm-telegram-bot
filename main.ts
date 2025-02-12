@@ -32,8 +32,6 @@ BOT.hears(/^(gpt|gptImage):/gi, (ctx) => TelegramService.callAdminModel(ctx, Tel
 
 BOT.hears(/^(blackbox|deepseek|r1|image):/gi, (ctx) => TelegramService.callAdminModel(ctx, TelegramService.callBlackboxModel));
 
-BOT.hears(/(o3mini|haiku):/gi, (ctx) => TelegramService.callAdminModel(ctx, TelegramService.callDuckDuckGoModel));
-
 BOT.hears(new RegExp(`^(${modelCommands.join('|')})$`) , async (ctx) => await TelegramService.setCurrentModel(ctx));
 
 BOT.command('clear', (ctx) => _clearHistory(ctx));
@@ -97,8 +95,6 @@ const helpMessage = `*Comandos inline*:
 \\- \`blackbox:\` mensagem \\- Faz uma pergunta usando o modelo __Deepseek\\-V3__ pela __BlackboxAI__
 \\- \`deepseek:\` mensagem \\- Faz uma pergunta usando o modelo __Deepseek\\-V3__ pela __BlackboxAI__
 \\- \`r1:\` mensagem \\- Faz uma pergunta usando o modelo __Deepseek\\-R1__ pela __BlackboxAI__
-\\- \`haiku:\` mensagem \\- Faz uma pergunta usando o modelo __Claude 3 Haiku__ pelo __DuckDuckGo__
-\\- \`o3mini:\` mensagem \\- Faz uma pergunta usando o modelo __O3 Mini__ pelo __DuckDuckGo__
 
 *Seleção de modelos de linguagem*:`;
 
@@ -118,10 +114,6 @@ const helpCommandButtons = [
   [
     ['Deepseek V3', '/blackbox'],
     ['Deepseek R1', '/r1']
-  ],
-  [
-    ['o3 Mini', '/o3mini'],
-    ['Claude 3 Haiku', '/haiku']
   ],
   [ ['Limpar Histórico', '/clear'] ]
 ];
