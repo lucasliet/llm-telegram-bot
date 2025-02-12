@@ -24,3 +24,11 @@ export const blackboxModels = {
   textModel: 'deepseek-ai/DeepSeek-V3',
   reasoningModel: 'deepseek-ai/DeepSeek-R1',
 }
+
+export const duckduckgoModels = {
+  o3mini: 'o3-mini',
+  gpt4omini: 'gpt-4o-mini',
+  haiku: 'claude-3-haiku-20240307',
+  llama: 'meta-llama/Llama-3.3-70B-Instruct-Turbo',
+  mixtral: 'mistralai/Mixtral-8x7B-Instruct-v0.1',
+}

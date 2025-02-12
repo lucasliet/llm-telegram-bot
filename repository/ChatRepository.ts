@@ -5,10 +5,13 @@ import { ApiKeyNotFoundError } from "../error/ApiKeyNotFoundError.ts";
 const kv = await Deno.openKv();
 const oneDayInMillis = 60 * 60 * 24 * 1000;
 
-export type ModelCommand = '/gemini' | '/llama' | '/gpt' | '/perplexity' | '/perplexityReasoning' | '/blackbox' | '/r1';
+export type ModelCommand = '/gemini' | '/llama' | '/gpt' | '/perplexity' | '/perplexityReasoning' 
+  | '/blackbox' | '/r1' | '/o3mini' | '/haiku';
 
-export const modelCommands: ModelCommand[] = ['/gemini', '/llama', '/gpt', '/perplexity','/perplexityReasoning', '/blackbox', '/r1'];
-export const [ geminiModelCommand, llamaModelCommand, gptModelCommand, perplexityModelCommand, perplexityReasoningModelCommand, blackboxModelCommand, blackboxReasoningModelCommand ] = modelCommands;
+export const modelCommands: ModelCommand[] = ['/gemini', '/llama', '/gpt', '/perplexity','/perplexityReasoning',
+    '/blackbox', '/r1', '/o3mini', '/haiku'];
+export const [ geminiModelCommand, llamaModelCommand, gptModelCommand, perplexityModelCommand, perplexityReasoningModelCommand, 
+    blackboxModelCommand, blackboxReasoningModelCommand, ducko3MiniCommand, duckHaikuCommand ] = modelCommands;
 
 export async function setUserGeminiApiKeysIfAbsent(userKey: string, message: string | undefined): Promise<boolean> {
   if (message && message.startsWith('key:')) {
@@ -57,5 +60,13 @@ export async function setCurrentModel(userKey: string, model: ModelCommand = '/g
 }
 
 export async function getCurrentModel(userKey: string): Promise<ModelCommand> {
-  return (await kv.get<ModelCommand>([userKey, 'current_model'])).value || '/blackbox';
+  return (await kv.get<ModelCommand>([userKey, 'current_model'])).value || '/o3mini';
+}
+
+export async function setVqdHeader(vqdHeader: string): Promise<void> {
+  await kv.set(['vqd_header'], vqdHeader, { expireIn: oneDayInMillis / 20 });
+}
+
+export async function getVqdHeader(): Promise<string | null> {
+  return (await kv.get<string>(['vqd_header'])).value || null;
 }
