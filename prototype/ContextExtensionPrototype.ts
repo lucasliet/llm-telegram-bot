@@ -70,7 +70,7 @@ Context.prototype.streamReply = async function (
     result += chunk;
     
     if(result.length > 4093) {
-      result = result.removeThinkingChatCompletion();
+      result = result.removeThinkingChatCompletion().convertBlackBoxWebSearchSourcesToMarkdown();
       if(result.length > 4093) {
         chunk = result.substring(4093, result.length) + chunk;
         result = result.substring(0, 4093);
@@ -81,8 +81,8 @@ Context.prototype.streamReply = async function (
     
     lastUpdate = await _editMessageWithCompletionEvery3Seconds(this, message_id, result, lastUpdate);
   }
-  result = result.removeThinkingChatCompletion();
-  this.api.editMessageText(this.chat!.id, message_id, result, { parse_mode: 'Markdown' });
+  const sanitizedResult = result.removeThinkingChatCompletion().convertBlackBoxWebSearchSourcesToMarkdown();
+  this.api.editMessageText(this.chat!.id, message_id, sanitizedResult, { parse_mode: 'Markdown' });
   onComplete(result);
 }
 

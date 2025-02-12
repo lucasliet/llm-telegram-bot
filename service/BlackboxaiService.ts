@@ -8,15 +8,19 @@ const blackboxMaxTokens = 8000;
 const requestOptions = {
   method: 'POST',
   headers: {
+    'User-Agent': 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:134.0) Gecko/20100101 Firefox/134.0',
     'Content-Type': 'application/json',
+    'Origin': 'https://www.blackbox.ai'
   }
 };
 
 export default {
   async generateText(userKey: string, quote: string = '', prompt: string, model = blackboxModels.textModel): Promise<StreamReplyResponse> {
       const geminiHistory = await getChatHistory(userKey);
+
+      const [ id, modelName ] = model.split('/');
   
-      const apiResponse = await fetch(`https://api.blackbox.ai/api/chat`, {
+      const apiResponse = await fetch(`https://www.blackbox.ai/api/chat`, {
         ...requestOptions,
         body: JSON.stringify({
           messages: [
@@ -25,8 +29,17 @@ export default {
             { role: 'assistant', content: quote },
             { role: "user", content: prompt }
           ], 
-          model,
-          max_tokens: blackboxMaxTokens
+          agentMode: {
+            mode: true,
+            id,
+            name: modelName
+          },  
+          maxTokens: blackboxMaxTokens,
+          deepSearchMode: true,
+          isPremium: true,
+          webSearchModePrompt: true,
+          trendingAgentMode: {},
+          validated: '00f37b34-a166-4efb-bce5-1312d87f2f94'
         })
       });
   

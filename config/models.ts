@@ -21,8 +21,8 @@ export const cloudflareModels =  {
 }
 
 export const blackboxModels = {
-  textModel: 'deepseek-ai/DeepSeek-V3',
-  reasoningModel: 'deepseek-ai/DeepSeek-R1',
+  textModel: 'deepseek-chat/DeepSeek-V3',
+  reasoningModel: 'deepseek-reasoner/DeepSeek-R1',
 }
 
 export const duckduckgoModels = {
