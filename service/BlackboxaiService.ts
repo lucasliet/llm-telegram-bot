@@ -1,4 +1,4 @@
-import { getChatHistory, addChatToHistory } from "../repository/ChatRepository.ts";
+import { getChatHistory, addContentToChatHistory } from "../repository/ChatRepository.ts";
 import { replaceGeminiConfigFromTone, convertGeminiHistoryToGPT, StreamReplyResponse } from "../util/ChatConfigUtil.ts";
 
 import { blackboxModels } from "../config/models.ts";
@@ -50,7 +50,7 @@ export default {
   
       const reader = apiResponse.body!.getReader();
 
-      const onComplete = (completedAnswer: string) => addChatToHistory(geminiHistory, quote, requestPrompt, completedAnswer, userKey);
+      const onComplete = (completedAnswer: string) => addContentToChatHistory(geminiHistory, quote, requestPrompt, completedAnswer, userKey);
 
       return { reader, onComplete };
   },

@@ -1,5 +1,4 @@
-import { Content } from 'npm:@google/generative-ai';
-import { addChatToHistory, getChatHistory, getVqdHeader, setVqdHeader } from "../repository/ChatRepository.ts";
+import { addContentToChatHistory, ExpirableContent, getChatHistory, getVqdHeader, setVqdHeader } from "../repository/ChatRepository.ts";
 import { convertGeminiHistoryToGPT, replaceGeminiConfigFromTone, StreamReplyResponse } from "../util/ChatConfigUtil.ts";
 import OpenAi from 'npm:openai';
 
@@ -47,7 +46,7 @@ export default {
 
     const reader = apiResponse.body!.getReader();
 
-    const onComplete = (completedAnswer: string) => addChatToHistory(geminiHistory, quote, requestPrompt, completedAnswer, userKey);
+    const onComplete = (completedAnswer: string) => addContentToChatHistory(geminiHistory, quote, requestPrompt, completedAnswer, userKey);
 
     return { reader, onComplete, responseMap };
   },
@@ -80,7 +79,7 @@ async function _fetchVqdHeader(): Promise<string> {
   return header;
 }
 
-function _convertChatHistoryToDuckDuckGo(geminiHistory: Content[]): OpenAi.Chat.Completions.ChatCompletionMessageParam[] {
+function _convertChatHistoryToDuckDuckGo(geminiHistory: ExpirableContent[]): OpenAi.Chat.Completions.ChatCompletionMessageParam[] {
   return convertGeminiHistoryToGPT(geminiHistory).map(history => (
     { content: `${history.role === 'assistant' ? 'your last answer, assistant:' + history.content : history.content}`, role: 'user' }
   ))

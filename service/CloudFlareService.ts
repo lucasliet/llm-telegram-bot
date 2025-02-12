@@ -1,4 +1,4 @@
-import { addChatToHistory, getChatHistory } from "../repository/ChatRepository.ts";
+import { addContentToChatHistory, getChatHistory } from "../repository/ChatRepository.ts";
 import { convertGeminiHistoryToGPT, replaceGeminiConfigFromTone, StreamReplyResponse } from "../util/ChatConfigUtil.ts";
 import { cloudflareModels } from '../config/models.ts'; 
 import { downloadTelegramFile } from "./TelegramService.ts";
@@ -40,7 +40,7 @@ export default {
     }
     const { result: { description } } = await apiResponse.json();
 
-    addChatToHistory(geminiHistory, quote, requestPrompt, description, userKey);
+    addContentToChatHistory(geminiHistory, quote, requestPrompt, description, userKey);
 
     return description;
   },
@@ -68,7 +68,7 @@ export default {
 
     const reader = apiResponse.body!.getReader();
 
-    const onComplete = (completedAnswer: string) => addChatToHistory(geminiHistory, quote, requestPrompt, completedAnswer, userKey);
+    const onComplete = (completedAnswer: string) => addContentToChatHistory(geminiHistory, quote, requestPrompt, completedAnswer, userKey);
 
     return { reader, onComplete, responseMap };
   },

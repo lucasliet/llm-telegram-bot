@@ -6,6 +6,7 @@ import { ApiKeyNotFoundError } from '../error/ApiKeyNotFoundError.ts';
 import { HarmBlockThreshold } from 'npm:@google/generative-ai';
 import { geminiModel } from '../config/models.ts';
 import { downloadTelegramFile } from './TelegramService.ts';
+import { removeExpirationFromHistory } from '../util/ChatConfigUtil.ts';
 
 const GEMINI_API_KEY = Deno.env.get('GEMINI_API_KEY') as string;
 
@@ -61,23 +62,25 @@ export default class GeminiService {
 
   async sendTextMessage(quote: string = '', prompt: string): Promise<string> {
     const history = await getChatHistory(this.userKey);
-    const chat = GeminiService.buildChat(this.model, history);
+    const geminiHistory = removeExpirationFromHistory(history);
+    const chat = GeminiService.buildChat(this.model, geminiHistory);
     const message = quote ? [quote, prompt] : [prompt];
     const response = (await chat.sendMessage(message)).response.text();
-    await addContentToChatHistory(await chat.getHistory(), this.userKey);
+    addContentToChatHistory(history, quote, prompt, response, this.userKey);
     return response;
   }
   ;
   async sendPhotoMessage(quote: string = '', photoUrls: Promise<string>[], prompt: string): Promise<string> {
     const history = await getChatHistory(this.userKey);
-    const chat = GeminiService.buildChat(this.model, history);
+    const geminiHistory = removeExpirationFromHistory(history);
+    const chat = GeminiService.buildChat(this.model, geminiHistory);
     const urls = await Promise.all(photoUrls);
     const imageParts = await Promise.all(urls.map(this.fileToGenerativePart));
 
     const message = quote ? [quote, prompt, ...imageParts] : [prompt, ...imageParts];
 
     const response = (await chat.sendMessage(message)).response.text();
-    await addContentToChatHistory(await chat.getHistory(), this.userKey);
+    addContentToChatHistory(history, quote, prompt, response, this.userKey);
     return response;
   }
 

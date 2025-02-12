@@ -1,5 +1,5 @@
 import OpenAi, { toFile } from 'npm:openai';
-import { getChatHistory, addChatToHistory } from '../repository/ChatRepository.ts';
+import { getChatHistory, addContentToChatHistory } from '../repository/ChatRepository.ts';
 import { replaceGeminiConfigFromTone, convertGeminiHistoryToGPT, StreamReplyResponse } from '../util/ChatConfigUtil.ts';
 import { perplexityModels, openAIModels } from '../config/models.ts';
 import * as path from 'jsr:@std/path';
@@ -48,7 +48,7 @@ export default class OpenAiService {
         ...convertGeminiHistoryToGPT(geminiHistory),
         { role: 'user', content: [
           { type: 'text', text: requestPrompt },
-          ...urls.map(photoUrl => ({ type: 'image_url', image_url: { url: photoUrl } }))
+          ...urls.map(photoUrl => ({ type: 'image_url', image_url: { url: photoUrl } } as const))
         ] }
       ],
       max_tokens: this.maxTokens,
@@ -57,7 +57,7 @@ export default class OpenAiService {
 
     const reader = completion.toReadableStream().getReader();
 
-    const onComplete = (completedAnswer: string) => addChatToHistory(geminiHistory, quote, requestPrompt, completedAnswer, userKey);
+    const onComplete = (completedAnswer: string) => addContentToChatHistory(geminiHistory, quote, requestPrompt, completedAnswer, userKey);
 
     return { reader, onComplete, responseMap };
   }
@@ -79,7 +79,7 @@ export default class OpenAiService {
 
     const reader = completion.toReadableStream().getReader();
 
-    const onComplete = (completedAnswer: string) => addChatToHistory(geminiHistory, quote, requestPrompt, completedAnswer, userKey);
+    const onComplete = (completedAnswer: string) => addContentToChatHistory(geminiHistory, quote, requestPrompt, completedAnswer, userKey);
 
     return { reader, onComplete, responseMap };
   }

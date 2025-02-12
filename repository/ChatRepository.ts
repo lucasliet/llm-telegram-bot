@@ -10,6 +10,8 @@ export type ModelCommand = '/gemini' | '/llama' | '/gpt' | '/perplexity' | '/per
 export const modelCommands: ModelCommand[] = ['/gemini', '/llama', '/gpt', '/perplexity','/perplexityReasoning', '/blackbox', '/r1'];
 export const [ geminiModelCommand, llamaModelCommand, gptModelCommand, perplexityModelCommand, perplexityReasoningModelCommand, blackboxModelCommand, blackboxReasoningModelCommand ] = modelCommands;
 
+export interface ExpirableContent extends Content { createdAt: number }
+
 export async function setUserGeminiApiKeysIfAbsent(userKey: string, message: string | undefined): Promise<boolean> {
   if (message && message.startsWith('key:')) {
     const apiKey = message.replace('key:', '');
@@ -25,27 +27,32 @@ export async function getUserGeminiApiKeys(userKey: string): Promise<string> {
   return decompressText(compressedKey);
 }
 
-export async function getChatHistory(userKey: string): Promise<Content[]> {
+export async function getChatHistory(userKey: string): Promise<ExpirableContent[]> {
   const compressedChatHistory = (await kv.get<string>([userKey, 'chat-history'])).value;
   if (!compressedChatHistory) return [];
 
-  return decompressObject<Content[]>(compressedChatHistory);
+  return _addCreatedAtToMessageMissingProperty(decompressObject<ExpirableContent[]>(compressedChatHistory));
 }
 
-export async function addChatToHistory(history: Content[], quote: string = '', userPrompt: string, modelPrompt: string, userKey: string): Promise<void> {
+function _addCreatedAtToMessageMissingProperty(history: ExpirableContent[]): ExpirableContent[] {
+  return history.map(message => ({...message, createdAt: message.createdAt || Date.now() }));
+}
+
+export async function addContentToChatHistory(history: ExpirableContent[], quote: string = '', userPrompt: string, modelPrompt: string, userKey: string): Promise<void> {
+  const createdAt = Date.now();
   const userPart = quote ? [{ text: quote }, { text: userPrompt }] : [{ text: userPrompt }];
-  history = [ ...history, { role: 'user', parts: userPart }, { role: 'model', parts: [{ text: modelPrompt }] } ]
-  await addContentToChatHistory(history, userKey);
+  history = [ ...history, { role: 'user', parts: userPart, createdAt }, { role: 'model', parts: [{ text: modelPrompt }], createdAt } ]
+  await _addChatToHistory(history, userKey);
 }
 
-function removeOldMessages<T>(history: Array<T>, maxsize: number) {
-  if (history.length > maxsize) history.splice(0, history.length - maxsize);
+function removeExpiredMessages(history: Array<ExpirableContent>, expirationInMillis: number): ExpirableContent[] {
+  return history.filter(message => message.createdAt >= Date.now() - expirationInMillis);
 }
 
-export async function addContentToChatHistory(history: Content[], userKey: string): Promise<void> {
-  removeOldMessages(history, 100);
+async function _addChatToHistory(history: ExpirableContent[], userKey: string): Promise<void> {
+  history = removeExpiredMessages(history, oneDayInMillis);
   const compressedChatHistory = compressObject(history);
-  await kv.set([userKey, 'chat-history'], compressedChatHistory, { expireIn: oneDayInMillis });
+  await kv.set([userKey, 'chat-history'], compressedChatHistory, { expireIn: oneDayInMillis * 30 });
 }
 
 export async function clearChatHistory(userKey: string): Promise<void> {
