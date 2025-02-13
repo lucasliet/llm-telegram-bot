@@ -7,10 +7,12 @@ import { ModelCommand, setCurrentModel, getCurrentModel, setUserGeminiApiKeysIfA
 import GeminiService from './GeminiService.ts';
 import CloudFlareService from './CloudFlareService.ts';
 import OpenAiService from './OpenAIService.ts';
+import BlackboxaiService from './BlackboxaiService.ts';
+import PuterService from './PuterService.ts';
+
 import { ApiKeyNotFoundError } from '../error/ApiKeyNotFoundError.ts';
 import { Audio, InputFile, PhotoSize, Voice } from 'https://deno.land/x/grammy@v1.17.2/types.deno.ts';
 import { InputMediaBuilder } from 'https://deno.land/x/grammy@v1.17.2/mod.ts';
-import BlackboxaiService from './BlackboxaiService.ts';
 
 const TOKEN = Deno.env.get('BOT_TOKEN') as string;
 const ADMIN_USER_IDS: number[] = (Deno.env.get('ADMIN_USER_IDS') as string).split('|').map(id => parseInt(id));
@@ -123,6 +125,10 @@ export default {
 
   async callBlackboxModel(ctx: Context, commandMessage?: string): Promise<void> {
     return await _callBlackboxModel(ctx, commandMessage);
+  },
+
+  async callPuterModel(ctx: Context, commandMessage?: string): Promise<void> {
+    return await _callPuterModel(ctx, commandMessage);
   }
 }
 
@@ -248,6 +254,20 @@ async function _callBlackboxModel(ctx: Context, commandMessage?: string): Promis
       return;
     }
   }
+}
+
+async function _callPuterModel (ctx: Context, commandMessage?: string): Promise<void> {
+  const { userKey, contextMessage: message, photos, caption, quote } = await ctx.extractContextKeys();
+
+  if (photos && caption) {
+    ctx.replyWithVisionNotSupportedByModel();
+    return;
+  }
+
+  const puterCommand = message!.split(':')[0].toLowerCase();
+
+  const { reader, onComplete, responseMap } = await PuterService.generateText(userKey, quote, message!.replace(puterCommand + ':', ''));
+  ctx.streamReply(reader, onComplete, responseMap);
 }
 
 async function _callGeminiModel(ctx: Context): Promise<void> {

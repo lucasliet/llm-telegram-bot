@@ -32,6 +32,8 @@ BOT.hears(/^(gpt|gptImage):/gi, (ctx) => TelegramService.callAdminModel(ctx, Tel
 
 BOT.hears(/^(blackbox|deepseek|r1|image):/gi, (ctx) => TelegramService.callAdminModel(ctx, TelegramService.callBlackboxModel));
 
+BOT.hears(/^(puter|claude):/gi, (ctx) => TelegramService.callAdminModel(ctx, TelegramService.callPuterModel));
+
 BOT.hears(new RegExp(`^(${modelCommands.join('|')})$`) , async (ctx) => await TelegramService.setCurrentModel(ctx));
 
 BOT.command('clear', (ctx) => _clearHistory(ctx));
