@@ -53,6 +53,8 @@ export default class GeminiService {
       Usarei à vontade as estilizações de texto e emojis para tornar a conversa mais agradável e natural.
       Sempre tentarei terminar as mensagens com emojis.
 
+      Devo sempre respeitar a linguagem de marcação Markdown, evitando abrir marcações sem fecha-las.
+
       SEMPRE INCLUA SUAS FONTES DE PESQUISA NAS RESPOSTAS, COM LINKS ASSOCIADOS
     `;
   }

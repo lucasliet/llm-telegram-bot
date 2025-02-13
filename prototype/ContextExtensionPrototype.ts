@@ -44,11 +44,22 @@ Context.prototype.replyOnLongAnswer = function(this: Context): number {
 Context.prototype.replyInChunks= function (this: Context, output: string): void {
   if(output.length > 4096) {
     const outputChunks = output.match(/[\s\S]{1,4093}/g)!;
-    outputChunks.forEach((chunk, index) => this.reply(`${chunk}${index === outputChunks.length ? '' : '...'}`, { reply_to_message_id: this.message?.message_id }));
+    outputChunks.forEach((chunk, index) => {
+      const chunkOutput = `${chunk}${index === outputChunks.length - 1 ? '' : '...'}`;
+      this.replyWithQuote(chunkOutput, { parse_mode: 'Markdown'  })
+        .catch(() => {
+          console.warn(warnMarkdownErrorMessage, chunkOutput);
+          this.replyWithQuote(chunkOutput);
+        });
+    });
     return;
   }
 
-  this.replyWithQuote(output, { parse_mode: 'Markdown' });
+  this.replyWithQuote(output, { parse_mode: 'Markdown' })
+    .catch(() => {
+      console.warn(warnMarkdownErrorMessage, output);
+      this.replyWithQuote(output);
+    });
 }
 
 Context.prototype.streamReply = async function (
@@ -75,6 +86,7 @@ Context.prototype.streamReply = async function (
         chunk = result.substring(4093, result.length) + chunk;
         result = result.substring(0, 4093);
         _editMessageWithCompletionEvery3Seconds(this, message_id, result, lastUpdate - 2000, true);
+        onComplete(result);
         return this.streamReply(reader, onComplete, responseMap, chunk);
       }
     }
@@ -82,7 +94,11 @@ Context.prototype.streamReply = async function (
     lastUpdate = await _editMessageWithCompletionEvery3Seconds(this, message_id, result, lastUpdate);
   }
   const sanitizedResult = result.removeThinkingChatCompletion().convertBlackBoxWebSearchSourcesToMarkdown();
-  this.api.editMessageText(this.chat!.id, message_id, sanitizedResult, { parse_mode: 'Markdown' });
+  this.api.editMessageText(this.chat!.id, message_id, sanitizedResult, { parse_mode: 'Markdown' })
+    .catch(() => {
+      console.warn(warnMarkdownErrorMessage, sanitizedResult)
+      this.api.editMessageText(this.chat!.id, message_id, sanitizedResult)
+    });
   onComplete(result);
 }
 
@@ -113,7 +129,13 @@ async function _editMessageWithCompletionEvery3Seconds(ctx: Context, messageId: 
   const now = Date.now();
   if (now - lastUpdate >= 2000) {
     message += isLastMessage ? '' : '...'
-    await ctx.api.editMessageText(ctx.chat!.id, messageId, message, isLastMessage ? { parse_mode: 'Markdown' } : {});
+    await ctx.api.editMessageText(ctx.chat!.id, messageId, message, { parse_mode: 'Markdown' })
+      .catch(() => {
+        console.warn(warnMarkdownErrorMessage, message);
+        ctx.api.editMessageText(ctx.chat!.id, messageId, message);
+      });
     return now;
   } return lastUpdate;
 }
+
+const warnMarkdownErrorMessage = 'Error on markdown parse_mode, message:';
