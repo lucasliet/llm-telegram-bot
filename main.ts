@@ -30,7 +30,7 @@ BOT.hears(/^(perplexity|reasonSearch|search):/gi, (ctx) => TelegramService.callA
 
 BOT.hears(/^(gpt|gptImage):/gi, (ctx) => TelegramService.callAdminModel(ctx, TelegramService.callOpenAIModel));
 
-BOT.hears(/^(blackbox|deepseek|r1|image):/gi, (ctx) => TelegramService.callAdminModel(ctx, TelegramService.callBlackboxModel));
+BOT.hears(/^(blackbox|v3|r1|gemini|mixtral|qwen|image):/gi, (ctx) => TelegramService.callAdminModel(ctx, TelegramService.callBlackboxModel));
 
 BOT.hears(/^(puter|claude):/gi, (ctx) => TelegramService.callAdminModel(ctx, TelegramService.callPuterModel));
 
@@ -87,16 +87,18 @@ const helpMessage = `*Comandos inline*:
 \\- \`cloudflareImage:\` mensagem \\- Gera imagens com __Stable Diffusion__
 \\- \`image:\` mensagem \\- Gera imagens com __Flux\\.1__
 \\- \`gptImage:\` mensagem \\- Gera imagens com __DALL\\-e__
-\\- \`gpt:\` mensagem \\- Gera texto com __GPT__
-\\- \`llama:\` mensagem \\- Gera texto com o __Llama__
-\\- \`sql:\` mensagem \\- Gera sql com modelo __cloudflare__
-\\- \`code:\` mensagem \\- Gera código com modelo __cloudflare__
+\\- \`gpt:\` mensagem \\- Gera texto com __GPT 4o mini__
+\\- \`llama:\` mensagem \\- Gera texto com o __Llama 3\\.3__
+\\- \`sql:\` mensagem \\- Gera sql com modelo __SQL Coder__
+\\- \`code:\` mensagem \\- Gera código com modelo __Deepseek Coder__
 \\- \`perplexity:\` mensagem \\- Faz uma pergunta usando o modelo perplexity\\.ai
 \\- \`search:\` mensagem \\- Faz uma pergunta usando o modelo perplexity\\.ai
 \\- \`reasonSearch:\` mensagem \\- Faz uma pergunta usando o modelo perplexity\\.ai com o uso de __Deepseek\\-R1__
-\\- \`blackbox:\` mensagem \\- Faz uma pergunta usando o modelo __Deepseek\\-V3__ pela __BlackboxAI__
-\\- \`deepseek:\` mensagem \\- Faz uma pergunta usando o modelo __Deepseek\\-V3__ pela __BlackboxAI__
+\\- \`v3:\` mensagem \\- Faz uma pergunta usando o modelo __Deepseek\\-V3__ pela __BlackboxAI__
 \\- \`r1:\` mensagem \\- Faz uma pergunta usando o modelo __Deepseek\\-R1__ pela __BlackboxAI__
+\\- \`gemini:\` mensagem \\- Faz uma pergunta usando o modelo __Gemini Flash 2\\.0__ pela __BlackboxAI__
+\\- \`qwen:\` mensagem \\- Faz uma pergunta usando o modelo __Qwen__ pela __BlackboxAI__
+\\- \`mixtral:\` mensagem \\- Faz uma pergunta usando o modelo __Mixtral__ pela __BlackboxAI__
 
 *Seleção de modelos de linguagem*:`;
 
@@ -106,16 +108,20 @@ const helpCommandButtons = [
     ['GPT', '/gpt'],
   ],
   [
+    ['Deepseek R1', '/r1'],
+    ['Deepseek V3', '/v3']
+  ],
+  [
     ['Llama', '/llama'],
     ['Gemini', '/gemini']
   ],
   [
-    ['Perplexity', '/perplexity'],
-    ['Perplexity Reasoning', '/perplexityReasoning']
+    ['Qwen', '/qwen'],
+    ['Mixtral', '/mixtral']
   ],
   [
-    ['Deepseek V3', '/blackbox'],
-    ['Deepseek R1', '/r1']
+    ['Perplexity', '/perplexity'],
+    ['Perplexity Reasoning', '/perplexityReasoning']
   ],
   [ ['Limpar Histórico', '/clear'] ]
 ];

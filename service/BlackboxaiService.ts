@@ -3,6 +3,8 @@ import { replaceGeminiConfigFromTone, convertGeminiHistoryToGPT, StreamReplyResp
 
 import { blackboxModels } from "../config/models.ts";
 
+const { reasoningModel } = blackboxModels;
+
 const blackboxMaxTokens = 8000;
 
 const requestOptions = {
@@ -18,7 +20,7 @@ export default {
   async generateText(userKey: string, quote: string = '', prompt: string, model = blackboxModels.textModel): Promise<StreamReplyResponse> {
       const geminiHistory = await getChatHistory(userKey);
 
-      const [ id, modelName ] = model.split('/');
+      const [ modelId, modelName ] = model.split('|');
   
       const requestPrompt = quote ? `quote: "${quote}"\n\n${prompt}` : prompt;  
 
@@ -26,17 +28,17 @@ export default {
         ...requestOptions,
         body: JSON.stringify({
           messages: [
-            { role: "system", content: replaceGeminiConfigFromTone('BlackboxAI', model, blackboxMaxTokens) },
+            { role: "system", content: replaceGeminiConfigFromTone('BlackboxAI', modelName, blackboxMaxTokens) },
             ...convertGeminiHistoryToGPT(geminiHistory),
             { role: "user", content: requestPrompt }
           ], 
           agentMode: {
             mode: true,
-            id,
+            id: modelId,
             name: modelName
           },  
           maxTokens: blackboxMaxTokens,
-          deepSearchMode: true,
+          deepSearchMode: model === reasoningModel,
           isPremium: true,
           webSearchModePrompt: true,
           trendingAgentMode: {},
@@ -53,10 +55,6 @@ export default {
       const onComplete = (completedAnswer: string) => addContentToChatHistory(geminiHistory, quote, requestPrompt, completedAnswer, userKey);
 
       return { reader, onComplete };
-  },
-
-  async generateReasoningText(userKey: string, quote: string = '', prompt: string ): Promise<StreamReplyResponse>  {
-    return await this.generateText(userKey, quote, prompt, blackboxModels.reasoningModel);
   },
 
   async generateImage(prompt: string): Promise<string> {

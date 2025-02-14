@@ -21,8 +21,12 @@ export const cloudflareModels =  {
 }
 
 export const blackboxModels = {
-  textModel: 'deepseek-chat/DeepSeek-V3',
-  reasoningModel: 'deepseek-reasoner/DeepSeek-R1',
+  textModel: 'deepseek-chat|DeepSeek-V3',
+  reasoningModel: 'deepseek-reasoner|DeepSeek-R1',
+  geminiModel: 'Gemini/Gemini-Flash-2.0|Gemini-Flash-2.0',
+  llamaModel: 'meta-llama/Llama-3.3-70B-Instruct-Turbo|Meta-Llama-3.3-70B-Instruct-Turbo',
+  mixtralModel: 'mistralai/Mistral-Small-24B-Instruct-2501|Mistral-Small-24B-Instruct-2501',
+  qwenModel: 'Qwen/QwQ-32B-Preview|Qwen-QwQ-32B-Preview'
 }
 
 export const duckduckgoModels = {

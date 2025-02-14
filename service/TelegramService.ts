@@ -2,8 +2,10 @@ import { Context } from 'https://deno.land/x/grammy@v1.17.2/context.ts';
 import { ModelCommand, setCurrentModel, getCurrentModel, setUserGeminiApiKeysIfAbsent,
   gptModelCommand, llamaModelCommand, geminiModelCommand, perplexityModelCommand, 
   blackboxModelCommand, blackboxReasoningModelCommand, perplexityReasoningModelCommand,
+  blackboxMixtralModelCommand, blackboxQwenModelCommand,
   modelCommands,
   } from '../repository/ChatRepository.ts';
+
 import GeminiService from './GeminiService.ts';
 import CloudFlareService from './CloudFlareService.ts';
 import OpenAiService from './OpenAIService.ts';
@@ -13,6 +15,10 @@ import PuterService from './PuterService.ts';
 import { ApiKeyNotFoundError } from '../error/ApiKeyNotFoundError.ts';
 import { Audio, InputFile, PhotoSize, Voice } from 'https://deno.land/x/grammy@v1.17.2/types.deno.ts';
 import { InputMediaBuilder } from 'https://deno.land/x/grammy@v1.17.2/mod.ts';
+
+import { blackboxModels } from "../config/models.ts";
+
+const { reasoningModel, geminiModel, mixtralModel, qwenModel, llamaModel } = blackboxModels;
 
 const TOKEN = Deno.env.get('BOT_TOKEN') as string;
 const ADMIN_USER_IDS: number[] = (Deno.env.get('ADMIN_USER_IDS') as string).split('|').map(id => parseInt(id));
@@ -102,8 +108,14 @@ export default {
       case blackboxReasoningModelCommand:
         await _callBlackboxModel(ctx,`r1: ${message}`);
         return;
+      case blackboxMixtralModelCommand:
+        await _callBlackboxModel(ctx, `mixtral: ${message}`);
+        return;
+      case blackboxQwenModelCommand:
+        await _callBlackboxModel(ctx, `qwen: ${message}`);
+        return;
       case geminiModelCommand:
-        await _callGeminiModel(ctx);
+        await _callBlackboxModel(ctx, `gemini: ${message}`);
         return;
       default:
         ctx.reply('Modelo de inteligência não encontrado.', { reply_to_message_id: ctx.message?.message_id });
@@ -236,15 +248,35 @@ async function _callBlackboxModel(ctx: Context, commandMessage?: string): Promis
   const blackBoxCommand = message!.split(':')[0].toLowerCase();
 
   switch(blackBoxCommand) {
-    case 'deepseek':
+    case 'v3':
     case 'blackbox':{
       const { reader, onComplete } = await BlackboxaiService.generateText(userKey, quote, 
-        message!.replace('blackbox:', '').replace('deepseek:', ''));
+        message!.replace('blackbox:', '').replace('v3:', ''));
       ctx.streamReply(reader, onComplete);
       return;
     }
     case 'r1':{
-      const { reader, onComplete } = await BlackboxaiService.generateReasoningText(userKey, quote, message!.replace('r1:', ''));
+      const { reader, onComplete } = await BlackboxaiService.generateText(userKey, quote, message!.replace('r1:', ''), reasoningModel);
+      ctx.streamReply(reader, onComplete);
+      return;
+    }
+    case 'gemini': {
+      const { reader, onComplete } = await BlackboxaiService.generateText(userKey, quote, message!.replace('gemini:', ''), geminiModel);
+      ctx.streamReply(reader, onComplete);
+      return;
+    }
+    case 'mixtral': {
+      const { reader, onComplete } = await BlackboxaiService.generateText(userKey, quote, message!.replace('mixtral:', ''), mixtralModel);
+      ctx.streamReply(reader, onComplete);
+      return;
+    }
+    case 'qwen': {
+      const { reader, onComplete } = await BlackboxaiService.generateText(userKey, quote, message!.replace('qwen:', ''), qwenModel);
+      ctx.streamReply(reader, onComplete);
+      return;
+    }
+    case 'llama': {
+      const { reader, onComplete } = await BlackboxaiService.generateText(userKey, quote, message!.replace('llama:', ''), llamaModel);
       ctx.streamReply(reader, onComplete);
       return;
     }
