@@ -25,15 +25,18 @@ const ADMIN_USER_IDS: number[] = (Deno.env.get('ADMIN_USER_IDS') as string).spli
 const WHITELISTED_MODELS: ModelCommand[] = [ llamaModelCommand, blackboxModelCommand, blackboxReasoningModelCommand ];
 
 export default {
-  setWebhook: (): Promise<Response> => fetch(`https://api.telegram.org/bot${TOKEN}/setWebhook`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify({
-      url: 'https://llm-telegram-bot.deno.dev/webhook'
+  setWebhook(): Promise<Response> {
+    console.log('Setting webhook...');
+    return fetch(`https://api.telegram.org/bot${TOKEN}/setWebhook`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        url: 'https://llm-telegram-bot.deno.dev/webhook'
+      })
     })
-  }),
+  },
 
   callAdminModel(ctx: Context, modelCallFunction: (ctx: Context) => Promise<void>): void {
     const userId = ctx.from?.id!;

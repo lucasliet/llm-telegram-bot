@@ -62,6 +62,7 @@ APP.use(async (ctx, next) => {
     if (ctx.request.url.pathname !== '/webhook') {
       ctx.response.status = 200;
       ctx.response.body = 'Use with https://t.me/llm_gemini_bot';
+      TelegramService.setWebhook();
       return;
     }
     await next();
