@@ -85,7 +85,7 @@ Context.prototype.streamReply = async function (
       if(result.length > 4093) {
         chunk = result.substring(4093, result.length) + chunk;
         result = result.substring(0, 4093);
-        _editMessageWithCompletionEvery3Seconds(this, message_id, result, lastUpdate - 2000, true);
+        _editMessageWithCompletionEvery3Seconds(this, message_id, result, lastUpdate, true);
         onComplete(result);
         return this.streamReply(reader, onComplete, responseMap, chunk);
       }
@@ -127,7 +127,8 @@ function _decodeStreamResponseText(responseMessage: Uint8Array, responseMap?: (r
  */
 async function _editMessageWithCompletionEvery3Seconds(ctx: Context, messageId: number, message: string, lastUpdate: number, isLastMessage = false): Promise<number> {
   const now = Date.now();
-  if (now - lastUpdate >= 2000) {
+  const has2SecondsPassed = now - lastUpdate >= 2000;
+  if (isLastMessage || has2SecondsPassed) {
     message += isLastMessage ? '' : '...'
     await ctx.api.editMessageText(ctx.chat!.id, messageId, message, { parse_mode: 'Markdown' })
       .catch(() => {
