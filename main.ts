@@ -20,7 +20,7 @@ BOT.command('start', (ctx) => ctx.reply('Olá, me envie uma mensagem para começ
 
 BOT.command('help', (ctx) => ctx.reply(helpMessage, { parse_mode: 'MarkdownV2', reply_markup: keyboard}));
 
-BOT.command('currentModel', async (ctx) => ctx.reply(`Modelo atual: ${await TelegramService.getCurrentModel(ctx)}`));
+BOT.command('currentmodel', async (ctx) => ctx.reply(`Modelo atual: ${await TelegramService.getCurrentModel(ctx)}`));
 
 BOT.command('adminIds', async (ctx) => ctx.reply((await TelegramService.getAdminIds(ctx)).join('|')));
 
@@ -105,7 +105,7 @@ const helpMessage = `*Comandos inline*:
 
 const helpCommandButtons = [
   [
-    ['Modelo Atual', '/currentModel'],
+    ['Modelo Atual', '/currentmodel'],
     ['GPT', '/gpt'],
   ],
   [
