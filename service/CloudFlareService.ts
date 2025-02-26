@@ -8,9 +8,9 @@ const CLOUDFLARE_API_KEY: string = Deno.env.get('CLOUDFLARE_API_KEY') as string;
 
 const { imageModel, textModel, visionTextModel, sqlModel, codeModel, sttModel } = cloudflareModels;
 
-const cloudFlareMaxTokens = 4000;
+const CLOUDFLARE_MAX_TOKENS = 4000;
 
-const requestOptions = {
+const REQUEST_OPTIONS = {
   method: 'POST',
   headers: {
     'Content-Type': 'application/json',
@@ -18,7 +18,18 @@ const requestOptions = {
   }
 };
 
+/**
+ * Service for interacting with Cloudflare AI API
+ */
 export default {
+  /**
+   * Generate text from an image using the vision text model
+   * @param userKey - User identifier for chat history
+   * @param quote - Optional quote to include in context
+   * @param photoUrl - Promise resolving to the photo URL
+   * @param prompt - Text prompt to accompany the image
+   * @returns Generated text response
+   */
   async generateTextFromImage(userKey: string, quote: string = '', photoUrl: Promise<string>, prompt: string): Promise<string> {
     const geminiHistory = await getChatHistory(userKey);
 
@@ -27,11 +38,11 @@ export default {
     const photoBinaryArray = await downloadTelegramFile(await photoUrl);
 
     const apiResponse = await fetch(`https://api.cloudflare.com/client/v4/accounts/${CLOUDFLARE_ACCOUNT_ID}/ai/run/${visionTextModel}`, {
-      ...requestOptions,
+      ...REQUEST_OPTIONS,
       body: JSON.stringify({
         prompt: requestPrompt,
         image: Array.from(photoBinaryArray),
-        max_tokens: cloudFlareMaxTokens
+        max_tokens: CLOUDFLARE_MAX_TOKENS
       })
     });
 
@@ -44,20 +55,29 @@ export default {
 
     return description;
   },
+  
+  /**
+   * Generate text using a specified text model
+   * @param userKey - User identifier for chat history
+   * @param quote - Optional quote to include in context
+   * @param prompt - Text prompt
+   * @param model - Model to use (defaults to textModel)
+   * @returns Stream reply response with reader and completion handler
+   */
   async generateText(userKey: string, quote: string = '', prompt: string, model: string = textModel): Promise<StreamReplyResponse> {
     const geminiHistory = await getChatHistory(userKey);
 
     const requestPrompt = quote ? `quote: "${quote}"\n\n${prompt}` : prompt;
 
     const apiResponse = await fetch(`https://api.cloudflare.com/client/v4/accounts/${CLOUDFLARE_ACCOUNT_ID}/ai/run/${model}`, {
-      ...requestOptions,
+      ...REQUEST_OPTIONS,
       body: JSON.stringify({
         messages: [
-          { role: "system", content: replaceGeminiConfigFromTone('Llama', textModel, cloudFlareMaxTokens) },
+          { role: "system", content: replaceGeminiConfigFromTone('Llama', textModel, CLOUDFLARE_MAX_TOKENS) },
           ...convertGeminiHistoryToGPT(geminiHistory),
           { role: "user", content: requestPrompt }
         ], 
-        max_tokens: cloudFlareMaxTokens,
+        max_tokens: CLOUDFLARE_MAX_TOKENS,
         stream: true
       })
     });
@@ -72,29 +92,57 @@ export default {
 
     return { reader, onComplete, responseMap };
   },
+  
+  /**
+   * Generate an image using Stable Diffusion
+   * @param prompt - Text prompt describing the desired image
+   * @returns Generated image as ArrayBuffer
+   */
   async generateImage(prompt: string): Promise<ArrayBuffer> {
     const response = await fetch(
       `https://api.cloudflare.com/client/v4/accounts/${CLOUDFLARE_ACCOUNT_ID}/ai/run/${imageModel}`, {
-      ...requestOptions,
+      ...REQUEST_OPTIONS,
       body: `{"prompt": "${escapeMessageQuotes(prompt)}"}`
     });
 
     if (!response.ok) {
       console.error(
         `https://api.cloudflare.com/client/v4/accounts/${CLOUDFLARE_ACCOUNT_ID}/ai/run/${imageModel}`,
-        { ...requestOptions, body: `{"prompt": "${escapeMessageQuotes(prompt)}"}` },
+        { ...REQUEST_OPTIONS, body: `{"prompt": "${escapeMessageQuotes(prompt)}"}` },
         response.statusText
-      )
+      );
       throw new Error(`Failed to generate image: ${response.statusText}}`);
     }
     return await response.arrayBuffer();
   },
-  async generateSQL(userKey: string, quote: string = '', prompt: string):Promise<StreamReplyResponse> {
+  
+  /**
+   * Generate SQL code using a dedicated SQL model
+   * @param userKey - User identifier for chat history
+   * @param quote - Optional quote to include in context
+   * @param prompt - Text prompt describing the SQL query
+   * @returns Stream reply response with reader and completion handler
+   */
+  async generateSQL(userKey: string, quote: string = '', prompt: string): Promise<StreamReplyResponse> {
     return await this.generateText(userKey, quote, prompt, sqlModel);
   },
-  async generateCode(userKey: string, quote: string = '', prompt: string):Promise<StreamReplyResponse> {
+  
+  /**
+   * Generate code using a dedicated coding model
+   * @param userKey - User identifier for chat history
+   * @param quote - Optional quote to include in context
+   * @param prompt - Text prompt describing the code
+   * @returns Stream reply response with reader and completion handler
+   */
+  async generateCode(userKey: string, quote: string = '', prompt: string): Promise<StreamReplyResponse> {
     return await this.generateText(userKey, quote, prompt, codeModel);
   },
+  
+  /**
+   * Transcribe audio to text
+   * @param audioFile - Promise resolving to audio file as Uint8Array
+   * @returns Transcribed text
+   */
   async transcribeAudio(audioFile: Promise<Uint8Array>): Promise<string> {
     const response = await fetch(`https://api.cloudflare.com/client/v4/accounts/${CLOUDFLARE_ACCOUNT_ID}/ai/run/${sttModel}`, {
       method: 'POST',
@@ -112,12 +160,22 @@ export default {
 
     return text;
   },
-}
+};
 
+/**
+ * Escapes double quotes in message text for JSON
+ * @param message - Input message text
+ * @returns Escaped message text
+ */
 function escapeMessageQuotes(message: string): string {
   return message.replace(/"/g, '\\"');
 }
 
+/**
+ * Maps the response body from Cloudflare to text content
+ * @param responseBody - Raw response body
+ * @returns Extracted text content
+ */
 function responseMap(responseBody: string): string {
   if(responseBody.startsWith('data: ')) {
     try {
@@ -125,5 +183,6 @@ function responseMap(responseBody: string): string {
     } catch {
       return '';
     }
-  } return '';
+  } 
+  return '';
 }
