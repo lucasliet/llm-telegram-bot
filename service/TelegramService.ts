@@ -1,11 +1,16 @@
 import { Context } from 'https://deno.land/x/grammy@v1.17.2/context.ts';
 import { Voice } from 'https://deno.land/x/grammy@v1.17.2/types.deno.ts';
+
 import { 
-  ModelCommand, 
   setCurrentModel, 
   getCurrentModel,
-  modelCommands 
 } from '../repository/ChatRepository.ts';
+
+import { 
+  ModelCommand,
+  modelCommands,
+  WHITELISTED_MODELS
+} from '../config/models.ts'
 
 import { 
   handleBlackbox,
@@ -20,7 +25,6 @@ import { FileUtils } from '../util/FileUtils.ts';
 
 const TOKEN = Deno.env.get('BOT_TOKEN') as string;
 const ADMIN_USER_IDS: number[] = (Deno.env.get('ADMIN_USER_IDS') as string).split('|').map(id => parseInt(id));
-const WHITELISTED_MODELS: ModelCommand[] = [ '/llama', '/v3', '/r1' ];
 
 /**
  * Helper to keep Deno job alive during long-running requests
@@ -140,7 +144,7 @@ export default {
     const { userKey, contextMessage: message } = await ctx.extractContextKeys();
     const currentModel = await getCurrentModel(userKey);
     
-    const modelHandlers = {
+    const modelHandlers: Record<ModelCommand, () => Promise<void>> = {
       '/gpt': () => handleOpenAI(ctx, `gpt: ${message}`),
       '/perplexity': () => handlePerplexity(ctx, `perplexity: ${message}`),
       '/perplexityReasoning': () => handlePerplexity(ctx, `perplexityReasoning: ${message}`),

@@ -1,6 +1,7 @@
 import { compressObject, compressText, decompressObject, decompressText } from "https://deno.land/x/textcompress@v1.0.0/mod.ts";
 import { Content } from "npm:@google/generative-ai";
 import { ApiKeyNotFoundError } from "../error/ApiKeyNotFoundError.ts";
+import { ModelCommand } from "../config/models.ts";
 
 /**
  * Open a connection to Deno KV store
@@ -13,40 +14,9 @@ const kv = await Deno.openKv();
 const ONE_DAY_IN_MILLIS = 60 * 60 * 24 * 1000;
 const THIRTY_DAYS_IN_MILLIS = ONE_DAY_IN_MILLIS * 30;
 
-/**
- * Type definitions
- */
-export type ModelCommand = '/gemini' | '/llama' | '/gpt' 
-  | '/perplexity' | '/perplexityReasoning' 
-  | '/v3' | '/r1' | '/qwen' | '/mixtral';
-
 export interface ExpirableContent extends Content { 
   createdAt: number 
 }
-
-/**
- * Available model commands
- */
-export const modelCommands: ModelCommand[] = [
-  '/gemini', '/llama', '/gpt',
-  '/perplexity','/perplexityReasoning', 
-  '/v3', '/r1', '/qwen', '/mixtral'
-];
-
-/**
- * Named model commands for improved readability
- */
-export const [
-  geminiModelCommand,
-  llamaModelCommand,
-  gptModelCommand,
-  perplexityModelCommand,
-  perplexityReasoningModelCommand,
-  blackboxModelCommand,
-  blackboxReasoningModelCommand,
-  blackboxQwenModelCommand,
-  blackboxMixtralModelCommand
-] = modelCommands;
 
 /**
  * Store API key for Gemini if user provides it

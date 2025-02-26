@@ -20,7 +20,9 @@ export async function handleBlackbox(ctx: Context, commandMessage?: string): Pro
   const message = commandMessage || contextMessage;
   const blackBoxCommand = message!.split(':')[0].toLowerCase();
 
-  const commandHandlers = {
+  type CommandHandlerKey = 'v3' | 'blackbox' | 'r1' | 'gemini' | 'mixtral' | 'qwen' | 'llama' | 'image';
+  
+  const commandHandlers: Record<CommandHandlerKey, () => Promise<void>> = {
     'v3': async () => {
       const { reader, onComplete } = await BlackboxaiService.generateText(
         userKey, 
@@ -95,7 +97,7 @@ export async function handleBlackbox(ctx: Context, commandMessage?: string): Pro
     }
   };
 
-  const handler = commandHandlers[blackBoxCommand];
+  const handler = commandHandlers[blackBoxCommand as CommandHandlerKey];
   
   if (handler) {
     await handler();

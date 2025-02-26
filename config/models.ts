@@ -36,3 +36,41 @@ export const duckduckgoModels = {
   llama: 'meta-llama/Llama-3.3-70B-Instruct-Turbo',
   mixtral: 'mistralai/Mixtral-8x7B-Instruct-v0.1',
 }
+
+
+/**
+ * Type definitions
+ */
+export type ModelCommand = '/gemini' | '/llama' | '/gpt' 
+  | '/perplexity' | '/perplexityReasoning' 
+  | '/v3' | '/r1' | '/qwen' | '/mixtral';
+
+  /**
+ * Available model commands
+ */
+export const modelCommands: ModelCommand[] = [
+  '/gemini', '/llama', '/gpt',
+  '/perplexity','/perplexityReasoning', 
+  '/v3', '/r1', '/qwen', '/mixtral'
+];
+
+export const WHITELISTED_MODELS: ModelCommand[] = [
+  '/llama', '/v3', '/r1', 
+  '/qwen', '/mixtral', '/gemini', 
+  '/gpt'
+];
+
+/**
+ * Named model commands for improved readability
+ */
+export const [
+  geminiModelCommand,
+  llamaModelCommand,
+  gptModelCommand,
+  perplexityModelCommand,
+  perplexityReasoningModelCommand,
+  blackboxModelCommand,
+  blackboxReasoningModelCommand,
+  blackboxQwenModelCommand,
+  blackboxMixtralModelCommand
+] = modelCommands;
