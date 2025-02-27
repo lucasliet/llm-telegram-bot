@@ -43,7 +43,6 @@ export function convertGeminiHistoryToGPT(
 export function removeExpirationFromHistory(
 	history: ExpirableContent[],
 ): Content[] {
-	// deno-lint-ignore no-unused-vars
 	return history.map(({ createdAt, ...content }) => content);
 }
 

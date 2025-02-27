@@ -16,7 +16,6 @@ describe("BlackboxaiService", () => {
   const originalFetch = globalThis.fetch;
   
   beforeEach(() => {
-    // Setup mock fetch before each test
     mockFetch = spy(() => Promise.resolve({
       ok: true,
       json: () => Promise.resolve({ 
@@ -47,11 +46,9 @@ describe("BlackboxaiService", () => {
         "gpt-3.5-turbo"
       );
 
-      // Verify response has reader and onComplete
       assertEquals(typeof response.reader.read, "function");
       assertEquals(typeof response.onComplete, "function");
       
-      // Verify API call
       assertSpyCalls(mockFetch, 1);
       const [url, options] = mockFetch.calls[0].args;
       assertEquals(url, "https://www.blackbox.ai/api/chat");

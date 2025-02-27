@@ -98,7 +98,6 @@ export async function addContentToChatHistory(
 		? [{ text: quote }, { text: userPrompt }]
 		: [{ text: userPrompt }];
 
-	// Add user message and model response to history
 	history = [
 		...history,
 		{ role: 'user', parts: userPart, createdAt },
@@ -126,10 +125,8 @@ async function saveHistoryToStorage(
 	history: ExpirableContent[],
 	userKey: string,
 ): Promise<void> {
-	// Remove messages older than 1 day
 	history = removeExpiredMessages(history, ONE_DAY_IN_MILLIS);
 
-	// Compress and store with 30-day expiration
 	const compressedChatHistory = compressObject(history);
 	await kv.set([userKey, 'chat-history'], compressedChatHistory, {
 		expireIn: THIRTY_DAYS_IN_MILLIS,
@@ -148,17 +145,17 @@ export async function clearChatHistory(userKey: string): Promise<void> {
  */
 export async function setCurrentModel(
 	userKey: string,
-	model: ModelCommand = '/v3',
+	model: ModelCommand = '/gemini',
 ): Promise<void> {
 	await kv.set([userKey, 'current_model'], model);
 }
 
 /**
- * Get user's current model preference (defaults to /v3)
+ * Get user's current model preference (defaults to /gemini)
  */
 export async function getCurrentModel(userKey: string): Promise<ModelCommand> {
 	return (await kv.get<ModelCommand>([userKey, 'current_model'])).value ||
-		'/v3';
+		'/gemini';
 }
 
 /**

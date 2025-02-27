@@ -18,4 +18,8 @@ deno test --allow-all --unstable-kv --unstable-cron tests/basic/
 echo "Running all tests..."
 deno test --coverage=coverage --allow-all --unstable-kv --unstable-cron --no-check tests/
 
+deno coverage coverage
+
+rm -rf coverage
+
 echo "Test run complete!"

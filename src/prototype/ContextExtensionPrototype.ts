@@ -8,28 +8,21 @@ import {
 } from 'https://deno.land/x/grammy@v1.17.2/types.deno.ts';
 import { transcribeAudio } from '../service/TelegramService.ts';
 
-// Define warning message for markdown parsing errors
 const MARKDOWN_ERROR_MESSAGE = 'Error on markdown parse_mode, message:';
 
-// Extend the Context type with our custom methods
 declare module 'https://deno.land/x/grammy@v1.17.2/mod.ts' {
 	interface Context {
-		// Reply to a message with quote to the original message
 		replyWithQuote(
 			output: string,
 			config?: { parse_mode: ParseMode },
 		): Promise<Message.TextMessage>;
 
-		// Reply that a model doesn't support vision capabilities
 		replyWithVisionNotSupportedByModel(): Promise<Message.TextMessage>;
 
-		// Set a timeout to reply if the answer takes too long
 		replyOnLongAnswer(): number;
 
-		// Split a large response into multiple message chunks
 		replyInChunks(output: string): void;
 
-		// Stream a response in chunks using a ReadableStream
 		streamReply(
 			reader: ReadableStreamDefaultReader<Uint8Array>,
 			onComplete: (completedAnswer: string) => Promise<void>,
@@ -37,7 +30,6 @@ declare module 'https://deno.land/x/grammy@v1.17.2/mod.ts' {
 			lastResult?: string,
 		): Promise<void>;
 
-		// Extract common context keys from the message
 		extractContextKeys(): Promise<{
 			userId: number;
 			userKey: string;
@@ -92,7 +84,6 @@ Context.prototype.replyInChunks = function (
 	this: Context,
 	output: string,
 ): void {
-	// If output is too large, split it into chunks
 	if (output.length > 4096) {
 		const outputChunks = output.match(/[\s\S]{1,4093}/g)!;
 
@@ -100,7 +91,6 @@ Context.prototype.replyInChunks = function (
 			const isLastChunk = index === outputChunks.length - 1;
 			const chunkOutput = `${chunk}${isLastChunk ? '' : '...'}`;
 
-			// Try to send with markdown, fall back to plain text if it fails
 			this.replyWithQuote(chunkOutput, { parse_mode: 'Markdown' })
 				.catch(() => {
 					console.warn(MARKDOWN_ERROR_MESSAGE, chunkOutput);
@@ -110,7 +100,6 @@ Context.prototype.replyInChunks = function (
 		return;
 	}
 
-	// If not too large, send as a single message
 	this.replyWithQuote(output, { parse_mode: 'Markdown' })
 		.catch(() => {
 			console.warn(MARKDOWN_ERROR_MESSAGE, output);
@@ -128,7 +117,6 @@ Context.prototype.streamReply = async function (
 	responseMap?: (responseBody: string) => string,
 	lastResult?: string,
 ): Promise<void> {
-	// Send initial processing message
 	const { message_id } = await this.replyWithQuote('processando...');
 	let result = lastResult || '';
 	let lastUpdate = Date.now();
@@ -137,17 +125,14 @@ Context.prototype.streamReply = async function (
 		const { done, value } = await reader.read();
 		if (done) break;
 
-		// Decode and process the chunk
 		const chunk = decodeStreamResponseText(value, responseMap);
 		result += chunk;
 
-		// If result exceeds maximum message size, handle splitting
 		if (result.length > 4093) {
 			result = result.removeThinkingChatCompletion()
 				.convertBlackBoxWebSearchSourcesToMarkdown();
 
 			if (result.length > 4093) {
-				// If still too large, need to split and continue with a new message
 				const remainingChunk = result.substring(4093) + chunk;
 				result = result.substring(0, 4093);
 
@@ -168,7 +153,6 @@ Context.prototype.streamReply = async function (
 			}
 		}
 
-		// Update message periodically
 		lastUpdate = await editMessageWithCompletionEvery3Seconds(
 			this,
 			message_id,
@@ -177,7 +161,6 @@ Context.prototype.streamReply = async function (
 		);
 	}
 
-	// Final message update with complete response
 	const sanitizedResult = result.removeThinkingChatCompletion()
 		.convertBlackBoxWebSearchSourcesToMarkdown();
 

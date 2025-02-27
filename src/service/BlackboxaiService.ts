@@ -47,21 +47,16 @@ export default {
 		prompt: string,
 		model = blackboxModels.textModel,
 	): Promise<StreamReplyResponse> {
-		// Get chat history
 		const geminiHistory = await getChatHistory(userKey);
 
-		// Parse model information
 		const [modelId, modelName] = model.split('|');
 
-		// Format the request prompt with quote if available
 		const requestPrompt = quote ? `quote: "${quote}"\n\n${prompt}` : prompt;
 
-		// Call the BlackboxAI API
 		const apiResponse = await fetch(`https://www.blackbox.ai/api/chat`, {
 			...REQUEST_OPTIONS,
 			body: JSON.stringify({
 				messages: [
-					// Add system prompt with appropriate tone
 					{
 						role: 'system',
 						content: replaceGeminiConfigFromTone(
@@ -70,12 +65,9 @@ export default {
 							BLACKBOX_MAX_TOKENS,
 						),
 					},
-					// Add chat history
 					...convertGeminiHistoryToGPT(geminiHistory),
-					// Add current user message
 					{ role: 'user', content: requestPrompt },
 				],
-				// Model configuration
 				agentMode: {
 					mode: true,
 					id: modelId,
@@ -83,6 +75,7 @@ export default {
 				},
 				maxTokens: BLACKBOX_MAX_TOKENS,
 				deepSearchMode: model === reasoningModel,
+				beastMode: model === reasoningModel,
 				isPremium: true,
 				webSearchModePrompt: true,
 				trendingAgentMode: {},
@@ -90,15 +83,12 @@ export default {
 			}),
 		});
 
-		// Handle error response
 		if (!apiResponse.ok) {
 			throw new Error(`Failed to generate text: ${apiResponse.statusText}`);
 		}
 
-		// Get the reader for streaming response
 		const reader = apiResponse.body!.getReader();
 
-		// Define completion handler to save chat history
 		const onComplete = (completedAnswer: string) =>
 			addContentToChatHistory(
 				geminiHistory,
@@ -118,7 +108,6 @@ export default {
 	 * @returns URL of the generated image
 	 */
 	async generateImage(prompt: string): Promise<string> {
-		// Call the image generation API
 		const apiResponse = await fetch(
 			`https://api.blackbox.ai/api/image-generator`,
 			{
@@ -129,12 +118,10 @@ export default {
 			},
 		);
 
-		// Handle error response
 		if (!apiResponse.ok) {
 			throw new Error(`Failed to generate image: ${apiResponse.statusText}`);
 		}
 
-		// Parse the response and extract the image URL
 		const { markdown } = await apiResponse.json();
 		const imageUrlMatch = markdown.match(/\!\[.*\]\((.*)\)/);
 
