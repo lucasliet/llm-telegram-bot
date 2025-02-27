@@ -1,0 +1,48 @@
+name: Deno Tests
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Setup repo
+        uses: actions/checkout@v3
+
+      - name: Setup Deno
+        uses: denoland/setup-deno@v1
+        with:
+          deno-version: v1.x
+
+      - name: Verify formatting
+        run: deno fmt --check src
+        continue-on-error: true
+
+      - name: Run linter
+        run: deno lint src
+        continue-on-error: true
+
+      - name: Generate coverage report
+        run: deno test --coverage=coverage --allow-all --unstable-kv --unstable-cron --no-check tests/
+        env:
+          ADMIN_USER_IDS: '12345|67890'
+          OPENAI_API_KEY: 'sk-1234567890'
+          BOT_TOKEN: '1234567890:ABCDEFGHIJKLMNOPQRSTUVWXYZ'
+          CLOUDFLARE_API_KEY: '1234567890'
+          CLOUDFLARE_ACCOUNT_ID: '1234567890'
+
+      - name: Create coverage report
+        run: deno coverage coverage --lcov > coverage.lcov
+        continue-on-error: true
+
+      - name: Upload coverage to Codecov
+        uses: coverallsapp/github-action@master
+        with:
+          path-to-lcov: ./coverage.lcov
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+        continue-on-error: true
