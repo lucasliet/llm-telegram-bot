@@ -2,7 +2,7 @@ import { Context } from 'https://deno.land/x/grammy@v1.17.2/context.ts';
 import BlackboxaiService from '../../service/BlackboxaiService.ts';
 import { blackboxModels } from '../../config/models.ts';
 
-const { reasoningModel, geminiModel, mixtralModel, qwenModel, llamaModel } =
+const { reasoningModel, reasoningModelOffline, mixtralModel, qwenModel, llamaModel } =
 	blackboxModels;
 
 /**
@@ -26,34 +26,14 @@ export async function handleBlackbox(
 	const blackBoxCommand = message!.split(':')[0].toLowerCase();
 
 	type CommandHandlerKey =
-		| 'v3'
-		| 'blackbox'
+		| 'r1off'
 		| 'r1'
-		| 'gemini'
 		| 'mixtral'
 		| 'qwen'
 		| 'llama'
 		| 'image';
 
 	const commandHandlers: Record<CommandHandlerKey, () => Promise<void>> = {
-		'v3': async () => {
-			const { reader, onComplete } = await BlackboxaiService.generateText(
-				userKey,
-				quote,
-				message!.replace(/^(blackbox|v3):/, ''),
-			);
-
-			ctx.streamReply(reader, onComplete);
-		},
-		'blackbox': async () => {
-			const { reader, onComplete } = await BlackboxaiService.generateText(
-				userKey,
-				quote,
-				message!.replace(/^(blackbox|v3):/, ''),
-			);
-
-			ctx.streamReply(reader, onComplete);
-		},
 		'r1': async () => {
 			const { reader, onComplete } = await BlackboxaiService.generateText(
 				userKey,
@@ -64,12 +44,12 @@ export async function handleBlackbox(
 
 			ctx.streamReply(reader, onComplete);
 		},
-		'gemini': async () => {
+		'r1off': async () => {
 			const { reader, onComplete } = await BlackboxaiService.generateText(
 				userKey,
 				quote,
-				message!.replace('gemini:', ''),
-				geminiModel,
+				message!.replace('r1off:', ''),
+				reasoningModelOffline,
 			);
 
 			ctx.streamReply(reader, onComplete);

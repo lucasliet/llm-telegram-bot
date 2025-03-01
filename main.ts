@@ -55,7 +55,7 @@ function registerBotCommands() {
 	BOT.command(
 		'adminIds',
 		async (ctx) =>
-			ctx.reply((await TelegramService.getAdminIds(ctx)).join('|')),
+			ADMIN_USER_IDS.includes(ctx.from?.id!) && ctx.reply((await TelegramService.getAdminIds(ctx)).join('|')),
 	);
 	BOT.command('clear', (ctx) => clearChatHistoryHandler(ctx));
 
@@ -75,7 +75,7 @@ function registerBotCommands() {
 			TelegramService.callAdminModel(ctx, TelegramService.callOpenAIModel),
 	);
 	BOT.hears(
-		/^(blackbox|v3|r1|gemini|mixtral|qwen|image):/gi,
+		/^(r1off|r1|mixtral|qwen|image):/gi,
 		(ctx) =>
 			TelegramService.callAdminModel(ctx, TelegramService.callBlackboxModel),
 	);

@@ -145,17 +145,17 @@ export async function clearChatHistory(userKey: string): Promise<void> {
  */
 export async function setCurrentModel(
 	userKey: string,
-	model: ModelCommand = '/gemini',
+	model: ModelCommand = '/r1off',
 ): Promise<void> {
 	await kv.set([userKey, 'current_model'], model);
 }
 
 /**
- * Get user's current model preference (defaults to /gemini)
+ * Get user's current model preference (defaults to /r1off)
  */
 export async function getCurrentModel(userKey: string): Promise<ModelCommand> {
 	return (await kv.get<ModelCommand>([userKey, 'current_model'])).value ||
-		'/gemini';
+		'/r1off';
 }
 
 /**

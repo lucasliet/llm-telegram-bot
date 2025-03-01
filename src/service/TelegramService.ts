@@ -157,14 +157,13 @@ export default {
 		const modelHandlers: Record<ModelCommand, () => Promise<void>> = {
 			'/gpt': () => handleOpenAI(ctx, `gpt: ${message}`),
 			'/perplexity': () => handlePerplexity(ctx, `perplexity: ${message}`),
-			'/perplexityReasoning': () =>
-				handlePerplexity(ctx, `perplexityReasoning: ${message}`),
+			'/perplexityReasoning': () =>handlePerplexity(ctx, `perplexityReasoning: ${message}`),
 			'/llama': () => handleCloudflare(ctx, `llama: ${message!}`),
-			'/v3': () => handleBlackbox(ctx, `blackbox: ${message}`),
 			'/r1': () => handleBlackbox(ctx, `r1: ${message}`),
+			'/r1off': () => handleBlackbox(ctx, `r1off: ${message}`),
 			'/mixtral': () => handleBlackbox(ctx, `mixtral: ${message}`),
 			'/qwen': () => handleBlackbox(ctx, `qwen: ${message}`),
-			'/gemini': () => handleBlackbox(ctx, `gemini: ${message}`),
+			'/gemini': () => handleGemini(ctx),
 		};
 
 		const handler = modelHandlers[currentModel];

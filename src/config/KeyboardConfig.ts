@@ -9,8 +9,8 @@ const adminCommandButtons = [
 		['GPT', '/gpt'],
 	],
 	[
-		['Deepseek R1', '/r1'],
-		['Deepseek V3', '/v3'],
+		['Deepseek R1 Online', '/r1'],
+		['Deepseek R1', '/r1off'],
 	],
 	[
 		['Llama', '/llama'],
@@ -36,18 +36,17 @@ const userCommandButtons = [
 		['GPT', '/gpt'],
 	],
 	[
-		['Deepseek R1', '/r1'],
-		['Deepseek V3', '/v3'],
+		['Deepseek R1 Online', '/r1'],
+		['Deepseek R1', '/r1off'],
+	],
+	[
+		['Qwen Online', '/qwen'],
+		['Mixtral Online', '/mixtral'],
 	],
 	[
 		['Llama', '/llama'],
-		['Gemini', '/gemini'],
+		['Limpar Histórico', '/clear']
 	],
-	[
-		['Qwen', '/qwen'],
-		['Mixtral', '/mixtral'],
-	],
-	[['Limpar Histórico', '/clear']],
 ];
 
 export const adminKeyboard = InlineKeyboard.from(
@@ -67,7 +66,6 @@ export const userKeyboard = InlineKeyboard.from(
  */
 export const adminHelpMessage = `*Comandos inline*:
 \\- \`cloudflareImage:\` mensagem \\- Gera imagens com __Stable Diffusion__
-\\- \`image:\` mensagem \\- Gera imagens com __Flux\\.1__
 \\- \`gptImage:\` mensagem \\- Gera imagens com __DALL\\-e__
 \\- \`gpt:\` mensagem \\- Gera texto com __GPT 4o mini__
 \\- \`llama:\` mensagem \\- Gera texto com o __Llama 3\\.3__
@@ -76,9 +74,8 @@ export const adminHelpMessage = `*Comandos inline*:
 \\- \`perplexity:\` mensagem \\- Faz uma pergunta usando o modelo perplexity\\.ai
 \\- \`search:\` mensagem \\- Faz uma pergunta usando o modelo perplexity\\.ai
 \\- \`reasonSearch:\` mensagem \\- Faz uma pergunta usando o modelo perplexity\\.ai com o uso de __Deepseek\\-R1__
-\\- \`v3:\` mensagem \\- Faz uma pergunta usando o modelo __Deepseek\\-V3__ pela __BlackboxAI__
-\\- \`r1:\` mensagem \\- Faz uma pergunta usando o modelo __Deepseek\\-R1__ pela __BlackboxAI__
-\\- \`gemini:\` mensagem \\- Faz uma pergunta usando o modelo __Gemini Flash 2\\.0__ pela __BlackboxAI__
+\\- \`r1off:\` mensagem \\- Faz uma pergunta usando o modelo __Deepseek\\-R1__ pela __BlackboxAI__
+\\- \`r1:\` mensagem \\- Faz uma pergunta usando o modelo __Deepseek\\-R1__ pela __BlackboxAI__ Online
 \\- \`qwen:\` mensagem \\- Faz uma pergunta usando o modelo __Qwen__ pela __BlackboxAI__
 \\- \`mixtral:\` mensagem \\- Faz uma pergunta usando o modelo __Mixtral__ pela __BlackboxAI__
 \\- \`puter:\` mensagem \\- Faz uma pergunta usando o modelo __Claude__ pela __PuterAI__
@@ -92,9 +89,8 @@ export const adminHelpMessage = `*Comandos inline*:
 export const userHelpMessage = `*Comandos inline*:
 \\- \`gpt:\` mensagem \\- Gera texto com __GPT 4o mini__
 \\- \`llama:\` mensagem \\- Gera texto com o __Llama 3\\.3__
-\\- \`v3:\` mensagem \\- Faz uma pergunta usando o modelo __Deepseek\\-V3__ pela __BlackboxAI__
+\\- \`r1off:\` mensagem \\- Faz uma pergunta usando o modelo __Deepseek\\-R1__ pela __BlackboxAI__
 \\- \`r1:\` mensagem \\- Faz uma pergunta usando o modelo __Deepseek\\-R1__ pela __BlackboxAI__
-\\- \`gemini:\` mensagem \\- Faz uma pergunta usando o modelo __Gemini Flash 2\\.0__ pela __BlackboxAI__
 \\- \`qwen:\` mensagem \\- Faz uma pergunta usando o modelo __Qwen__ pela __BlackboxAI__
 \\- \`mixtral:\` mensagem \\- Faz uma pergunta usando o modelo __Mixtral__ pela __BlackboxAI__
 \\- \`cloudflareImage:\` mensagem \\- Gera imagens com __Stable Diffusion__

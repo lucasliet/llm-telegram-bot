@@ -12,7 +12,7 @@ import { blackboxModels } from '../config/models.ts';
 /**
  * Constants and configuration
  */
-const { reasoningModel } = blackboxModels;
+const { reasoningModel, reasoningModelOffline } = blackboxModels;
 const BLACKBOX_MAX_TOKENS = 8000;
 
 /**
@@ -45,7 +45,7 @@ export default {
 		userKey: string,
 		quote: string = '',
 		prompt: string,
-		model = blackboxModels.textModel,
+		model = blackboxModels.reasoningModelOffline,
 	): Promise<StreamReplyResponse> {
 		const geminiHistory = await getChatHistory(userKey);
 
@@ -75,9 +75,9 @@ export default {
 				},
 				maxTokens: BLACKBOX_MAX_TOKENS,
 				deepSearchMode: model === reasoningModel,
-				beastMode: model === reasoningModel,
+				beastMode: model === reasoningModel || model === reasoningModelOffline,
 				isPremium: true,
-				webSearchModePrompt: true,
+				webSearchModePrompt: model !== reasoningModelOffline,
 				trendingAgentMode: {},
 				validated: '00f37b34-a166-4efb-bce5-1312d87f2f94',
 			}),

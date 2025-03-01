@@ -21,9 +21,9 @@ export const cloudflareModels = {
 };
 
 export const blackboxModels = {
-	textModel: 'deepseek-chat|DeepSeek-V3',
 	reasoningModel: 'deepseek-reasoner|DeepSeek-R1',
-	geminiModel: 'Gemini/Gemini-Flash-2.0|Gemini-Flash-2.0',
+	reasoningModelOffline: 'deepseek-reasoner|DeepSeek-R1',
+	gptModel: 'GPT-3.5|GPT-3.5',
 	llamaModel:
 		'meta-llama/Llama-3.3-70B-Instruct-Turbo|Meta-Llama-3.3-70B-Instruct-Turbo',
 	mixtralModel:
@@ -48,8 +48,8 @@ export type ModelCommand =
 	| '/gpt'
 	| '/perplexity'
 	| '/perplexityReasoning'
-	| '/v3'
 	| '/r1'
+	| '/r1off'
 	| '/qwen'
 	| '/mixtral';
 
@@ -62,19 +62,18 @@ export const modelCommands: ModelCommand[] = [
 	'/gpt',
 	'/perplexity',
 	'/perplexityReasoning',
-	'/v3',
 	'/r1',
+	'/r1off',
 	'/qwen',
 	'/mixtral',
 ];
 
 export const WHITELISTED_MODELS: ModelCommand[] = [
 	'/llama',
-	'/v3',
+	'/r1off',
 	'/r1',
 	'/qwen',
 	'/mixtral',
-	'/gemini',
 	'/gpt',
 ];
 
@@ -87,8 +86,8 @@ export const [
 	gptModelCommand,
 	perplexityModelCommand,
 	perplexityReasoningModelCommand,
-	blackboxModelCommand,
 	blackboxReasoningModelCommand,
+	blackboxReasoningOffModelCommand,
 	blackboxQwenModelCommand,
 	blackboxMixtralModelCommand,
 ] = modelCommands;
