@@ -21,6 +21,10 @@ const adminCommandButtons = [
 		['Mixtral', '/mixtral'],
 	],
 	[
+		['Claude', '/claude'],
+		['GeminiPro', '/geminiPro'],
+	],
+	[
 		['Perplexity', '/perplexity'],
 		['Perplexity Reasoning', '/perplexityReasoning'],
 	],
@@ -78,8 +82,9 @@ export const adminHelpMessage = `*Comandos inline*:
 \\- \`r1:\` mensagem \\- Faz uma pergunta usando o modelo __Deepseek\\-R1__ pela __BlackboxAI__ Online
 \\- \`qwen:\` mensagem \\- Faz uma pergunta usando o modelo __Qwen__ pela __BlackboxAI__
 \\- \`mixtral:\` mensagem \\- Faz uma pergunta usando o modelo __Mixtral__ pela __BlackboxAI__
-\\- \`puter:\` mensagem \\- Faz uma pergunta usando o modelo __Claude__ pela __PuterAI__
-\\- \`claude:\` mensagem \\- Faz uma pergunta usando o modelo __Claude__ pela __PuterAI__
+\\- \`claude:\` mensagem \\- Faz uma pergunta usando o modelo __Claude__ pela __BlackboxAI__
+\\- \`gemini:\` mensagem \\- Faz uma pergunta usando o modelo __Gemini__ pela __BlackboxAI__
+\\- \`geminiPro:\` mensagem \\- Faz uma pergunta usando o modelo __GeminiPro__ pela __BlackboxAI__
 
 *Seleção de modelos de linguagem*:`;
 

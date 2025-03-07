@@ -163,7 +163,9 @@ export default {
 			'/r1off': () => handleBlackbox(ctx, `r1off: ${message}`),
 			'/mixtral': () => handleBlackbox(ctx, `mixtral: ${message}`),
 			'/qwen': () => handleBlackbox(ctx, `qwen: ${message}`),
-			'/gemini': () => handleGemini(ctx),
+			'/claude': () => handleBlackbox(ctx, `claude: ${message}`),
+			'/geminiPro': () => handleBlackbox(ctx, `geminiPro: ${message}`),
+			'/gemini': () => handleBlackbox(ctx, `gemini: ${message}`),
 		};
 
 		const handler = modelHandlers[currentModel];

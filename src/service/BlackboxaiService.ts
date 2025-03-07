@@ -79,7 +79,9 @@ export default {
 				isPremium: true,
 				webSearchModePrompt: model !== reasoningModelOffline,
 				trendingAgentMode: {},
+				userSelectedModel: modelName,
 				validated: '00f37b34-a166-4efb-bce5-1312d87f2f94',
+				session: generateRandomSession()
 			}),
 		});
 
@@ -108,8 +110,6 @@ export default {
 	 * @returns URL of the generated image
 	 */
 	async generateImage(prompt: string): Promise<string> {
-		const randomUser = generateRandomUser();
-
 		const apiResponse =  await fetch(`https://www.blackbox.ai/api/chat`, {
 				...REQUEST_OPTIONS,
 				body: JSON.stringify({
@@ -120,14 +120,7 @@ export default {
 					imageGenerationMode: true,
 					isPremium: true,
 					validated: '00f37b34-a166-4efb-bce5-1312d87f2f94',
-					session: {
-						user: {
-							name: randomUser.name,
-							email: randomUser.email,
-							image: generateRandomAvatarUrl()
-						},
-						expires: generateRandomExpireDate()
-					},
+					session: generateRandomSession()
 				}),
 			},
 		);
@@ -151,33 +144,39 @@ export default {
 };
 
 const firstNames = [
-	'Alice', 'Bob', 'Carol', 'David', 'Emma', 
-	'Frank', 'Grace', 'Henry', 'Isabel', 'John'
+	'Alice', 'Bob', 'Carol', 'David', 'Emma', 'Frank', 'Grace', 'Henry',
+	'Isabel', 'John', 'Kate', 'Lucas', 'Maria', 'Nathan', 'Olivia',
+	'Paul', 'Quinn', 'Rachel', 'Samuel', 'Taylor', 'Uma', 'Victor',
+	'Wendy', 'Xavier', 'Yara', 'Zack'
 ];
 
 const lastNames = [
-	'Smith', 'Johnson', 'Williams', 'Brown', 'Jones',
-	'Garcia', 'Miller', 'Davis', 'Rodriguez', 'Martinez'
+	'Smith', 'Johnson', 'Williams', 'Brown', 'Jones', 'Garcia', 'Miller',
+	'Davis', 'Rodriguez', 'Martinez', 'Anderson', 'Taylor', 'Thomas',
+	'Moore', 'Jackson', 'Martin', 'Lee', 'Thompson', 'White', 'Lopez',
+	'Hill', 'Scott', 'Green', 'Adams', 'Baker', 'Silva'
 ];
 
-export const generateRandomUser = () => {
+function generateRandomSession() {
 	const firstName = firstNames[Math.floor(Math.random() * firstNames.length)];
 	const lastName = lastNames[Math.floor(Math.random() * lastNames.length)];
 	const randomNum = Math.floor(Math.random() * 1000000);
+
+	const randomValidExpireDate = new Date(Date.now() + Math.floor(Math.random() * (30 - 1 + 1) + 1) * 24 * 60 * 60 * 1000).toISOString();
 	
 	return {
+		user: {
 			name: `${firstName} ${lastName}`,
-			email: `${firstName}-${lastName}${randomNum}@gmail.com`
-	};
+			email: `${firstName}-${lastName}${randomNum}@gmail.com`,
+			image: generateRandomAvatarUrl()
+		},
+		expires: randomValidExpireDate
+	}
 };
-
-function generateRandomExpireDate() {
-	return new Date(Date.now() + Math.floor(Math.random() * (30 - 1 + 1) + 1) * 24 * 60 * 60 * 1000).toISOString();
-}
 
 function generateRandomAvatarUrl(): string {
 	const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789_-';
-	const length = 40; // comprimento aproximado da parte aleatória
+	const length = 40;
 	let result = '';
 	
 	for (let i = 0; i < length; i++) {

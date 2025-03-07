@@ -2,7 +2,9 @@ import { Context } from 'https://deno.land/x/grammy@v1.17.2/context.ts';
 import BlackboxaiService from '../../service/BlackboxaiService.ts';
 import { blackboxModels } from '../../config/models.ts';
 
-const { reasoningModel, reasoningModelOffline, mixtralModel, qwenModel, llamaModel } =
+const { reasoningModel, reasoningModelOffline, mixtralModel,
+	 	qwenModel, llamaModel, claudeModel, deepseekv3,
+		geminiModel, geminiProModel, o1Model, o3MiniModel } =
 	blackboxModels;
 
 /**
@@ -31,6 +33,12 @@ export async function handleBlackbox(
 		| 'mixtral'
 		| 'qwen'
 		| 'llama'
+		| 'v3'
+		| 'claude'
+		| 'o1'
+		| 'o3mini'
+		| 'gemini'
+		| 'geminiPro'
 		| 'image';
 
 	const commandHandlers: Record<CommandHandlerKey, () => Promise<void>> = {
@@ -80,6 +88,66 @@ export async function handleBlackbox(
 				quote,
 				message!.replace('llama:', ''),
 				llamaModel,
+			);
+
+			ctx.streamReply(reader, onComplete);
+		},
+		'v3': async () => {
+			const { reader, onComplete } = await BlackboxaiService.generateText(
+				userKey,
+				quote,
+				message!.replace('v3:', ''),
+				deepseekv3,
+			);
+
+			ctx.streamReply(reader, onComplete);
+		},
+		'claude': async () => {
+			const { reader, onComplete } = await BlackboxaiService.generateText(
+				userKey,
+				quote,
+				message!.replace('claude:', ''),
+				claudeModel,
+			);
+
+			ctx.streamReply(reader, onComplete);
+		},
+		'o1': async () => {
+			const { reader, onComplete } = await BlackboxaiService.generateText(
+				userKey,
+				quote,
+				message!.replace('o1:', ''),
+				o1Model,
+			);
+
+			ctx.streamReply(reader, onComplete);
+		},
+		'o3mini': async () => {
+			const { reader, onComplete } = await BlackboxaiService.generateText(
+				userKey,
+				quote,
+				message!.replace('o3mini:', ''),
+				o3MiniModel,
+			);
+
+			ctx.streamReply(reader, onComplete);
+		},
+		'gemini': async () => {
+			const { reader, onComplete } = await BlackboxaiService.generateText(
+				userKey,
+				quote,
+				message!.replace('gemini:', ''),
+				geminiModel,
+			);
+
+			ctx.streamReply(reader, onComplete);
+		},
+		'geminiPro': async () => {
+			const { reader, onComplete } = await BlackboxaiService.generateText(
+				userKey,
+				quote,
+				message!.replace('geminiPro:', ''),
+				geminiProModel,
 			);
 
 			ctx.streamReply(reader, onComplete);

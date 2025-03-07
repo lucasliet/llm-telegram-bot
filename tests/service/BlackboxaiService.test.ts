@@ -10,6 +10,7 @@ import {
 } from "https://deno.land/std@0.214.0/testing/bdd.ts";
 import { assertSpyCalls, spy, Spy } from "https://deno.land/std@0.214.0/testing/mock.ts";
 import BlackboxaiService from "../../src/service/BlackboxaiService.ts";
+import { text } from 'node:stream/consumers';
 
 describe("BlackboxaiService", () => {
   let mockFetch: Spy;
@@ -18,8 +19,8 @@ describe("BlackboxaiService", () => {
   beforeEach(() => {
     mockFetch = spy(() => Promise.resolve({
       ok: true,
+      text: () => Promise.resolve("![Generated image](https://example.com/image.png)"),
       json: () => Promise.resolve({ 
-        markdown: "![Generated Image](https://example.com/image.png)",
         choices: [{ message: { content: "Generated text response" } }]
       }),
       body: new ReadableStream({
@@ -80,11 +81,11 @@ describe("BlackboxaiService", () => {
       assertSpyCalls(mockFetch, 1);
       
       const [url, options] = mockFetch.calls[0].args;
-      assertEquals(url, "https://api.blackbox.ai/api/image-generator");
+      assertEquals(url, "https://www.blackbox.ai/api/chat");
       assertEquals(options.method, "POST");
       
       const body = JSON.parse(options.body);
-      assertEquals(body.query, "A test prompt");
+      assertEquals(body.messages[0].content, "A test prompt");
     });
 
     it("should handle API errors", async () => {

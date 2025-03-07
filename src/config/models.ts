@@ -23,12 +23,18 @@ export const cloudflareModels = {
 export const blackboxModels = {
 	reasoningModel: 'deepseek-reasoner|DeepSeek-R1',
 	reasoningModelOffline: 'deepseek-reasoner|DeepSeek-R1',
-	gptModel: 'GPT-3.5|GPT-3.5',
+	gptModel: 'GPT-4o|GPT-4o',
 	llamaModel:
-		'meta-llama/Llama-3.3-70B-Instruct-Turbo|Meta-Llama-3.3-70B-Instruct-Turbo',
+	'meta-llama/Llama-3.3-70B-Instruct-Turbo|Meta-Llama-3.3-70B-Instruct-Turbo',
 	mixtralModel:
-		'mistralai/Mistral-Small-24B-Instruct-2501|Mistral-Small-24B-Instruct-2501',
+	'mistralai/Mistral-Small-24B-Instruct-2501|Mistral-Small-24B-Instruct-2501',
 	qwenModel: 'Qwen/QwQ-32B-Preview|Qwen-QwQ-32B-Preview',
+	deepseekv3: 'deepseek-chat|DeepSeek-V3',
+	geminiModel: 'Gemini/Gemini-Flash-2.0|Gemini-Flash-2.0',
+	geminiProModel: 'Gemini-PRO|Gemini-PRO',
+	claudeModel: 'Claude-sonnet-3.7|Claude-sonnet-3.7',
+	o1Model: 'o1|o1',
+	o3MiniModel: 'o3-mini|o3-mini'
 };
 
 export const duckduckgoModels = {
@@ -51,7 +57,9 @@ export type ModelCommand =
 	| '/r1'
 	| '/r1off'
 	| '/qwen'
-	| '/mixtral';
+	| '/mixtral'
+	| '/claude'
+	| '/geminiPro';
 
 /**
  * Available model commands
@@ -66,6 +74,8 @@ export const modelCommands: ModelCommand[] = [
 	'/r1off',
 	'/qwen',
 	'/mixtral',
+	'/claude',
+	'/geminiPro',
 ];
 
 export const WHITELISTED_MODELS: ModelCommand[] = [
@@ -90,4 +100,6 @@ export const [
 	blackboxReasoningOffModelCommand,
 	blackboxQwenModelCommand,
 	blackboxMixtralModelCommand,
+	blackboxClaudeModelCommand,
+	blackboxGeminiProModelCommand,
 ] = modelCommands;
