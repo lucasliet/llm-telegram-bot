@@ -108,12 +108,26 @@ export default {
 	 * @returns URL of the generated image
 	 */
 	async generateImage(prompt: string): Promise<string> {
-		const apiResponse = await fetch(
-			`https://api.blackbox.ai/api/image-generator`,
-			{
+		const randomUser = generateRandomUser();
+
+		const apiResponse =  await fetch(`https://www.blackbox.ai/api/chat`, {
 				...REQUEST_OPTIONS,
 				body: JSON.stringify({
-					query: prompt,
+					messages: [
+						{ role: 'user', content: prompt },
+					],
+					agentMode: {},
+					imageGenerationMode: true,
+					isPremium: true,
+					validated: '00f37b34-a166-4efb-bce5-1312d87f2f94',
+					session: {
+						user: {
+							name: randomUser.name,
+							email: randomUser.email,
+							image: generateRandomAvatarUrl()
+						},
+						expires: generateRandomExpireDate()
+					},
 				}),
 			},
 		);
@@ -122,7 +136,7 @@ export default {
 			throw new Error(`Failed to generate image: ${apiResponse.statusText}`);
 		}
 
-		const { markdown } = await apiResponse.json();
+		const markdown = await apiResponse.text();
 		const imageUrlMatch = markdown.match(/\!\[.*\]\((.*)\)/);
 
 		if (!imageUrlMatch || !imageUrlMatch[1]) {
@@ -135,3 +149,41 @@ export default {
 		return imageUrl;
 	},
 };
+
+const firstNames = [
+	'Alice', 'Bob', 'Carol', 'David', 'Emma', 
+	'Frank', 'Grace', 'Henry', 'Isabel', 'John'
+];
+
+const lastNames = [
+	'Smith', 'Johnson', 'Williams', 'Brown', 'Jones',
+	'Garcia', 'Miller', 'Davis', 'Rodriguez', 'Martinez'
+];
+
+export const generateRandomUser = () => {
+	const firstName = firstNames[Math.floor(Math.random() * firstNames.length)];
+	const lastName = lastNames[Math.floor(Math.random() * lastNames.length)];
+	const randomNum = Math.floor(Math.random() * 1000000);
+	
+	return {
+			name: `${firstName} ${lastName}`,
+			email: `${firstName}-${lastName}${randomNum}@gmail.com`
+	};
+};
+
+function generateRandomExpireDate() {
+	return new Date(Date.now() + Math.floor(Math.random() * (30 - 1 + 1) + 1) * 24 * 60 * 60 * 1000).toISOString();
+}
+
+function generateRandomAvatarUrl(): string {
+	const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789_-';
+	const length = 40; // comprimento aproximado da parte aleatória
+	let result = '';
+	
+	for (let i = 0; i < length; i++) {
+			result += chars.charAt(Math.floor(Math.random() * chars.length));
+	}
+	const randomNumber = Math.floor(Math.random() * 100).toString().padStart(2, '0');
+	
+	return `https://lh3.googleusercontent.com/a/ACg8ocJ${result}=s${randomNumber}-c`;
+}
