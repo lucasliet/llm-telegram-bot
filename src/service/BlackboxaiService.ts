@@ -8,6 +8,7 @@ import {
 	StreamReplyResponse,
 } from '../util/ChatConfigUtil.ts';
 import { blackboxModels } from '../config/models.ts';
+import { createSession, getSession } from '../repository/SessionRepository.ts';
 
 /**
  * Constants and configuration
@@ -81,7 +82,7 @@ export default {
 				trendingAgentMode: {},
 				userSelectedModel: modelName,
 				validated: '00f37b34-a166-4efb-bce5-1312d87f2f94',
-				session: generateRandomSession()
+				session: await getOrCreateSession()
 			}),
 		});
 
@@ -120,7 +121,7 @@ export default {
 					imageGenerationMode: true,
 					isPremium: true,
 					validated: '00f37b34-a166-4efb-bce5-1312d87f2f94',
-					session: generateRandomSession()
+					session: await getOrCreateSession()
 				}),
 			},
 		);
@@ -157,7 +158,19 @@ const lastNames = [
 	'Hill', 'Scott', 'Green', 'Adams', 'Baker', 'Silva'
 ];
 
-function generateRandomSession() {
+async function getOrCreateSession(): Promise<Session> {
+	const cachedSession = await getSession();
+
+	if (cachedSession) {
+		return cachedSession;
+	}
+
+	const newSession = generateRandomSession();
+	createSession(newSession);
+	return newSession;
+}
+
+function generateRandomSession(): Session {
 	const firstName = firstNames[Math.floor(Math.random() * firstNames.length)];
 	const lastName = lastNames[Math.floor(Math.random() * lastNames.length)];
 	const randomNum = Math.floor(Math.random() * 1000000);
@@ -185,4 +198,13 @@ function generateRandomAvatarUrl(): string {
 	const randomNumber = Math.floor(Math.random() * 100).toString().padStart(2, '0');
 	
 	return `https://lh3.googleusercontent.com/a/ACg8ocJ${result}=s${randomNumber}-c`;
+}
+
+export interface Session {
+	user: {
+			name: string;
+			email: string;
+			image: string;
+	};
+	expires: string;
 }
