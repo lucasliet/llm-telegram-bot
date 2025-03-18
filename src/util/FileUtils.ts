@@ -7,7 +7,7 @@ import {
 import { getCurrentModel } from '../repository/ChatRepository.ts';
 import OpenAiService from '../service/OpenAIService.ts';
 import CloudFlareService from '../service/CloudFlareService.ts';
-
+import ElevenLabsService from '../service/ElevenLabsService.ts';
 const TOKEN = Deno.env.get('BOT_TOKEN') as string;
 const ADMIN_USER_IDS: number[] = (Deno.env.get('ADMIN_USER_IDS') as string)
 	.split('|').map((id) => parseInt(id));
@@ -61,13 +61,18 @@ export const FileUtils = {
 
 		const audioFile: Promise<Uint8Array> = this.downloadTelegramFile(audioUrl);
 
-		if (isGptModelCommand || ADMIN_USER_IDS.includes(userId)) {
-			return await new OpenAiService('/openai').transcribeAudio(
-				audioFile,
-				audioUrl,
-			);
-		} else {
-			return await CloudFlareService.transcribeAudio(audioFile);
+		try {
+			return await ElevenLabsService.transcribeAudio(audioFile);
+		} catch (error) {
+			console.error('Erro ao transcrever áudio do ElevenLabs:', error);
+			if (isGptModelCommand || ADMIN_USER_IDS.includes(userId)) {
+				return await new OpenAiService('/openai').transcribeAudio(
+					audioFile,
+					audioUrl,
+				);
+			} else {
+				return await CloudFlareService.transcribeAudio(audioFile);
+			}
 		}
 	},
 };
