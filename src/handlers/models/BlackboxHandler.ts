@@ -1,6 +1,7 @@
 import { Context } from 'https://deno.land/x/grammy@v1.17.2/context.ts';
 import BlackboxaiService from '../../service/BlackboxaiService.ts';
 import { blackboxModels } from '../../config/models.ts';
+import { textToSpeech } from '../../service/TelegramService.ts';
 
 const { reasoningModel, reasoningModelOffline, mixtralModel,
 	 	qwenModel, llamaModel, claudeModel, deepseekv3,
@@ -39,7 +40,8 @@ export async function handleBlackbox(
 		| 'o3mini'
 		| 'gemini'
 		| 'geminiPro'
-		| 'image';
+		| 'image'
+		| 'fala';
 
 	const commandHandlers: Record<CommandHandlerKey, () => Promise<void>> = {
 		'r1': async () => {
@@ -101,6 +103,40 @@ export async function handleBlackbox(
 			);
 
 			ctx.streamReply(reader, onComplete);
+		},
+		'fala': async () => {
+			const { reader, onComplete } = await BlackboxaiService.generateText(
+				userKey,
+				quote,
+				'max_token limit this answer to 500 characters, it will be converted to limited voice message: '
+				 + message!.replace('fala:', ''),
+				claudeModel,
+			);
+
+			let fullText = '';
+			let done = false;
+
+			while (!done) {
+				const result = await reader.read();
+				if (result.done) {
+					done = true;
+				} else if (result.value) {
+					const decoder = new TextDecoder();
+					fullText += decoder.decode(result.value);
+				}
+			}
+
+			fullText = fullText.removeThinkingChatCompletion()
+
+			if (onComplete) await onComplete(fullText);
+			
+			if (fullText.length > 500) {
+				await ctx.reply("O texto gerado excede o limite da API (500 caracteres). Apenas os primeiros 500 caracteres serão convertidos em áudio.", {
+					reply_to_message_id: ctx.message?.message_id,
+				});
+			}
+
+			await textToSpeech(ctx, fullText);
 		},
 		'claude': async () => {
 			const { reader, onComplete } = await BlackboxaiService.generateText(

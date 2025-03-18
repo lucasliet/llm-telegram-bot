@@ -75,7 +75,7 @@ function registerBotCommands() {
 			TelegramService.callAdminModel(ctx, TelegramService.callOpenAIModel),
 	);
 	BOT.hears(
-		/^(r1off|r1|v3|mixtral|qwen|claude|gemini|geminiPro|image):/gi,
+		/^(r1off|r1|v3|mixtral|qwen|claude|gemini|geminiPro|image|fala):/gi,
 		(ctx) =>
 			TelegramService.callAdminModel(ctx, TelegramService.callBlackboxModel),
 	);

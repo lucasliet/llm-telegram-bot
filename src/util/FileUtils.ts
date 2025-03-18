@@ -3,6 +3,7 @@ import {
 	Audio,
 	PhotoSize,
 	Voice,
+	InputFile,
 } from 'https://deno.land/x/grammy@v1.17.2/types.deno.ts';
 import { getCurrentModel } from '../repository/ChatRepository.ts';
 import OpenAiService from '../service/OpenAIService.ts';
@@ -73,6 +74,28 @@ export const FileUtils = {
 			} else {
 				return await CloudFlareService.transcribeAudio(audioFile);
 			}
+		}
+	},
+
+	/**
+	 * Converte texto em áudio e envia como mensagem de voz no Telegram
+	 * @param ctx - Contexto do Telegram
+	 * @param text - Texto para converter em áudio
+	 * @param replyToMessageId - ID da mensagem para responder (opcional)
+	 * @returns Promise resolvendo para undefined quando completo
+	 */
+	async textToSpeech(
+		text: string
+	): Promise<InputFile> {
+		try {
+			const audioData = await ElevenLabsService.textToSpeech(text);
+			
+			const audioInput = new InputFile(audioData, 'audio.mp3');
+			
+			return audioInput;
+		} catch (error: unknown) {
+			console.error('Erro ao converter texto para áudio:', error);
+			throw new Error(`Falha ao gerar áudio: ${error instanceof Error ? error.message : 'Erro desconhecido'}`);
 		}
 	},
 };

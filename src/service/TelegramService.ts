@@ -209,3 +209,14 @@ export const transcribeAudio = (
 ): Promise<string> => {
 	return FileUtils.transcribeAudio(userId, userKey, ctx, audio);
 };
+
+export async function textToSpeech(
+	ctx: Context,
+	text: string
+): Promise<void> {
+	const audioFile = await FileUtils.textToSpeech(text);
+
+	ctx.replyWithVoice(audioFile, {
+		reply_to_message_id: ctx.message?.message_id,
+	});
+};
