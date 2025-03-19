@@ -57,10 +57,10 @@ export async function handleCloudflare(
 			);
 
 		ctx.streamReply(reader, onComplete, responseMap);
-	} else if (cloudflareCommand === 'cloudflareimage') {
+	} else if (cloudflareCommand === 'cloudflareimage' || cloudflareCommand === 'image') {
 		ctx.replyWithPhoto(
 			new InputFile(
-				new Uint8Array(await CloudFlareService.generateImage(message!)),
+				await CloudFlareService.generateImage(message!),
 				'image/png',
 			),
 			{ reply_to_message_id: ctx.message?.message_id },

@@ -12,7 +12,7 @@ export const openAIModels = {
 };
 
 export const cloudflareModels = {
-	imageModel: '@cf/stabilityai/stable-diffusion-xl-base-1.0',
+	imageModel: '@cf/black-forest-labs/flux-1-schnell',
 	textModel: '@cf/meta/llama-3.3-70b-instruct-fp8-fast',
 	visionTextModel: '@cf/llava-hf/llava-1.5-7b-hf',
 	sqlModel: '@cf/defog/sqlcoder-7b-2',

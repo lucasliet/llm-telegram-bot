@@ -148,9 +148,9 @@ export default {
 	/**
 	 * Generate an image using Stable Diffusion
 	 * @param prompt - Text prompt describing the desired image
-	 * @returns Generated image as ArrayBuffer
+	 * @returns Generated image as Uint8Array
 	 */
-	async generateImage(prompt: string): Promise<ArrayBuffer> {
+	async generateImage(prompt: string): Promise<Uint8Array> {
 		const response = await fetch(
 			`https://api.cloudflare.com/client/v4/accounts/${CLOUDFLARE_ACCOUNT_ID}/ai/run/${imageModel}`,
 			{
@@ -170,10 +170,13 @@ export default {
 			);
 			throw new Error(`Failed to generate image: ${response.statusText}}`);
 		}
-		return await response.arrayBuffer();
+		
+		const { result: { image } } = await response.json();
+
+		return Uint8Array.from(atob(image), (m) => m.codePointAt(0)!);
 	},
 
-	/**
+	/**	
 	 * Generate SQL code using a dedicated SQL model
 	 * @param userKey - User identifier for chat history
 	 * @param quote - Optional quote to include in context
