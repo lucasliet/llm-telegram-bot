@@ -13,7 +13,7 @@ export const openAIModels = {
 
 export const cloudflareModels = {
 	imageModel: '@cf/black-forest-labs/flux-1-schnell',
-	textModel: '@cf/meta/llama-3.3-70b-instruct-fp8-fast',
+	textModel: '@cf/meta/llama-4-scout-17b-16e-instruct',
 	visionTextModel: '@cf/llava-hf/llava-1.5-7b-hf',
 	sqlModel: '@cf/defog/sqlcoder-7b-2',
 	codeModel: '@hf/thebloke/deepseek-coder-6.7b-instruct-awq',
@@ -25,7 +25,7 @@ export const blackboxModels = {
 	reasoningModelOffline: 'deepseek-reasoner|DeepSeek-R1',
 	gptModel: 'GPT-4o|GPT-4o',
 	llamaModel:
-	'meta-llama/Llama-3.3-70B-Instruct-Turbo|Meta-Llama-3.3-70B-Instruct-Turbo',
+	'meta-llama/Llama-4-Maverick-17B-128E-Instruct-FP8|Llama-4-Maverick-17B-128E',
 	mixtralModel:
 	'mistralai/Mistral-Small-24B-Instruct-2501|Mistral-Small-24B-Instruct-2501',
 	qwenModel: 'Qwen/QwQ-32B-Preview|Qwen-QwQ-32B-Preview',
