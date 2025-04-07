@@ -231,6 +231,48 @@ export default {
 
 		return text;
 	},
+
+	/**
+	 * Converte arquivos para formato Markdown usando a API Cloudflare Workers AI
+	 * @param fileContents - Array de Promise<Uint8Array> dos arquivos a serem convertidos
+	 * @returns Texto em formato Markdown (conteúdo da propriedade data)
+	 */
+	async transcribeFile(
+		fileDataList: { content: Promise<Uint8Array>; fileName: string }[],
+	): Promise<string> {
+		const formData = new FormData();
+
+		for (const fileData of fileDataList) {
+			try {
+				const fileContent = await fileData.content;
+				const file = new File([fileContent], fileData.fileName, {
+					type: 'application/octet-stream',
+				});
+				formData.append('files', file);
+			} catch (error) {
+				console.error(`Erro ao processar arquivo: ${error instanceof Error ? error.message : error}`);
+				throw new Error(`Falha ao processar arquivo: ${error instanceof Error ? error.message : error}`);
+			}
+		}
+
+		const response = await fetch(
+			`https://api.cloudflare.com/client/v4/accounts/${CLOUDFLARE_ACCOUNT_ID}/ai/tomarkdown`,
+			{
+				method: 'POST',
+				headers: {
+					Authorization: `Bearer ${CLOUDFLARE_API_KEY}`,
+				},
+				body: formData,
+			},
+		);
+
+		if (!response.ok) {
+			throw new Error(`Falha ao converter para markdown: ${response.statusText}`);
+		}
+
+		const result = await response.json();
+		return result.result.data;
+	}
 };
 
 /**
