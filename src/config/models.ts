@@ -85,6 +85,8 @@ export const WHITELISTED_MODELS: ModelCommand[] = [
 	'/qwen',
 	'/mixtral',
 	'/gpt',
+	'/gemini',
+	'/claude',
 ];
 
 /**

@@ -48,6 +48,10 @@ const userCommandButtons = [
 		['Mixtral Online', '/mixtral'],
 	],
 	[
+		['Claude', '/claude'],
+		['Gemini', '/gemini'],
+	],
+	[
 		['Llama', '/llama'],
 		['Limpar Histórico', '/clear']
 	],
@@ -85,6 +89,7 @@ export const adminHelpMessage = `*Comandos inline*:
 \\- \`claude:\` mensagem \\- Faz uma pergunta usando o modelo __Claude__ pela __BlackboxAI__
 \\- \`gemini:\` mensagem \\- Faz uma pergunta usando o modelo __Gemini__ pela __BlackboxAI__
 \\- \`geminiPro:\` mensagem \\- Faz uma pergunta usando o modelo __GeminiPro__ pela __BlackboxAI__
+\\- \`fala:\` mensagem \\- Faz uma pergunta usando __Elevenlabs__ para TTS
 
 *Seleção de modelos de linguagem*:`;
 

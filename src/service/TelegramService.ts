@@ -158,7 +158,7 @@ export default {
 			'/gpt': () => handleOpenAI(ctx, `gpt: ${message}`),
 			'/perplexity': () => handlePerplexity(ctx, `perplexity: ${message}`),
 			'/perplexityReasoning': () =>handlePerplexity(ctx, `perplexityReasoning: ${message}`),
-			'/llama': () => handleCloudflare(ctx, `llama: ${message!}`),
+			'/llama': () => handleBlackbox(ctx, `llama: ${message!}`),
 			'/r1': () => handleBlackbox(ctx, `r1: ${message}`),
 			'/r1off': () => handleBlackbox(ctx, `r1off: ${message}`),
 			'/mixtral': () => handleBlackbox(ctx, `mixtral: ${message}`),
