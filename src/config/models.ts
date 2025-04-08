@@ -14,6 +14,7 @@ export const openAIModels = {
 export const openRouterModels = {
 	llamaModel: 'meta-llama/llama-4-maverick:free',
 	deepseekModel: 'deepseek/deepseek-r1-zero:free',
+	geminiModel: 'google/gemini-2.5-pro-exp-03-25:free',
 };
 
 export const cloudflareModels = {
@@ -28,6 +29,7 @@ export const cloudflareModels = {
 export const blackboxModels = {
 	reasoningModel: 'deepseek-reasoner|DeepSeek-R1',
 	reasoningModelOffline: 'deepseek-reasoner|DeepSeek-R1',
+	gptOnline: 'gpt-3.5-turbo',
 	gptModel: 'GPT-4o|GPT-4o',
 	llamaModel:
 	'meta-llama/Llama-4-Maverick-17B-128E-Instruct-FP8|Llama-4-Maverick-17B-128E',

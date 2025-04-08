@@ -3,7 +3,7 @@ import BlackboxaiService from '../../service/BlackboxaiService.ts';
 import { blackboxModels } from '../../config/models.ts';
 import { textToSpeech } from '../../service/TelegramService.ts';
 
-const { reasoningModel, reasoningModelOffline, mixtralModel,
+const { gptOnline, reasoningModel, reasoningModelOffline, mixtralModel,
 	 	qwenModel, llamaModel, claudeModel, deepseekv3,
 		geminiModel, geminiProModel, o1Model, o3MiniModel } =
 	blackboxModels;
@@ -29,6 +29,8 @@ export async function handleBlackbox(
 	const blackBoxCommand = message!.split(':')[0].toLowerCase();
 
 	type CommandHandlerKey =
+		| 'black'
+		| 'gptonline'
 		| 'r1off'
 		| 'r1'
 		| 'mixtral'
@@ -44,6 +46,27 @@ export async function handleBlackbox(
 		| 'fala';
 
 	const commandHandlers: Record<CommandHandlerKey, () => Promise<void>> = {
+		'black': async () => {
+			const { reader, onComplete } = await BlackboxaiService.generateText(
+				userKey,
+				quote,
+				message!.replace('black:', ''),
+				gptOnline,
+			);
+
+			ctx.streamReply(reader, onComplete);
+		},
+		'gptonline': async () => {
+			const { reader, onComplete } = await BlackboxaiService.generateText(
+				userKey,
+				quote,
+				message!.replace('gptonline:', ''),
+				gptOnline,
+			);
+
+			ctx.streamReply(reader, onComplete);
+		}
+		,
 		'r1': async () => {
 			const { reader, onComplete } = await BlackboxaiService.generateText(
 				userKey,

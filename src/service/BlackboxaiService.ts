@@ -13,7 +13,7 @@ import { createSession, getSession } from '../repository/SessionRepository.ts';
 /**
  * Constants and configuration
  */
-const { reasoningModel, reasoningModelOffline } = blackboxModels;
+const { reasoningModel, reasoningModelOffline, gptOnline } = blackboxModels;
 const BLACKBOX_MAX_TOKENS = 8000;
 
 /**
@@ -69,7 +69,7 @@ export default {
 					...convertGeminiHistoryToGPT(geminiHistory),
 					{ role: 'user', content: requestPrompt },
 				],
-				agentMode: {
+				agentMode: gptOnline === model ? {} : {
 					mode: true,
 					id: modelId,
 					name: modelName,
@@ -80,7 +80,7 @@ export default {
 				isPremium: true,
 				webSearchModePrompt: model !== reasoningModelOffline,
 				trendingAgentMode: {},
-				userSelectedModel: modelName,
+				userSelectedModel: gptOnline === model ? null : modelName,
 				validated: '00f37b34-a166-4efb-bce5-1312d87f2f94',
 				session: await getOrCreateSession()
 			}),
