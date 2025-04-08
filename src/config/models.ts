@@ -11,6 +11,11 @@ export const openAIModels = {
 	sttModel: 'whisper-1',
 };
 
+export const openRouterModels = {
+	llamaModel: 'meta-llama/llama-4-maverick:free',
+	deepseekModel: 'deepseek/deepseek-r1-zero:free',
+};
+
 export const cloudflareModels = {
 	imageModel: '@cf/black-forest-labs/flux-1-schnell',
 	textModel: '@cf/meta/llama-4-scout-17b-16e-instruct',

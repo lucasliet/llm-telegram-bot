@@ -17,6 +17,7 @@ import {
 	handleCloudflare,
 	handleGemini,
 	handleOpenAI,
+	handleOpenRouter,
 	handlePerplexity,
 	handlePuter,
 } from '../handlers/models/index.ts';
@@ -158,7 +159,7 @@ export default {
 			'/gpt': () => handleOpenAI(ctx, `gpt: ${message}`),
 			'/perplexity': () => handlePerplexity(ctx, `perplexity: ${message}`),
 			'/perplexityReasoning': () =>handlePerplexity(ctx, `perplexityReasoning: ${message}`),
-			'/llama': () => handleBlackbox(ctx, `llama: ${message!}`),
+			'/llama': () => handleOpenRouter(ctx, `llama: ${message!}`),
 			'/r1': () => handleBlackbox(ctx, `r1: ${message}`),
 			'/r1off': () => handleBlackbox(ctx, `r1off: ${message}`),
 			'/mixtral': () => handleBlackbox(ctx, `mixtral: ${message}`),
@@ -193,6 +194,10 @@ export default {
 
 	callBlackboxModel(ctx: Context, commandMessage?: string): Promise<void> {
 		return handleBlackbox(ctx, commandMessage);
+	},
+
+	callOpenRouterModel(ctx: Context, commandMessage?: string): Promise<void> {
+		return handleOpenRouter(ctx, commandMessage);
 	},
 
 	callPuterModel(ctx: Context, commandMessage?: string): Promise<void> {

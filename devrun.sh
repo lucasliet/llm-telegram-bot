@@ -31,6 +31,7 @@ export BOT_TOKEN=${BOT_TOKEN:-$TELEGRAM_CHAT_BOT_TOKEN};
 export ADMIN_USER_IDS=${ADMIN_USER_IDS:-$TELEGRAM_USER_ID};
 export CLOUDFLARE_API_KEY=${CLOUDFLARE_API_KEY:-$CLOUDFLARE_AI_API_KEY};
 export CLOUDFLARE_ACCOUNT_ID=${CLOUDFLARE_ACCOUNT_ID:-$CLOUDFLARE_AI_ACCOUNT_ID};
+export OPENROUTER_API_KEY=${OPENROUTER_API_KEY:-$OPENROUTER_AI_API_KEY};
 
 denon run --allow-env --allow-net --allow-read --allow-write --allow-import --unstable-kv --unstable-cron main.ts;
 

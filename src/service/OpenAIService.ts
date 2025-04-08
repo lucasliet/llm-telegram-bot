@@ -8,14 +8,16 @@ import {
 	replaceGeminiConfigFromTone,
 	StreamReplyResponse,
 } from '../util/ChatConfigUtil.ts';
-import { openAIModels, perplexityModels } from '../config/models.ts';
+import { openAIModels, perplexityModels, openRouterModels } from '../config/models.ts';
 import * as path from 'jsr:@std/path';
 
 const PERPLEXITY_API_KEY: string = Deno.env.get('PERPLEXITY_API_KEY') as string;
+const OPENROUTER_API_KEY: string = Deno.env.get('OPENROUTER_API_KEY') as string;
 const GITHUB_TOKEN: string = Deno.env.get('GITHUB_TOKEN') as string;
 
 const { imageModel, gptModel, sttModel } = openAIModels;
 const { textModel, reasoningModel } = perplexityModels;
+const { llamaModel } = openRouterModels;
 
 export default class OpenAiService {
 	private openai: OpenAi;
@@ -23,7 +25,7 @@ export default class OpenAiService {
 	private maxTokens: number;
 
 	public constructor(
-		command: '/openai' | '/perplexity' | '/perplexityreasoning' | '/github',
+		command: '/openai' | '/perplexity' | '/perplexityreasoning' | '/github'| '/openrouter',
 	) {
 		this.model = gptModel;
 		this.openai = new OpenAi({
@@ -45,6 +47,14 @@ export default class OpenAiService {
 					apiKey: GITHUB_TOKEN,
 					baseURL: 'https://models.inference.ai.azure.com',
 				});
+				break;
+			case '/openrouter':
+				this.openai = new OpenAi({
+					apiKey: OPENROUTER_API_KEY,
+					baseURL: 'https://openrouter.ai/api/v1',
+				});
+				this.model = llamaModel;
+				break;
 		}
 		this.maxTokens = 1000;
 	}
