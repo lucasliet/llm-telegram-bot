@@ -66,7 +66,8 @@ export type ModelCommand =
 	| '/qwen'
 	| '/mixtral'
 	| '/claude'
-	| '/geminiPro';
+	| '/geminiPro'
+	| '/o3mini'
 
 /**
  * Available model commands
@@ -83,6 +84,7 @@ export const modelCommands: ModelCommand[] = [
 	'/mixtral',
 	'/claude',
 	'/geminiPro',
+	'/o3mini',
 ];
 
 export const WHITELISTED_MODELS: ModelCommand[] = [
@@ -94,6 +96,7 @@ export const WHITELISTED_MODELS: ModelCommand[] = [
 	'/gpt',
 	'/gemini',
 	'/claude',
+	'/o3mini',
 ];
 
 /**
@@ -111,4 +114,5 @@ export const [
 	blackboxMixtralModelCommand,
 	blackboxClaudeModelCommand,
 	blackboxGeminiProModelCommand,
+	duckO3miniModelCommand,
 ] = modelCommands;

@@ -86,6 +86,12 @@ function registerBotCommands() {
 	);
 
 	BOT.hears(
+		/^(duck):/gi,
+		(ctx) =>
+			TelegramService.callAdminModel(ctx, TelegramService.callDuckDuckGoModel),
+	);
+
+	BOT.hears(
 		new RegExp(`^(${modelCommands.join('|')})$`),
 		async (ctx) => await TelegramService.setCurrentModel(ctx),
 	);

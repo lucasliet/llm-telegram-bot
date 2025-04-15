@@ -15,6 +15,7 @@ import {
 import {
 	handleBlackbox,
 	handleCloudflare,
+	handleDuckDuckGo,
 	handleGemini,
 	handleOpenAI,
 	handleOpenRouter,
@@ -167,6 +168,7 @@ export default {
 			'/claude': () => handleBlackbox(ctx, `claude: ${message}`),
 			'/geminiPro': () => handleBlackbox(ctx, `geminiPro: ${message}`),
 			'/gemini': () => handleBlackbox(ctx, `gemini: ${message}`),
+			'/o3mini': () => handleDuckDuckGo(ctx, `duck: ${message}`),
 		};
 
 		const handler = modelHandlers[currentModel];
@@ -203,6 +205,10 @@ export default {
 	callPuterModel(ctx: Context, commandMessage?: string): Promise<void> {
 		return handlePuter(ctx, commandMessage);
 	},
+
+	callDuckDuckGoModel(ctx: Context, commandMessage?: string): Promise<void> {
+		return handleDuckDuckGo(ctx, commandMessage);
+	}
 };
 
 export const downloadTelegramFile = FileUtils.downloadTelegramFile;

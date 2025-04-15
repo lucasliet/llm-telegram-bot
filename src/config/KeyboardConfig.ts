@@ -6,27 +6,27 @@ import { InlineKeyboard } from 'https://deno.land/x/grammy@v1.17.2/mod.ts';
 const adminCommandButtons = [
 	[
 		['Modelo Atual', '/currentmodel'],
-		['GPT', '/gpt'],
+		['GPT 4o Mini', '/gpt'],
 	],
 	[
 		['Deepseek R1 Online', '/r1'],
 		['Deepseek R1', '/r1off'],
 	],
 	[
-		['Llama', '/llama'],
-		['Gemini', '/gemini'],
+		['Llama 4 Maverick', '/llama'],
+		['Gemini 2.0 Flash', '/gemini'],
 	],
 	[
 		['Qwen', '/qwen'],
 		['Mixtral', '/mixtral'],
 	],
 	[
-		['Claude', '/claude'],
-		['GeminiPro', '/geminiPro'],
+		['Claude 2.7 Sonnet', '/claude'],
+		['GPT o3 Mini', '/o3mini'],
 	],
 	[
-		['Perplexity', '/perplexity'],
-		['Perplexity Reasoning', '/perplexityReasoning'],
+		['Sonar', '/perplexity'],
+		['Sonar Reasoning', '/perplexityReasoning'],
 	],
 	[['Limpar Histórico', '/clear']],
 ];
@@ -37,7 +37,7 @@ const adminCommandButtons = [
 const userCommandButtons = [
 	[
 		['Modelo Atual', '/currentmodel'],
-		['GPT', '/gpt'],
+		['GPT 4o Mini', '/gpt'],
 	],
 	[
 		['Deepseek R1 Online', '/r1'],
@@ -48,13 +48,14 @@ const userCommandButtons = [
 		['Mixtral Online', '/mixtral'],
 	],
 	[
-		['Claude', '/claude'],
-		['Gemini', '/gemini'],
+		['Llama 4 Maverick', '/llama'],
+		['Gemini 2.0 Flash', '/gemini'],
 	],
 	[
-		['Llama', '/llama'],
-		['Limpar Histórico', '/clear']
+		['Claude 2.7 Sonnet', '/claude'],
+		['GPT o3 Mini', '/o3mini'],
 	],
+	[['Limpar Histórico', '/clear']],
 ];
 
 export const adminKeyboard = InlineKeyboard.from(
@@ -89,6 +90,7 @@ export const adminHelpMessage = `*Comandos inline*:
 \\- \`claude:\` mensagem \\- Faz uma pergunta usando o modelo __Claude__ pela __BlackboxAI__
 \\- \`gemini:\` mensagem \\- Faz uma pergunta usando o modelo __Gemini__ pela __BlackboxAI__
 \\- \`geminiPro:\` mensagem \\- Faz uma pergunta usando o modelo __GeminiPro__ pela __BlackboxAI__
+\\- \`o3mini:\` mensagem \\- Faz uma pergunta usando o modelo __o3mini__ pela __DuckDuckGo__
 \\- \`fala:\` mensagem \\- Faz uma pergunta usando __Elevenlabs__ para TTS
 
 *Seleção de modelos de linguagem*:`;
@@ -103,6 +105,9 @@ export const userHelpMessage = `*Comandos inline*:
 \\- \`r1:\` mensagem \\- Faz uma pergunta usando o modelo __Deepseek\\-R1__ pela __BlackboxAI__
 \\- \`qwen:\` mensagem \\- Faz uma pergunta usando o modelo __Qwen__ pela __BlackboxAI__
 \\- \`mixtral:\` mensagem \\- Faz uma pergunta usando o modelo __Mixtral__ pela __BlackboxAI__
+\\- \`claude:\` mensagem \\- Faz uma pergunta usando o modelo __Claude__ pela __BlackboxAI__
+\\- \`gemini:\` mensagem \\- Faz uma pergunta usando o modelo __Gemini__ pela __BlackboxAI__
+\\- \`o3mini:\` mensagem \\- Faz uma pergunta usando o modelo __o3mini__ pela __DuckDuckGo__
 \\- \`cloudflareImage:\` mensagem \\- Gera imagens com __Stable Diffusion__
 
 *Seleção de modelos de linguagem*:`;

@@ -19,12 +19,12 @@ const { o3mini, haiku } = duckduckgoModels;
 const maxTokens = 8000;
 
 const requestHeaders = {
-	'User-Agent':
-		'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:134.0) Gecko/20100101 Firefox/134.0',
-	'Accept': 'text/event-stream',
+	'User-Agent': 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:134.0) Gecko/20100101 Firefox/134.0',
+	Accept: 'text/event-stream',
 	'Accept-Language': 'pt-BR',
 	'Accept-Encoding': 'gzip, deflate, br, zstd',
 	'Content-Type': 'application/json',
+	Origin: 'https://duckduckgo.com',
 };
 
 export default {
@@ -94,7 +94,7 @@ async function _fetchVqdHeader(): Promise<string> {
 			method: 'GET',
 			headers: {
 				...requestHeaders,
-				'x-vqd-accept': 1,
+				'x-vqd-accept': '1',
 			},
 		},
 	);
