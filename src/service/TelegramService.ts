@@ -16,6 +16,7 @@ import {
 	handleBlackbox,
 	handleCloudflare,
 	handleDuckDuckGo,
+	handleGithubCopilot,
 	handleGemini,
 	handleOpenAI,
 	handleOpenRouter,
@@ -157,7 +158,7 @@ export default {
 		const currentModel = await getCurrentModel(userKey);
 
 		const modelHandlers: Record<ModelCommand, () => Promise<void>> = {
-			'/gpt': () => handleOpenAI(ctx, `gpt: ${message}`),
+			'/gpt': () => handleGithubCopilot(ctx, `gpt: ${message}`),
 			'/perplexity': () => handlePerplexity(ctx, `perplexity: ${message}`),
 			'/perplexityReasoning': () =>handlePerplexity(ctx, `perplexityReasoning: ${message}`),
 			'/llama': () => handleOpenRouter(ctx, `llama: ${message!}`),
@@ -169,6 +170,7 @@ export default {
 			'/geminiPro': () => handleBlackbox(ctx, `geminiPro: ${message}`),
 			'/gemini': () => handleBlackbox(ctx, `gemini: ${message}`),
 			'/o3mini': () => handleDuckDuckGo(ctx, `duck: ${message}`),
+			'/o4mini': () => handleGithubCopilot(ctx, `o4mini: ${message}`),
 		};
 
 		const handler = modelHandlers[currentModel];
@@ -208,7 +210,11 @@ export default {
 
 	callDuckDuckGoModel(ctx: Context, commandMessage?: string): Promise<void> {
 		return handleDuckDuckGo(ctx, commandMessage);
-	}
+	},
+
+	callGithubCopilotModel(ctx: Context, commandMessage?: string): Promise<void> {
+		return handleGithubCopilot(ctx, commandMessage);
+	},
 };
 
 export const downloadTelegramFile = FileUtils.downloadTelegramFile;

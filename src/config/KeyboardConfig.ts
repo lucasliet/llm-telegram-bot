@@ -4,9 +4,10 @@ import { InlineKeyboard } from 'https://deno.land/x/grammy@v1.17.2/mod.ts';
  * Helper command buttons for inline keyboard - Admin version (all models)
  */
 const adminCommandButtons = [
+	[['Modelo Atual', '/currentmodel']],
 	[
-		['Modelo Atual', '/currentmodel'],
-		['GPT 4o Mini', '/gpt'],
+		['Copilot GPT 4.1', '/gpt'],
+		['Copilot GPT o4 Mini', '/o4mini'],
 	],
 	[
 		['Deepseek R1 Online', '/r1'],
@@ -76,7 +77,7 @@ export const userKeyboard = InlineKeyboard.from(
 export const adminHelpMessage = `*Comandos inline*:
 \\- \`cloudflareImage:\` mensagem \\- Gera imagens com __Stable Diffusion__
 \\- \`gptImage:\` mensagem \\- Gera imagens com __DALL\\-e__
-\\- \`gpt:\` mensagem \\- Gera texto com __GPT 4o mini__
+\\- \`gpt:\` mensagem \\- Gera texto com __GPT 4o__
 \\- \`llama:\` mensagem \\- Gera texto com o __Llama 3\\.3__
 \\- \`sql:\` mensagem \\- Gera sql com modelo __SQL Coder__
 \\- \`code:\` mensagem \\- Gera código com modelo __Deepseek Coder__
@@ -91,6 +92,7 @@ export const adminHelpMessage = `*Comandos inline*:
 \\- \`gemini:\` mensagem \\- Faz uma pergunta usando o modelo __Gemini__ pela __BlackboxAI__
 \\- \`geminiPro:\` mensagem \\- Faz uma pergunta usando o modelo __GeminiPro__ pela __BlackboxAI__
 \\- \`o3mini:\` mensagem \\- Faz uma pergunta usando o modelo __o3mini__ pela __DuckDuckGo__
+\\- \`o4mini:\` mensagem \\- Faz uma pergunta usando o modelo __o4mini__ pelo __Github Copilot__
 \\- \`fala:\` mensagem \\- Faz uma pergunta usando __Elevenlabs__ para TTS
 
 *Seleção de modelos de linguagem*:`;

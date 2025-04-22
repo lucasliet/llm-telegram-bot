@@ -2,61 +2,32 @@ import OpenAi, { toFile } from 'npm:openai';
 import {
 	addContentToChatHistory,
 	getChatHistory,
-} from '../repository/ChatRepository.ts';
+} from '../../repository/ChatRepository.ts';
 import {
 	convertGeminiHistoryToGPT,
 	replaceGeminiConfigFromTone,
 	StreamReplyResponse,
-} from '../util/ChatConfigUtil.ts';
-import { openAIModels, perplexityModels, openRouterModels } from '../config/models.ts';
+} from '../../util/ChatConfigUtil.ts';
+import { openAIModels } from '../../config/models.ts';
 import * as path from 'jsr:@std/path';
 
-const PERPLEXITY_API_KEY: string = Deno.env.get('PERPLEXITY_API_KEY') as string;
-const OPENROUTER_API_KEY: string = Deno.env.get('OPENROUTER_API_KEY') as string;
-const GITHUB_TOKEN: string = Deno.env.get('GITHUB_TOKEN') as string;
-
 const { imageModel, gptModel, sttModel } = openAIModels;
-const { textModel, reasoningModel } = perplexityModels;
-const { llamaModel } = openRouterModels;
+
+const PERPLEXITY_API_KEY: string = Deno.env.get('PERPLEXITY_API_KEY') as string;
 
 export default class OpenAiService {
-	private openai: OpenAi;
-	private model: string;
-	private maxTokens: number;
+	protected openai: OpenAi;
+	protected model: string;
+	protected maxTokens: number;
 
 	public constructor(
-		command: '/openai' | '/perplexity' | '/perplexityreasoning' | '/github'| '/openrouter',
+		openai: OpenAi = new OpenAi(),
+		model: string = gptModel,
+		maxTokens: number = 1000,
 	) {
-		this.model = gptModel;
-		this.openai = new OpenAi({
-			apiKey: PERPLEXITY_API_KEY,
-			baseURL: 'https://api.perplexity.ai',
-		});
-		switch (command) {
-			case '/openai':
-				this.openai = new OpenAi();
-				break;
-			case '/perplexityreasoning':
-				this.model = reasoningModel;
-				break;
-			case '/perplexity':
-				this.model = textModel;
-				break;
-			case '/github':
-				this.openai = new OpenAi({
-					apiKey: GITHUB_TOKEN,
-					baseURL: 'https://models.inference.ai.azure.com',
-				});
-				break;
-			case '/openrouter':
-				this.openai = new OpenAi({
-					apiKey: OPENROUTER_API_KEY,
-					baseURL: 'https://openrouter.ai/api/v1',
-				});
-				this.model = llamaModel;
-				break;
-		}
-		this.maxTokens = 1000;
+		this.openai = openai;
+		this.model = model;
+		this.maxTokens = maxTokens;
 	}
 
 	async generateTextFromImage(

@@ -70,9 +70,14 @@ function registerBotCommands() {
 			TelegramService.callAdminModel(ctx, TelegramService.callPerplexityModel),
 	);
 	BOT.hears(
-		/^(gpt|gptImage):/gi,
+		/^(gptImage):/gi,
 		(ctx) =>
 			TelegramService.callAdminModel(ctx, TelegramService.callOpenAIModel),
+	);
+	BOT.hears(
+		/^(gpt|o4mini):/gi,
+		(ctx) =>
+			TelegramService.callAdminModel(ctx, TelegramService.callGithubCopilotModel),
 	);
 	BOT.hears(
 		/^(black|gptonline|r1off|r1|v3|mixtral|qwen|claude|gemini|geminiPro|o1|o3Mini|image|fala):/gi,

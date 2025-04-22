@@ -68,6 +68,7 @@ export type ModelCommand =
 	| '/claude'
 	| '/geminiPro'
 	| '/o3mini'
+	| '/o4mini';
 
 /**
  * Available model commands
@@ -85,6 +86,7 @@ export const modelCommands: ModelCommand[] = [
 	'/claude',
 	'/geminiPro',
 	'/o3mini',
+	'/o4mini',
 ];
 
 export const WHITELISTED_MODELS: ModelCommand[] = [

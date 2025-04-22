@@ -1,5 +1,5 @@
 import { Context } from 'https://deno.land/x/grammy@v1.17.2/context.ts';
-import OpenAiService from '../../service/OpenAIService.ts';
+import PerplexityService from '../../service/openai/PerplexityService.ts';
 
 /**
  * Handles requests for Perplexity models
@@ -27,7 +27,7 @@ export async function handlePerplexity(
 
 	const model = `/${command}` as '/perplexity' | '/perplexityreasoning';
 
-	const openAIService = new OpenAiService(model);
+	const openAIService = new PerplexityService(model);
 
 	const { reader, onComplete, responseMap } = await openAIService.generateText(
 		userKey,

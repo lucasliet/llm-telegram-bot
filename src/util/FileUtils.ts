@@ -6,7 +6,7 @@ import {
 	InputFile,
 } from 'https://deno.land/x/grammy@v1.17.2/types.deno.ts';
 import { getCurrentModel } from '../repository/ChatRepository.ts';
-import OpenAiService from '../service/OpenAIService.ts';
+import OpenAiService from '../service/openai/OpenAIService.ts';
 import CloudFlareService from '../service/CloudFlareService.ts';
 import ElevenLabsService from '../service/ElevenLabsService.ts';
 const TOKEN = Deno.env.get('BOT_TOKEN') as string;
