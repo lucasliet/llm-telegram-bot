@@ -68,7 +68,8 @@ export type ModelCommand =
 	| '/claude'
 	| '/geminiPro'
 	| '/o3mini'
-	| '/o4mini';
+	| '/o4mini'
+	| '/phind';
 
 /**
  * Available model commands
@@ -87,6 +88,7 @@ export const modelCommands: ModelCommand[] = [
 	'/geminiPro',
 	'/o3mini',
 	'/o4mini',
+	'/phind',
 ];
 
 export const WHITELISTED_MODELS: ModelCommand[] = [
@@ -99,22 +101,5 @@ export const WHITELISTED_MODELS: ModelCommand[] = [
 	'/gemini',
 	'/claude',
 	'/o3mini',
+	'/phind',
 ];
-
-/**
- * Named model commands for improved readability
- */
-export const [
-	geminiModelCommand,
-	llamaModelCommand,
-	gptModelCommand,
-	perplexityModelCommand,
-	perplexityReasoningModelCommand,
-	blackboxReasoningModelCommand,
-	blackboxReasoningOffModelCommand,
-	blackboxQwenModelCommand,
-	blackboxMixtralModelCommand,
-	blackboxClaudeModelCommand,
-	blackboxGeminiProModelCommand,
-	duckO3miniModelCommand,
-] = modelCommands;

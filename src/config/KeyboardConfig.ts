@@ -4,7 +4,10 @@ import { InlineKeyboard } from 'https://deno.land/x/grammy@v1.17.2/mod.ts';
  * Helper command buttons for inline keyboard - Admin version (all models)
  */
 const adminCommandButtons = [
-	[['Modelo Atual', '/currentmodel']],
+	[
+		['Modelo Atual', '/currentmodel'],
+		['Phind', '/phind'],
+	],
 	[
 		['Copilot GPT 4.1', '/gpt'],
 		['Copilot GPT o4 Mini', '/o4mini'],
@@ -38,15 +41,15 @@ const adminCommandButtons = [
 const userCommandButtons = [
 	[
 		['Modelo Atual', '/currentmodel'],
-		['GPT 4o Mini', '/gpt'],
+		['Phind', '/phind'],
 	],
 	[
 		['Deepseek R1 Online', '/r1'],
 		['Deepseek R1', '/r1off'],
 	],
 	[
-		['Qwen Online', '/qwen'],
-		['Mixtral Online', '/mixtral'],
+		['Qwen', '/qwen'],
+		['Mixtral', '/mixtral'],
 	],
 	[
 		['Llama 4 Maverick', '/llama'],
@@ -81,6 +84,7 @@ export const adminHelpMessage = `*Comandos inline*:
 \\- \`llama:\` mensagem \\- Gera texto com o __Llama 3\\.3__
 \\- \`sql:\` mensagem \\- Gera sql com modelo __SQL Coder__
 \\- \`code:\` mensagem \\- Gera código com modelo __Deepseek Coder__
+\\- \`phind:\` mensagem \\- Faz uma pergunta usando o modelo __Phind__
 \\- \`perplexity:\` mensagem \\- Faz uma pergunta usando o modelo perplexity\\.ai
 \\- \`search:\` mensagem \\- Faz uma pergunta usando o modelo perplexity\\.ai
 \\- \`reasonSearch:\` mensagem \\- Faz uma pergunta usando o modelo perplexity\\.ai com o uso de __Deepseek\\-R1__
@@ -103,6 +107,7 @@ export const adminHelpMessage = `*Comandos inline*:
 export const userHelpMessage = `*Comandos inline*:
 \\- \`gpt:\` mensagem \\- Gera texto com __GPT 4o mini__
 \\- \`llama:\` mensagem \\- Gera texto com o __Llama 3\\.3__
+\\- \`phind:\` mensagem \\- Faz uma pergunta usando o modelo __Phind__
 \\- \`r1off:\` mensagem \\- Faz uma pergunta usando o modelo __Deepseek\\-R1__ pela __BlackboxAI__
 \\- \`r1:\` mensagem \\- Faz uma pergunta usando o modelo __Deepseek\\-R1__ pela __BlackboxAI__
 \\- \`qwen:\` mensagem \\- Faz uma pergunta usando o modelo __Qwen__ pela __BlackboxAI__

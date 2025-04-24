@@ -89,11 +89,15 @@ function registerBotCommands() {
 		(ctx) =>
 			TelegramService.callAdminModel(ctx, TelegramService.callOpenRouterModel),
 	);
-
 	BOT.hears(
 		/^(duck):/gi,
 		(ctx) =>
 			TelegramService.callAdminModel(ctx, TelegramService.callDuckDuckGoModel),
+	);
+	BOT.hears(
+		/^(phind):/gi,
+		(ctx) =>
+			TelegramService.callAdminModel(ctx, TelegramService.callPhindModel),
 	);
 
 	BOT.hears(

@@ -4,11 +4,10 @@
 		"dev": "./devrun.sh"
 	},
 	"fmt": {
-		"options": {
-			"useTabs": true,
-			"semiColons": true,
-			"singleQuote": true
-		}
+		"useTabs": true,
+		"semiColons": true,
+		"singleQuote": true,
+		"lineWidth": 160
 	},
 	"imports": {
 		"asserts": "https://deno.land/std@0.210.0/assert/mod.ts",

@@ -16,11 +16,12 @@ import {
 	handleBlackbox,
 	handleCloudflare,
 	handleDuckDuckGo,
-	handleGithubCopilot,
 	handleGemini,
+	handleGithubCopilot,
 	handleOpenAI,
 	handleOpenRouter,
 	handlePerplexity,
+	handlePhind,
 	handlePuter,
 } from '../handlers/models/index.ts';
 
@@ -160,7 +161,7 @@ export default {
 		const modelHandlers: Record<ModelCommand, () => Promise<void>> = {
 			'/gpt': () => handleGithubCopilot(ctx, `gpt: ${message}`),
 			'/perplexity': () => handlePerplexity(ctx, `perplexity: ${message}`),
-			'/perplexityReasoning': () =>handlePerplexity(ctx, `perplexityReasoning: ${message}`),
+			'/perplexityReasoning': () => handlePerplexity(ctx, `perplexityReasoning: ${message}`),
 			'/llama': () => handleOpenRouter(ctx, `llama: ${message!}`),
 			'/r1': () => handleBlackbox(ctx, `r1: ${message}`),
 			'/r1off': () => handleBlackbox(ctx, `r1off: ${message}`),
@@ -171,6 +172,7 @@ export default {
 			'/gemini': () => handleBlackbox(ctx, `gemini: ${message}`),
 			'/o3mini': () => handleDuckDuckGo(ctx, `duck: ${message}`),
 			'/o4mini': () => handleGithubCopilot(ctx, `o4mini: ${message}`),
+			'/phind': () => handlePhind(ctx, `phind: ${message}`),
 		};
 
 		const handler = modelHandlers[currentModel];
@@ -215,6 +217,10 @@ export default {
 	callGithubCopilotModel(ctx: Context, commandMessage?: string): Promise<void> {
 		return handleGithubCopilot(ctx, commandMessage);
 	},
+
+	callPhindModel(ctx: Context, commandMessage?: string): Promise<void> {
+		return handlePhind(ctx, commandMessage);
+	},
 };
 
 export const downloadTelegramFile = FileUtils.downloadTelegramFile;
@@ -229,11 +235,11 @@ export const transcribeAudio = (
 
 export async function textToSpeech(
 	ctx: Context,
-	text: string
+	text: string,
 ): Promise<void> {
 	const audioFile = await FileUtils.textToSpeech(text);
 
 	ctx.replyWithVoice(audioFile, {
 		reply_to_message_id: ctx.message?.message_id,
 	});
-};
+}

@@ -67,7 +67,7 @@ export const FileUtils = {
 		} catch (error) {
 			console.error('Erro ao transcrever áudio do ElevenLabs:', error);
 			if (isGptModelCommand || ADMIN_USER_IDS.includes(userId)) {
-				return await new OpenAiService('/openai').transcribeAudio(
+				return await new OpenAiService().transcribeAudio(
 					audioFile,
 					audioUrl,
 				);
