@@ -16,7 +16,7 @@ export default class OpenAiService {
 	public constructor(
 		openai: OpenAi = new OpenAi(),
 		model: string = gptModel,
-		maxTokens: number = 1000,
+		maxTokens: number = 8000,
 	) {
 		this.openai = openai;
 		this.model = model;
