@@ -63,15 +63,11 @@ const userCommandButtons = [
 ];
 
 export const adminKeyboard = InlineKeyboard.from(
-	adminCommandButtons.map((row) =>
-		row.map(([label, data]) => InlineKeyboard.text(label, data))
-	),
+	adminCommandButtons.map((row) => row.map(([label, data]) => InlineKeyboard.text(label, data))),
 );
 
 export const userKeyboard = InlineKeyboard.from(
-	userCommandButtons.map((row) =>
-		row.map(([label, data]) => InlineKeyboard.text(label, data))
-	),
+	userCommandButtons.map((row) => row.map(([label, data]) => InlineKeyboard.text(label, data))),
 );
 
 /**

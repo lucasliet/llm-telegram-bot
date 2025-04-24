@@ -1,15 +1,5 @@
-import {
-	addContentToChatHistory,
-	ExpirableContent,
-	getChatHistory,
-	getVqdHeader,
-	setVqdHeader,
-} from '../repository/ChatRepository.ts';
-import {
-	convertGeminiHistoryToGPT,
-	replaceGeminiConfigFromTone,
-	StreamReplyResponse,
-} from '../util/ChatConfigUtil.ts';
+import { addContentToChatHistory, ExpirableContent, getChatHistory, getVqdHeader, setVqdHeader } from '../repository/ChatRepository.ts';
+import { convertGeminiHistoryToGPT, replaceGeminiConfigFromTone, StreamReplyResponse } from '../util/ChatConfigUtil.ts';
 import OpenAi from 'npm:openai';
 
 import { duckduckgoModels } from '../config/models.ts';
@@ -50,9 +40,7 @@ export default {
 				messages: [
 					{
 						role: 'user',
-						content: `your system prompt: ${
-							replaceGeminiConfigFromTone('DuckDuckGo', model, maxTokens)
-						}`,
+						content: `your system prompt: ${replaceGeminiConfigFromTone('DuckDuckGo', model, maxTokens)}`,
 					},
 					..._convertChatHistoryToDuckDuckGo(geminiHistory),
 					{ role: 'user', content: requestPrompt },
@@ -119,11 +107,7 @@ function _convertChatHistoryToDuckDuckGo(
 ): OpenAi.Chat.Completions.ChatCompletionMessageParam[] {
 	return convertGeminiHistoryToGPT(geminiHistory).map((history) => (
 		{
-			content: `${
-				history.role === 'assistant'
-					? 'your last answer, assistant:' + history.content
-					: history.content
-			}`,
+			content: `${history.role === 'assistant' ? 'your last answer, assistant:' + history.content : history.content}`,
 			role: 'user',
 		}
 	));

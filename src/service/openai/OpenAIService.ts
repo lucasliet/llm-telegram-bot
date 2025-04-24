@@ -1,13 +1,6 @@
 import OpenAi, { toFile } from 'npm:openai';
-import {
-	addContentToChatHistory,
-	getChatHistory,
-} from '../../repository/ChatRepository.ts';
-import {
-	convertGeminiHistoryToGPT,
-	replaceGeminiConfigFromTone,
-	StreamReplyResponse,
-} from '../../util/ChatConfigUtil.ts';
+import { addContentToChatHistory, getChatHistory } from '../../repository/ChatRepository.ts';
+import { convertGeminiHistoryToGPT, replaceGeminiConfigFromTone, StreamReplyResponse } from '../../util/ChatConfigUtil.ts';
 import { openAIModels } from '../../config/models.ts';
 import * as path from 'jsr:@std/path';
 
@@ -107,11 +100,7 @@ export default class OpenAiService {
 				...convertGeminiHistoryToGPT(geminiHistory),
 				{
 					role: 'user',
-					content: `${requestPrompt}${
-						this.openai.apiKey === PERPLEXITY_API_KEY
-							? ', indique suas fontes com seus links'
-							: ''
-					}`,
+					content: `${requestPrompt}${this.openai.apiKey === PERPLEXITY_API_KEY ? ', indique suas fontes com seus links' : ''}`,
 				},
 			],
 			max_tokens: this.maxTokens,
@@ -147,9 +136,7 @@ export default class OpenAiService {
 			style,
 		});
 
-		const imageUrls = response.data.map((image: OpenAi.Images.Image) =>
-			image.url!
-		);
+		const imageUrls = response.data.map((image: OpenAi.Images.Image) => image.url!);
 		console.log('dall-e generated images: ', imageUrls);
 
 		return imageUrls;

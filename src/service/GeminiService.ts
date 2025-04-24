@@ -9,10 +9,7 @@ import {
 	SafetySetting,
 } from 'npm:@google/generative-ai';
 import { Base64 } from 'https://deno.land/x/bb64@1.1.0/mod.ts';
-import {
-	getChatHistory,
-	getUserGeminiApiKeys,
-} from '../repository/ChatRepository.ts';
+import { getChatHistory, getUserGeminiApiKeys } from '../repository/ChatRepository.ts';
 import { addContentToChatHistory } from '../repository/ChatRepository.ts';
 import { ApiKeyNotFoundError } from '../error/ApiKeyNotFoundError.ts';
 import { HarmBlockThreshold } from 'npm:@google/generative-ai';
@@ -60,16 +57,12 @@ export default class GeminiService {
 		return `
       Eu sou Gemini, um modelo de linguagem de IA muito prestativo. Estou usando o modelo ${model} 
       e estou hospedado em um bot do cliente de mensagens Telegram.
-      Minha configuração de geração é: ${
-			JSON.stringify(GeminiService.buildGenerationConfig())
-		},
+      Minha configuração de geração é: ${JSON.stringify(GeminiService.buildGenerationConfig())},
       então tentarei manter minhas respostas curtas e diretas para obter melhores resultados. 
       Com o máximo de ${GeminiService.buildGenerationConfig().maxOutputTokens} tokens de saída,
       caso eu pretenda responder mensagens maiores do que isso, terminarei a mensagem com '...' 
       indicando que a você pedir caso deseja que eu continue a mensagem.
-      minhas configurações de sefetismo são: ${
-			JSON.stringify(GeminiService.buildSafetySettings())
-		}.
+      minhas configurações de sefetismo são: ${JSON.stringify(GeminiService.buildSafetySettings())}.
       Usarei à vontade as estilizações de texto e emojis para tornar a conversa mais agradável e natural.
       Sempre tentarei terminar as mensagens com emojis.
 
@@ -100,9 +93,7 @@ export default class GeminiService {
 		const urls = await Promise.all(photoUrls);
 		const imageParts = await Promise.all(urls.map(this.fileToGenerativePart));
 
-		const message = quote
-			? [quote, prompt, ...imageParts]
-			: [prompt, ...imageParts];
+		const message = quote ? [quote, prompt, ...imageParts] : [prompt, ...imageParts];
 
 		const response = (await chat.sendMessage(message)).response.text();
 		addContentToChatHistory(history, quote, prompt, response, this.userKey);

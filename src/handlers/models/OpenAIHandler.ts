@@ -35,12 +35,11 @@ export async function handleOpenAI(
 	const command = message!.split(':')[0].toLowerCase();
 
 	if (command === 'gpt') {
-		const { reader, onComplete, responseMap } = 
-			await new GithubService().generateText(
-				userKey,
-				quote,
-				message!.replace('gpt:', ''),
-			);
+		const { reader, onComplete, responseMap } = await new GithubService().generateText(
+			userKey,
+			quote,
+			message!.replace('gpt:', ''),
+		);
 
 		ctx.streamReply(reader, onComplete, responseMap);
 	} else if (command === 'gptimage') {
@@ -48,9 +47,7 @@ export async function handleOpenAI(
 			userKey,
 			message!.replace('gptImage:', ''),
 		);
-		const mediaUrls = output.map((imageUrl) =>
-			InputMediaBuilder.photo(imageUrl)
-		);
+		const mediaUrls = output.map((imageUrl) => InputMediaBuilder.photo(imageUrl));
 		ctx.replyWithMediaGroup(mediaUrls, {
 			reply_to_message_id: ctx.message?.message_id,
 		});

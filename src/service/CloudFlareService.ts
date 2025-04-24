@@ -1,12 +1,5 @@
-import {
-	addContentToChatHistory,
-	getChatHistory,
-} from '../repository/ChatRepository.ts';
-import {
-	convertGeminiHistoryToGPT,
-	replaceGeminiConfigFromTone,
-	StreamReplyResponse,
-} from '../util/ChatConfigUtil.ts';
+import { addContentToChatHistory, getChatHistory } from '../repository/ChatRepository.ts';
+import { convertGeminiHistoryToGPT, replaceGeminiConfigFromTone, StreamReplyResponse } from '../util/ChatConfigUtil.ts';
 import { cloudflareModels } from '../config/models.ts';
 import { downloadTelegramFile } from './TelegramService.ts';
 
@@ -170,13 +163,13 @@ export default {
 			);
 			throw new Error(`Failed to generate image: ${response.statusText}}`);
 		}
-		
+
 		const { result: { image } } = await response.json();
 
 		return Uint8Array.from(atob(image), (m) => m.codePointAt(0)!);
 	},
 
-	/**	
+	/**
 	 * Generate SQL code using a dedicated SQL model
 	 * @param userKey - User identifier for chat history
 	 * @param quote - Optional quote to include in context
@@ -272,7 +265,7 @@ export default {
 
 		const result = await response.json();
 		return result.result.data;
-	}
+	},
 };
 
 /**

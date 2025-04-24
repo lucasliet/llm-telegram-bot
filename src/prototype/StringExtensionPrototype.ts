@@ -42,25 +42,24 @@ String.prototype.removeThinkingChatCompletion = function (): string {
 
 /**
  * Convert BlackBox web search sources to Markdown links
- * Takes the format $~~~$[{"title":"TITLE","link":"URL","snippet":"TEXT",...},...]$~~~$ 
+ * Takes the format $~~~$[{"title":"TITLE","link":"URL","snippet":"TEXT",...},...]$~~~$
  * or $~~~${"title":"TITLE","link":"URL","snippet":"TEXT",...}$~~~$
  * and converts to Markdown links [TITLE](URL)
  */
-String.prototype.convertBlackBoxWebSearchSourcesToMarkdown =
-	function (): string {
-		return this.replace(
-			/\$+~~~?\$(.*?)\$+~~~?\$/gs,
-			(_: string, groupContent: string): string => {
-				try {
-					const data = JSON.parse(groupContent);
-					if (Array.isArray(data)) {
-						return data.map(item => `[${item.title}](${item.link})`).join('\n');
-					} else {
-						return `[${data.title}](${data.link})`;
-					}
-				} catch (_e) {
-					return groupContent; // or handle the error as needed
+String.prototype.convertBlackBoxWebSearchSourcesToMarkdown = function (): string {
+	return this.replace(
+		/\$+~~~?\$(.*?)\$+~~~?\$/gs,
+		(_: string, groupContent: string): string => {
+			try {
+				const data = JSON.parse(groupContent);
+				if (Array.isArray(data)) {
+					return data.map((item) => `[${item.title}](${item.link})`).join('\n');
+				} else {
+					return `[${data.title}](${data.link})`;
 				}
-			},
-		);
-	};
+			} catch (_e) {
+				return groupContent; // or handle the error as needed
+			}
+		},
+	);
+};

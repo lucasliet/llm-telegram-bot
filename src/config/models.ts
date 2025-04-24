@@ -31,17 +31,15 @@ export const blackboxModels = {
 	reasoningModelOffline: 'deepseek-reasoner|DeepSeek-R1',
 	gptOnline: 'gpt-3.5-turbo',
 	gptModel: 'GPT-4o|GPT-4o',
-	llamaModel:
-	'meta-llama/Llama-4-Maverick-17B-128E-Instruct-FP8|Llama-4-Maverick-17B-128E',
-	mixtralModel:
-	'mistralai/Mistral-Small-24B-Instruct-2501|Mistral-Small-24B-Instruct-2501',
+	llamaModel: 'meta-llama/Llama-4-Maverick-17B-128E-Instruct-FP8|Llama-4-Maverick-17B-128E',
+	mixtralModel: 'mistralai/Mistral-Small-24B-Instruct-2501|Mistral-Small-24B-Instruct-2501',
 	qwenModel: 'Qwen/QwQ-32B-Preview|Qwen-QwQ-32B-Preview',
 	deepseekv3: 'deepseek-chat|DeepSeek-V3',
 	geminiModel: 'Gemini/Gemini-Flash-2.0|Gemini-Flash-2.0',
 	geminiProModel: 'Gemini-PRO|Gemini-PRO',
 	claudeModel: 'Claude-sonnet-3.7|Claude-sonnet-3.7',
 	o1Model: 'o1|o1',
-	o3MiniModel: 'o3-mini|o3-mini'
+	o3MiniModel: 'o3-mini|o3-mini',
 };
 
 export const duckduckgoModels = {

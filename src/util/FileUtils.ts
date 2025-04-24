@@ -1,10 +1,5 @@
 import { Context } from 'https://deno.land/x/grammy@v1.17.2/context.ts';
-import {
-	Audio,
-	PhotoSize,
-	Voice,
-	InputFile,
-} from 'https://deno.land/x/grammy@v1.17.2/types.deno.ts';
+import { Audio, InputFile, PhotoSize, Voice } from 'https://deno.land/x/grammy@v1.17.2/types.deno.ts';
 import { getCurrentModel } from '../repository/ChatRepository.ts';
 import OpenAiService from '../service/openai/OpenAIService.ts';
 import CloudFlareService from '../service/CloudFlareService.ts';
@@ -85,13 +80,13 @@ export const FileUtils = {
 	 * @returns Promise resolvendo para undefined quando completo
 	 */
 	async textToSpeech(
-		text: string
+		text: string,
 	): Promise<InputFile> {
 		try {
 			const audioData = await ElevenLabsService.textToSpeech(text);
-			
+
 			const audioInput = new InputFile(audioData, 'audio.mp3');
-			
+
 			return audioInput;
 		} catch (error: unknown) {
 			console.error('Erro ao converter texto para áudio:', error);

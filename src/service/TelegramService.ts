@@ -1,16 +1,9 @@
 import { Context } from 'https://deno.land/x/grammy@v1.17.2/context.ts';
 import { Voice } from 'https://deno.land/x/grammy@v1.17.2/types.deno.ts';
 
-import {
-	getCurrentModel,
-	setCurrentModel,
-} from '../repository/ChatRepository.ts';
+import { getCurrentModel, setCurrentModel } from '../repository/ChatRepository.ts';
 
-import {
-	ModelCommand,
-	modelCommands,
-	WHITELISTED_MODELS,
-} from '../config/models.ts';
+import { ModelCommand, modelCommands, WHITELISTED_MODELS } from '../config/models.ts';
 
 import {
 	handleBlackbox,

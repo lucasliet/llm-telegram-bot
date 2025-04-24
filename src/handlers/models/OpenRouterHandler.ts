@@ -37,7 +37,7 @@ export async function handleOpenRouter(
 	const { reader, onComplete, responseMap } = await openAIService.generateText(
 		userKey,
 		quote,
-		message!.replace(`${command}:`, '')
+		message!.replace(`${command}:`, ''),
 	);
 
 	ctx.streamReply(reader, onComplete, responseMap);

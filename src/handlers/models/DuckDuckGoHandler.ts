@@ -25,7 +25,7 @@ export async function handleDuckDuckGo(
 	const { reader, onComplete, responseMap } = await duckDuckGoService.generateText(
 		userKey,
 		quote,
-		message!.replace(`${command}:`, '')
+		message!.replace(`${command}:`, ''),
 	);
 
 	ctx.streamReply(reader, onComplete, responseMap);

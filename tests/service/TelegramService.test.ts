@@ -1,11 +1,6 @@
 import { assertEquals } from 'asserts';
 import { spy } from 'mock';
-import {
-	assertSpyCalls,
-	createMockContext,
-	MockContext,
-	mockDenoEnv,
-} from '../test_helpers.ts';
+import { assertSpyCalls, createMockContext, MockContext, mockDenoEnv } from '../test_helpers.ts';
 
 import { ModelCommand } from '../../src/config/models.ts';
 
@@ -16,9 +11,7 @@ Deno.test('TelegramService', async (t) => {
 	});
 
 	const originalFetch = globalThis.fetch;
-	const mockFetch = spy(() =>
-		Promise.resolve(new Response(JSON.stringify({ ok: true }), { status: 200 }))
-	);
+	const mockFetch = spy(() => Promise.resolve(new Response(JSON.stringify({ ok: true }), { status: 200 })));
 	globalThis.fetch = mockFetch;
 
 	const originalOpenKv = Deno.openKv;
@@ -227,7 +220,6 @@ Deno.test('TelegramService', async (t) => {
 		globalThis.handleOpenAI = mockHandleOpenAI;
 
 		TelegramService.callOpenAIModel(ctx, 'test message');
-
 	});
 
 	globalThis.fetch = originalFetch;

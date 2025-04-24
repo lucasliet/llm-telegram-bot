@@ -1,18 +1,10 @@
-import {
-	addContentToChatHistory,
-	getChatHistory,
-} from '../repository/ChatRepository.ts';
-import {
-	convertGeminiHistoryToGPT,
-	replaceGeminiConfigFromTone,
-	StreamReplyResponse,
-} from '../util/ChatConfigUtil.ts';
+import { addContentToChatHistory, getChatHistory } from '../repository/ChatRepository.ts';
+import { convertGeminiHistoryToGPT, replaceGeminiConfigFromTone, StreamReplyResponse } from '../util/ChatConfigUtil.ts';
 
 const PUTER_TOKEN = Deno.env.get('PUTER_TOKEN') as string;
 
 const requestHeaders = {
-	'User-Agent':
-		'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:134.0) Gecko/20100101 Firefox/134.0',
+	'User-Agent': 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:134.0) Gecko/20100101 Firefox/134.0',
 	'Accept': '*/*',
 	'Accept-Language': 'pt-BR',
 	'Accept-Encoding': 'gzip, deflate, br, zstd',

@@ -1,12 +1,5 @@
-import {
-	addContentToChatHistory,
-	getChatHistory,
-} from '../repository/ChatRepository.ts';
-import {
-	convertGeminiHistoryToGPT,
-	replaceGeminiConfigFromTone,
-	StreamReplyResponse,
-} from '../util/ChatConfigUtil.ts';
+import { addContentToChatHistory, getChatHistory } from '../repository/ChatRepository.ts';
+import { convertGeminiHistoryToGPT, replaceGeminiConfigFromTone, StreamReplyResponse } from '../util/ChatConfigUtil.ts';
 import { blackboxModels } from '../config/models.ts';
 import { createSession, getSession } from '../repository/SessionRepository.ts';
 
@@ -22,8 +15,7 @@ const BLACKBOX_MAX_TOKENS = 8000;
 const REQUEST_OPTIONS = {
 	method: 'POST',
 	headers: {
-		'User-Agent':
-			'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:134.0) Gecko/20100101 Firefox/134.0',
+		'User-Agent': 'Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:134.0) Gecko/20100101 Firefox/134.0',
 		'Content-Type': 'application/json',
 		'Origin': 'https://www.blackbox.ai',
 	},
@@ -82,7 +74,7 @@ export default {
 				trendingAgentMode: {},
 				userSelectedModel: gptOnline === model ? null : modelName,
 				validated: '00f37b34-a166-4efb-bce5-1312d87f2f94',
-				session: await getOrCreateSession()
+				session: await getOrCreateSession(),
 			}),
 		});
 
@@ -111,20 +103,19 @@ export default {
 	 * @returns URL of the generated image
 	 */
 	async generateImage(prompt: string): Promise<string> {
-		const apiResponse =  await fetch(`https://www.blackbox.ai/api/chat`, {
-				...REQUEST_OPTIONS,
-				body: JSON.stringify({
-					messages: [
-						{ role: 'user', content: prompt },
-					],
-					agentMode: {},
-					imageGenerationMode: true,
-					isPremium: true,
-					validated: '00f37b34-a166-4efb-bce5-1312d87f2f94',
-					session: await getOrCreateSession()
-				}),
-			},
-		);
+		const apiResponse = await fetch(`https://www.blackbox.ai/api/chat`, {
+			...REQUEST_OPTIONS,
+			body: JSON.stringify({
+				messages: [
+					{ role: 'user', content: prompt },
+				],
+				agentMode: {},
+				imageGenerationMode: true,
+				isPremium: true,
+				validated: '00f37b34-a166-4efb-bce5-1312d87f2f94',
+				session: await getOrCreateSession(),
+			}),
+		});
 
 		if (!apiResponse.ok) {
 			throw new Error(`Failed to generate image: ${apiResponse.statusText}`);
@@ -145,17 +136,61 @@ export default {
 };
 
 const firstNames = [
-	'Alice', 'Bob', 'Carol', 'David', 'Emma', 'Frank', 'Grace', 'Henry',
-	'Isabel', 'John', 'Kate', 'Lucas', 'Maria', 'Nathan', 'Olivia',
-	'Paul', 'Quinn', 'Rachel', 'Samuel', 'Taylor', 'Uma', 'Victor',
-	'Wendy', 'Xavier', 'Yara', 'Zack'
+	'Alice',
+	'Bob',
+	'Carol',
+	'David',
+	'Emma',
+	'Frank',
+	'Grace',
+	'Henry',
+	'Isabel',
+	'John',
+	'Kate',
+	'Lucas',
+	'Maria',
+	'Nathan',
+	'Olivia',
+	'Paul',
+	'Quinn',
+	'Rachel',
+	'Samuel',
+	'Taylor',
+	'Uma',
+	'Victor',
+	'Wendy',
+	'Xavier',
+	'Yara',
+	'Zack',
 ];
 
 const lastNames = [
-	'Smith', 'Johnson', 'Williams', 'Brown', 'Jones', 'Garcia', 'Miller',
-	'Davis', 'Rodriguez', 'Martinez', 'Anderson', 'Taylor', 'Thomas',
-	'Moore', 'Jackson', 'Martin', 'Lee', 'Thompson', 'White', 'Lopez',
-	'Hill', 'Scott', 'Green', 'Adams', 'Baker', 'Silva'
+	'Smith',
+	'Johnson',
+	'Williams',
+	'Brown',
+	'Jones',
+	'Garcia',
+	'Miller',
+	'Davis',
+	'Rodriguez',
+	'Martinez',
+	'Anderson',
+	'Taylor',
+	'Thomas',
+	'Moore',
+	'Jackson',
+	'Martin',
+	'Lee',
+	'Thompson',
+	'White',
+	'Lopez',
+	'Hill',
+	'Scott',
+	'Green',
+	'Adams',
+	'Baker',
+	'Silva',
 ];
 
 async function getOrCreateSession(): Promise<Session> {
@@ -176,35 +211,35 @@ function generateRandomSession(): Session {
 	const randomNum = Math.floor(Math.random() * 1000000);
 
 	const randomValidExpireDate = new Date(Date.now() + Math.floor(Math.random() * (30 - 1 + 1) + 1) * 24 * 60 * 60 * 1000).toISOString();
-	
+
 	return {
 		user: {
 			name: `${firstName} ${lastName}`,
 			email: `${firstName}-${lastName}${randomNum}@gmail.com`,
-			image: generateRandomAvatarUrl()
+			image: generateRandomAvatarUrl(),
 		},
-		expires: randomValidExpireDate
-	}
-};
+		expires: randomValidExpireDate,
+	};
+}
 
 function generateRandomAvatarUrl(): string {
 	const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789_-';
 	const length = 40;
 	let result = '';
-	
+
 	for (let i = 0; i < length; i++) {
-			result += chars.charAt(Math.floor(Math.random() * chars.length));
+		result += chars.charAt(Math.floor(Math.random() * chars.length));
 	}
 	const randomNumber = Math.floor(Math.random() * 100).toString().padStart(2, '0');
-	
+
 	return `https://lh3.googleusercontent.com/a/ACg8ocJ${result}=s${randomNumber}-c`;
 }
 
 export interface Session {
 	user: {
-			name: string;
-			email: string;
-			image: string;
+		name: string;
+		email: string;
+		image: string;
 	};
 	expires: string;
 }

@@ -1,19 +1,10 @@
 import { Application } from 'https://deno.land/x/oak@v12.6.1/mod.ts';
 import { oakCors } from 'https://deno.land/x/cors@v1.2.2/mod.ts';
-import {
-	Bot,
-	Context,
-	webhookCallback,
-} from 'https://deno.land/x/grammy@v1.17.2/mod.ts';
+import { Bot, Context, webhookCallback } from 'https://deno.land/x/grammy@v1.17.2/mod.ts';
 import TelegramService from './src/service/TelegramService.ts';
 import { clearChatHistory } from './src/repository/ChatRepository.ts';
 import { modelCommands } from './src/config/models.ts';
-import {
-	adminHelpMessage,
-	adminKeyboard,
-	userHelpMessage,
-	userKeyboard,
-} from './src/config/KeyboardConfig.ts';
+import { adminHelpMessage, adminKeyboard, userHelpMessage, userKeyboard } from './src/config/KeyboardConfig.ts';
 
 import './src/prototype/StringExtensionPrototype.ts';
 import './src/prototype/ContextExtensionPrototype.ts';
@@ -34,8 +25,7 @@ APP.use(oakCors());
 function registerBotCommands() {
 	BOT.command(
 		'start',
-		(ctx) =>
-			ctx.reply('Olá, me envie uma mensagem para começarmos a conversar!'),
+		(ctx) => ctx.reply('Olá, me envie uma mensagem para começarmos a conversar!'),
 	);
 	BOT.command('help', (ctx) => {
 		const userId = ctx.from?.id;
@@ -49,55 +39,45 @@ function registerBotCommands() {
 
 	BOT.command(
 		'currentmodel',
-		async (ctx) =>
-			ctx.reply(`Modelo atual: ${await TelegramService.getCurrentModel(ctx)}`),
+		async (ctx) => ctx.reply(`Modelo atual: ${await TelegramService.getCurrentModel(ctx)}`),
 	);
 	BOT.command(
 		'adminIds',
-		async (ctx) =>
-			ADMIN_USER_IDS.includes(ctx.from?.id!) && ctx.reply((await TelegramService.getAdminIds(ctx)).join('|')),
+		async (ctx) => ADMIN_USER_IDS.includes(ctx.from?.id!) && ctx.reply((await TelegramService.getAdminIds(ctx)).join('|')),
 	);
 	BOT.command('clear', (ctx) => clearChatHistoryHandler(ctx));
 
 	BOT.hears(
 		/^(sql|code|cloudflareImage):/gi,
-		(ctx) =>
-			TelegramService.callAdminModel(ctx, TelegramService.callCloudflareModel),
+		(ctx) => TelegramService.callAdminModel(ctx, TelegramService.callCloudflareModel),
 	);
 	BOT.hears(
 		/^(perplexity|reasonSearch|search):/gi,
-		(ctx) =>
-			TelegramService.callAdminModel(ctx, TelegramService.callPerplexityModel),
+		(ctx) => TelegramService.callAdminModel(ctx, TelegramService.callPerplexityModel),
 	);
 	BOT.hears(
 		/^(gptImage):/gi,
-		(ctx) =>
-			TelegramService.callAdminModel(ctx, TelegramService.callOpenAIModel),
+		(ctx) => TelegramService.callAdminModel(ctx, TelegramService.callOpenAIModel),
 	);
 	BOT.hears(
 		/^(gpt|o4mini):/gi,
-		(ctx) =>
-			TelegramService.callAdminModel(ctx, TelegramService.callGithubCopilotModel),
+		(ctx) => TelegramService.callAdminModel(ctx, TelegramService.callGithubCopilotModel),
 	);
 	BOT.hears(
 		/^(black|gptonline|r1off|r1|v3|mixtral|qwen|claude|gemini|geminiPro|o1|o3Mini|image|fala):/gi,
-		(ctx) =>
-			TelegramService.callAdminModel(ctx, TelegramService.callBlackboxModel),
+		(ctx) => TelegramService.callAdminModel(ctx, TelegramService.callBlackboxModel),
 	);
 	BOT.hears(
 		/^(llama):/gi,
-		(ctx) =>
-			TelegramService.callAdminModel(ctx, TelegramService.callOpenRouterModel),
+		(ctx) => TelegramService.callAdminModel(ctx, TelegramService.callOpenRouterModel),
 	);
 	BOT.hears(
 		/^(duck):/gi,
-		(ctx) =>
-			TelegramService.callAdminModel(ctx, TelegramService.callDuckDuckGoModel),
+		(ctx) => TelegramService.callAdminModel(ctx, TelegramService.callDuckDuckGoModel),
 	);
 	BOT.hears(
 		/^(phind):/gi,
-		(ctx) =>
-			TelegramService.callAdminModel(ctx, TelegramService.callPhindModel),
+		(ctx) => TelegramService.callAdminModel(ctx, TelegramService.callPhindModel),
 	);
 
 	BOT.hears(
