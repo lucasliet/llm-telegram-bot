@@ -1,9 +1,9 @@
-import { Context } from 'https://deno.land/x/grammy@v1.17.2/context.ts';
-import { PhotoSize } from 'https://deno.land/x/grammy@v1.17.2/types.deno.ts';
-import { ApiKeyNotFoundError } from '../../error/ApiKeyNotFoundError.ts';
-import GeminiService from '../../service/GeminiService.ts';
-import { setUserGeminiApiKeysIfAbsent } from '../../repository/ChatRepository.ts';
-import { FileUtils } from '../../util/FileUtils.ts';
+import { Context } from 'grammy-context';
+import { PhotoSize } from 'grammy-types';
+import { ApiKeyNotFoundError } from '@/error/ApiKeyNotFoundError.ts';
+import GeminiService from '@/service/GeminiService.ts';
+import { setUserGeminiApiKeysIfAbsent } from '@/repository/ChatRepository.ts';
+import { FileUtils } from '@/util/FileUtils.ts';
 
 /**
  * Handles requests for Google Gemini models

@@ -1,4 +1,4 @@
-import { Context } from 'https://deno.land/x/grammy@v1.17.2/mod.ts';
+import { Context } from 'grammy';
 import { Spy, spy } from 'mock';
 import { assertEquals } from 'asserts';
 

@@ -1,9 +1,9 @@
-import { Context } from 'https://deno.land/x/grammy@v1.17.2/context.ts';
-import { Audio, InputFile, PhotoSize, Voice } from 'https://deno.land/x/grammy@v1.17.2/types.deno.ts';
-import { getCurrentModel } from '../repository/ChatRepository.ts';
-import OpenAiService from '../service/openai/OpenAIService.ts';
-import CloudFlareService from '../service/CloudFlareService.ts';
-import ElevenLabsService from '../service/ElevenLabsService.ts';
+import { Context } from 'grammy-context';
+import { Audio, InputFile, PhotoSize, Voice } from 'grammy-types';
+import { getCurrentModel } from '@/repository/ChatRepository.ts';
+import OpenAiService from '@/service/openai/OpenAIService.ts';
+import CloudFlareService from '@/service/CloudFlareService.ts';
+import ElevenLabsService from '@/service/ElevenLabsService.ts';
 const TOKEN = Deno.env.get('BOT_TOKEN') as string;
 const ADMIN_USER_IDS: number[] = (Deno.env.get('ADMIN_USER_IDS') as string)
 	.split('|').map((id) => parseInt(id));

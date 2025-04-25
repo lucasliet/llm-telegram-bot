@@ -1,7 +1,7 @@
-import { Context } from 'https://deno.land/x/grammy@v1.17.2/context.ts';
-import { InputFile } from 'https://deno.land/x/grammy@v1.17.2/types.deno.ts';
-import CloudFlareService from '../../service/CloudFlareService.ts';
-import { FileUtils } from '../../util/FileUtils.ts';
+import { Context } from 'grammy-context';
+import { InputFile } from 'grammy-types';
+import CloudFlareService from '@/service/CloudFlareService.ts';
+import { FileUtils } from '@/util/FileUtils.ts';
 
 /**
  * Handles requests for Cloudflare models

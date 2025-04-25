@@ -1,12 +1,12 @@
-import { Context } from 'https://deno.land/x/grammy@v1.17.2/context.ts';
-import duckDuckGoService from '../../service/DuckDuckGoService.ts';
+import { Context } from 'grammy-context';
+import { PhindService } from '@/service/PhindService.ts';
 
 /**
- * Handles requests for OpenRouter models
+ * Handles requests for Phind models
  * @param ctx - Telegram context
  * @param commandMessage - Optional command message override
  */
-export async function handleDuckDuckGo(
+export async function handlePhind(
 	ctx: Context,
 	commandMessage?: string,
 ): Promise<void> {
@@ -20,9 +20,11 @@ export async function handleDuckDuckGo(
 		return;
 	}
 
+	const phindService = new PhindService();
+
 	const command = message!.split(':')[0].toLowerCase();
 
-	const { reader, onComplete, responseMap } = await duckDuckGoService.generateText(
+	const { reader, onComplete, responseMap } = await phindService.generateText(
 		userKey,
 		quote,
 		message!.replace(`${command}:`, ''),

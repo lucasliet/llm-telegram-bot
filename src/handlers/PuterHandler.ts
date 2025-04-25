@@ -1,5 +1,5 @@
-import { Context } from 'https://deno.land/x/grammy@v1.17.2/context.ts';
-import PuterService from '../../service/PuterService.ts';
+import { Context } from 'grammy-context';
+import PuterService from '@/service/PuterService.ts';
 
 /**
  * Handles requests for Puter's Claude models

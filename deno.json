@@ -11,7 +11,13 @@
 	},
 	"imports": {
 		"asserts": "https://deno.land/std@0.210.0/assert/mod.ts",
-		"mock": "https://deno.land/std@0.210.0/testing/mock.ts"
+		"mock": "https://deno.land/std@0.210.0/testing/mock.ts",
+		"grammy": "https://deno.land/x/grammy@v1.17.2/mod.ts",
+		"grammy-context": "https://deno.land/x/grammy@v1.17.2/context.ts",
+		"grammy-types": "https://deno.land/x/grammy@v1.17.2/types.deno.ts",
+		"oak": "https://deno.land/x/oak@v12.6.1/mod.ts",
+		"oak-cors": "https://deno.land/x/cors@v1.2.2/mod.ts",
+		"@/": "./src/"
 	},
 	"compilerOptions": {
 		"strict": true

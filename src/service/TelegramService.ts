@@ -1,9 +1,9 @@
-import { Context } from 'https://deno.land/x/grammy@v1.17.2/context.ts';
-import { Voice } from 'https://deno.land/x/grammy@v1.17.2/types.deno.ts';
+import { Context } from 'grammy-context';
+import { Voice } from 'grammy-types';
 
-import { getCurrentModel, setCurrentModel } from '../repository/ChatRepository.ts';
+import { getCurrentModel, setCurrentModel } from '@/repository/ChatRepository.ts';
 
-import { ModelCommand, modelCommands, WHITELISTED_MODELS } from '../config/models.ts';
+import { ModelCommand, modelCommands, WHITELISTED_MODELS } from '@/config/models.ts';
 
 import {
 	handleBlackbox,
@@ -16,9 +16,9 @@ import {
 	handlePerplexity,
 	handlePhind,
 	handlePuter,
-} from '../handlers/models/index.ts';
+} from '@/handlers/index.ts';
 
-import { FileUtils } from '../util/FileUtils.ts';
+import { FileUtils } from '@/util/FileUtils.ts';
 
 const TOKEN = Deno.env.get('BOT_TOKEN') as string;
 const ADMIN_USER_IDS: number[] = (Deno.env.get('ADMIN_USER_IDS') as string)

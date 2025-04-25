@@ -9,13 +9,13 @@ import {
 	SafetySetting,
 } from 'npm:@google/generative-ai';
 import { Base64 } from 'https://deno.land/x/bb64@1.1.0/mod.ts';
-import { getChatHistory, getUserGeminiApiKeys } from '../repository/ChatRepository.ts';
-import { addContentToChatHistory } from '../repository/ChatRepository.ts';
-import { ApiKeyNotFoundError } from '../error/ApiKeyNotFoundError.ts';
+import { getChatHistory, getUserGeminiApiKeys } from '@/repository/ChatRepository.ts';
+import { addContentToChatHistory } from '@/repository/ChatRepository.ts';
+import { ApiKeyNotFoundError } from '@/error/ApiKeyNotFoundError.ts';
 import { HarmBlockThreshold } from 'npm:@google/generative-ai';
-import { geminiModel } from '../config/models.ts';
+import { geminiModel } from '@/config/models.ts';
 import { downloadTelegramFile } from './TelegramService.ts';
-import { removeExpirationFromHistory } from '../util/ChatConfigUtil.ts';
+import { removeExpirationFromHistory } from '@/util/ChatConfigUtil.ts';
 
 const GEMINI_API_KEY = Deno.env.get('GEMINI_API_KEY') as string;
 

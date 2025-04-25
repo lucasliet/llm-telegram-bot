@@ -1,7 +1,7 @@
 import { Content } from 'npm:@google/generative-ai';
 import OpenAi from 'npm:openai';
-import GeminiService from '../service/GeminiService.ts';
-import { ExpirableContent } from '../repository/ChatRepository.ts';
+import GeminiService from '@/service/GeminiService.ts';
+import { ExpirableContent } from '@/repository/ChatRepository.ts';
 
 /**
  * Interface for StreamReplyResponse

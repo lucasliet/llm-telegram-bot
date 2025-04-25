@@ -1,10 +1,10 @@
-import { addContentToChatHistory, ExpirableContent, getChatHistory, getVqdHeader, setVqdHeader } from '../repository/ChatRepository.ts';
-import { convertGeminiHistoryToGPT, replaceGeminiConfigFromTone, StreamReplyResponse } from '../util/ChatConfigUtil.ts';
+import { addContentToChatHistory, ExpirableContent, getChatHistory, getVqdHeader, setVqdHeader } from '@/repository/ChatRepository.ts';
+import { convertGeminiHistoryToGPT, replaceGeminiConfigFromTone, StreamReplyResponse } from '@/util/ChatConfigUtil.ts';
 import OpenAi from 'npm:openai';
 
-import { duckduckgoModels } from '../config/models.ts';
+import { duckduckgoModels } from '@/config/models.ts';
 
-const { o3mini, haiku } = duckduckgoModels;
+const { o3mini } = duckduckgoModels;
 
 const maxTokens = 8000;
 
@@ -65,13 +65,6 @@ export default {
 			);
 
 		return { reader, onComplete, responseMap };
-	},
-	generateTextClaude(
-		userKey: string,
-		quote: string = '',
-		prompt: string,
-	): Promise<StreamReplyResponse> {
-		return this.generateText(userKey, quote, prompt, haiku);
 	},
 };
 

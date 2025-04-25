@@ -1,6 +1,6 @@
-import { addContentToChatHistory, getChatHistory } from '../repository/ChatRepository.ts';
-import { convertGeminiHistoryToGPT, replaceGeminiConfigFromTone, StreamReplyResponse } from '../util/ChatConfigUtil.ts';
-import { cloudflareModels } from '../config/models.ts';
+import { addContentToChatHistory, getChatHistory } from '@/repository/ChatRepository.ts';
+import { convertGeminiHistoryToGPT, replaceGeminiConfigFromTone, StreamReplyResponse } from '@/util/ChatConfigUtil.ts';
+import { cloudflareModels } from '@/config/models.ts';
 import { downloadTelegramFile } from './TelegramService.ts';
 
 const CLOUDFLARE_ACCOUNT_ID: string = Deno.env.get(

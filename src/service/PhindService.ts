@@ -1,5 +1,5 @@
-import { addContentToChatHistory, getChatHistory } from '../repository/ChatRepository.ts';
-import { convertGeminiHistoryToGPT, replaceGeminiConfigFromTone, StreamReplyResponse } from '../util/ChatConfigUtil.ts';
+import { addContentToChatHistory, getChatHistory } from '@/repository/ChatRepository.ts';
+import { convertGeminiHistoryToGPT, replaceGeminiConfigFromTone, StreamReplyResponse } from '@/util/ChatConfigUtil.ts';
 
 export class PhindService {
 	private readonly headers = {

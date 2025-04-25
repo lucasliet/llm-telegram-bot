@@ -1,7 +1,7 @@
-import { addContentToChatHistory, getChatHistory } from '../repository/ChatRepository.ts';
-import { convertGeminiHistoryToGPT, replaceGeminiConfigFromTone, StreamReplyResponse } from '../util/ChatConfigUtil.ts';
-import { blackboxModels } from '../config/models.ts';
-import { createSession, getSession } from '../repository/SessionRepository.ts';
+import { addContentToChatHistory, getChatHistory } from '@/repository/ChatRepository.ts';
+import { convertGeminiHistoryToGPT, replaceGeminiConfigFromTone, StreamReplyResponse } from '@/util/ChatConfigUtil.ts';
+import { blackboxModels } from '@/config/models.ts';
+import { createSession, getSession } from '@/repository/SessionRepository.ts';
 
 /**
  * Constants and configuration

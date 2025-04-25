@@ -1,13 +1,13 @@
-import { Context } from 'https://deno.land/x/grammy@v1.17.2/context.ts';
-import { FileUtils } from '../../util/FileUtils.ts';
-import GithubCopilotService from '../../service/openai/GithubCopilotService.ts';
+import { Context } from 'grammy-context';
+import { FileUtils } from '@/util/FileUtils.ts';
+import OpenrouterService from '@/service/openai/OpenrouterService.ts';
 
 /**
  * Handles requests for OpenRouter models
  * @param ctx - Telegram context
  * @param commandMessage - Optional command message override
  */
-export async function handleGithubCopilot(
+export async function handleOpenRouter(
 	ctx: Context,
 	commandMessage?: string,
 ): Promise<void> {
@@ -16,11 +16,7 @@ export async function handleGithubCopilot(
 
 	const message = commandMessage || contextMessage;
 
-	const command = message?.split(':')[0]?.toLowerCase();
-
-	const model = command === 'gpt' ? 'gpt-4.1' : 'o4-mini';
-
-	const openAIService = new GithubCopilotService(model);
+	const openAIService = new OpenrouterService();
 
 	if (photos && caption) {
 		const photosUrl = FileUtils.getTelegramFilesUrl(ctx, photos);
@@ -35,6 +31,8 @@ export async function handleGithubCopilot(
 		ctx.streamReply(reader, onComplete, responseMap);
 		return;
 	}
+
+	const command = message!.split(':')[0].toLowerCase();
 
 	const { reader, onComplete, responseMap } = await openAIService.generateText(
 		userKey,

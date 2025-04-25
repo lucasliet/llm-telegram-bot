@@ -1,4 +1,4 @@
-import { Session } from '../service/BlackboxaiService.ts';
+import { Session } from '@/service/BlackboxaiService.ts';
 
 const kv = await Deno.openKv();
 

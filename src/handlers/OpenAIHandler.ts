@@ -1,8 +1,8 @@
-import { Context } from 'https://deno.land/x/grammy@v1.17.2/context.ts';
-import { InputMediaBuilder } from 'https://deno.land/x/grammy@v1.17.2/mod.ts';
-import OpenAiService from '../../service/openai/OpenAIService.ts';
-import { FileUtils } from '../../util/FileUtils.ts';
-import GithubService from '../../service/openai/GithubService.ts';
+import { Context } from 'grammy-context';
+import { InputMediaBuilder } from 'grammy';
+import OpenAiService from '@/service/openai/OpenAIService.ts';
+import { FileUtils } from '@/util/FileUtils.ts';
+import GithubService from '@/service/openai/GithubService.ts';
 
 /**
  * Handles requests for OpenAI models

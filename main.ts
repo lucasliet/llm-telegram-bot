@@ -1,13 +1,13 @@
-import { Application } from 'https://deno.land/x/oak@v12.6.1/mod.ts';
-import { oakCors } from 'https://deno.land/x/cors@v1.2.2/mod.ts';
-import { Bot, Context, webhookCallback } from 'https://deno.land/x/grammy@v1.17.2/mod.ts';
-import TelegramService from './src/service/TelegramService.ts';
-import { clearChatHistory } from './src/repository/ChatRepository.ts';
-import { modelCommands } from './src/config/models.ts';
-import { adminHelpMessage, adminKeyboard, userHelpMessage, userKeyboard } from './src/config/KeyboardConfig.ts';
+import { Application } from 'oak';
+import { oakCors } from 'oak-cors';
+import { Bot, Context, webhookCallback } from 'grammy';
+import TelegramService from '@/service/TelegramService.ts';
+import { clearChatHistory } from '@/repository/ChatRepository.ts';
+import { modelCommands } from '@/config/models.ts';
+import { adminHelpMessage, adminKeyboard, userHelpMessage, userKeyboard } from '@/config/KeyboardConfig.ts';
 
-import './src/prototype/StringExtensionPrototype.ts';
-import './src/prototype/ContextExtensionPrototype.ts';
+import '@/prototype/StringExtensionPrototype.ts';
+import '@/prototype/ContextExtensionPrototype.ts';
 
 const TOKEN: string = Deno.env.get('BOT_TOKEN') as string;
 const PORT: number = parseInt(Deno.env.get('PORT') as string) || 3333;
@@ -72,7 +72,7 @@ function registerBotCommands() {
 		(ctx) => TelegramService.callAdminModel(ctx, TelegramService.callOpenRouterModel),
 	);
 	BOT.hears(
-		/^(duck):/gi,
+		/^(duck|duckgo):/gi,
 		(ctx) => TelegramService.callAdminModel(ctx, TelegramService.callDuckDuckGoModel),
 	);
 	BOT.hears(

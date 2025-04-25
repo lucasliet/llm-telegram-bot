@@ -1,7 +1,7 @@
-import { Context } from 'https://deno.land/x/grammy@v1.17.2/context.ts';
-import BlackboxaiService from '../../service/BlackboxaiService.ts';
-import { blackboxModels } from '../../config/models.ts';
-import { textToSpeech } from '../../service/TelegramService.ts';
+import { Context } from 'grammy-context';
+import BlackboxaiService from '@/service/BlackboxaiService.ts';
+import { blackboxModels } from '@/config/models.ts';
+import { textToSpeech } from '@/service/TelegramService.ts';
 
 const {
 	gptOnline,

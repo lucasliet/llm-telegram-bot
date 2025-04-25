@@ -1,10 +1,10 @@
-import { Context } from 'https://deno.land/x/grammy@v1.17.2/mod.ts';
-import { Audio, Message, ParseMode, PhotoSize, Voice } from 'https://deno.land/x/grammy@v1.17.2/types.deno.ts';
-import { transcribeAudio } from '../service/TelegramService.ts';
+import { Context } from 'grammy';
+import { Audio, Message, ParseMode, PhotoSize, Voice } from 'grammy-types';
+import { transcribeAudio } from '@/service/TelegramService.ts';
 
 const MARKDOWN_ERROR_MESSAGE = 'Error on markdown parse_mode, message:';
 
-declare module 'https://deno.land/x/grammy@v1.17.2/mod.ts' {
+declare module 'grammy' {
 	interface Context {
 		replyWithQuote(
 			output: string,

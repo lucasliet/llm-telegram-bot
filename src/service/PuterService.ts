@@ -1,5 +1,5 @@
-import { addContentToChatHistory, getChatHistory } from '../repository/ChatRepository.ts';
-import { convertGeminiHistoryToGPT, replaceGeminiConfigFromTone, StreamReplyResponse } from '../util/ChatConfigUtil.ts';
+import { addContentToChatHistory, getChatHistory } from '@/repository/ChatRepository.ts';
+import { convertGeminiHistoryToGPT, replaceGeminiConfigFromTone, StreamReplyResponse } from '@/util/ChatConfigUtil.ts';
 
 const PUTER_TOKEN = Deno.env.get('PUTER_TOKEN') as string;
 

@@ -1,4 +1,4 @@
-import { InlineKeyboard } from 'https://deno.land/x/grammy@v1.17.2/mod.ts';
+import { InlineKeyboard } from 'grammy';
 
 /**
  * Helper command buttons for inline keyboard - Admin version (all models)

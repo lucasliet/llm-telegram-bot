@@ -1,5 +1,5 @@
-import { Context } from 'https://deno.land/x/grammy@v1.17.2/context.ts';
-import PerplexityService from '../../service/openai/PerplexityService.ts';
+import { Context } from 'grammy-context';
+import PerplexityService from '@/service/openai/PerplexityService.ts';
 
 /**
  * Handles requests for Perplexity models
