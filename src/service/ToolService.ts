@@ -41,13 +41,14 @@ export default class ToolService {
 			 * @param args - The search parameters.
 			 * @param args.query - The search query string.
 			 * @param args.num_results - The number of results to return.
-			 * @returns A promise that resolves to an array of SearxResult.
+			 * @returns A promise that resolves to an array of {@link SearxResult}.
 			 * @throws An error if all SearxNG instances fail.
 			 */
 			fn: async (args: { query: string; num_results: number }): Promise<SearxResult[]> => {
 				const { query, num_results } = args;
 
 				const instances = [
+					'https://search.lucasliet.com.br',
 					'http://172.233.16.115:5387',
 				];
 
