@@ -4,8 +4,9 @@ import { InlineKeyboard } from 'grammy';
  * Helper command buttons for inline keyboard - Admin version (all models)
  */
 const adminCommandButtons = [
+	[['Modelo Atual', '/currentmodel']],
 	[
-		['Modelo Atual', '/currentmodel'],
+		['Grok 3', '/grok'],
 		['Phind', '/phind'],
 	],
 	[
@@ -39,8 +40,9 @@ const adminCommandButtons = [
  * Helper command buttons for inline keyboard - Regular user version (whitelisted models only)
  */
 const userCommandButtons = [
+	[['Modelo Atual', '/currentmodel']],
 	[
-		['Modelo Atual', '/currentmodel'],
+		['Grok 3', '/grok'],
 		['Phind', '/phind'],
 	],
 	[
@@ -92,7 +94,10 @@ export const adminHelpMessage = `*Comandos inline*:
 \\- \`gemini:\` mensagem \\- Faz uma pergunta usando o modelo __Gemini__ pela __BlackboxAI__
 \\- \`geminiPro:\` mensagem \\- Faz uma pergunta usando o modelo __GeminiPro__ pela __BlackboxAI__
 \\- \`o3mini:\` mensagem \\- Faz uma pergunta usando o modelo __o3mini__ pela __DuckDuckGo__
+\\- \`o3high:\` mensagem \\- Faz uma pergunta usando o modelo __o3high__ pela __BlackboxAI__
+\\- \`gpt45:\` mensagem \\- Faz uma pergunta usando o modelo __gpt45__ pela __BlackboxAI__
 \\- \`o4mini:\` mensagem \\- Faz uma pergunta usando o modelo __o4mini__ pelo __Github Copilot__
+\\- \`grok:\` mensagem \\- Faz uma pergunta usando o modelo __Grok 3__ pela __BlackboxAI__
 \\- \`fala:\` mensagem \\- Faz uma pergunta usando __Elevenlabs__ para TTS
 
 *Seleção de modelos de linguagem*:`;
@@ -111,6 +116,7 @@ export const userHelpMessage = `*Comandos inline*:
 \\- \`claude:\` mensagem \\- Faz uma pergunta usando o modelo __Claude__ pela __BlackboxAI__
 \\- \`gemini:\` mensagem \\- Faz uma pergunta usando o modelo __Gemini__ pela __BlackboxAI__
 \\- \`o3mini:\` mensagem \\- Faz uma pergunta usando o modelo __o3mini__ pela __DuckDuckGo__
+\\- \`grok:\` mensagem \\- Faz uma pergunta usando o modelo __Grok 3__ pela __BlackboxAI__
 \\- \`cloudflareImage:\` mensagem \\- Gera imagens com __Stable Diffusion__
 
 *Seleção de modelos de linguagem*:`;

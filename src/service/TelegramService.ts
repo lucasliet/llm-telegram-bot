@@ -155,7 +155,7 @@ export default {
 			'/gpt': () => handleGithubCopilot(ctx, `gpt: ${message}`),
 			'/perplexity': () => handlePerplexity(ctx, `perplexity: ${message}`),
 			'/perplexityReasoning': () => handlePerplexity(ctx, `perplexityReasoning: ${message}`),
-			'/llama': () => handleOpenRouter(ctx, `llama: ${message!}`),
+			'/llama': () => handleBlackbox(ctx, `llama: ${message!}`),
 			'/r1': () => handleBlackbox(ctx, `r1: ${message}`),
 			'/r1off': () => handleBlackbox(ctx, `r1off: ${message}`),
 			'/mixtral': () => handleBlackbox(ctx, `mixtral: ${message}`),
@@ -165,6 +165,7 @@ export default {
 			'/gemini': () => handleBlackbox(ctx, `gemini: ${message}`),
 			'/o3mini': () => handleDuckDuckGo(ctx, `duck: ${message}`),
 			'/o4mini': () => handleGithubCopilot(ctx, `o4mini: ${message}`),
+			'/grok': () => handleBlackbox(ctx, `grok: ${message}`),
 			'/phind': () => handlePhind(ctx, `phind: ${message}`),
 		};
 

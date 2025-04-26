@@ -16,6 +16,9 @@ const {
 	geminiProModel,
 	o1Model,
 	o3MiniModel,
+	o3miniHigh,
+	gpt45Preview,
+	grok3Beta,
 } = blackboxModels;
 
 /**
@@ -50,8 +53,11 @@ export async function handleBlackbox(
 		| 'claude'
 		| 'o1'
 		| 'o3mini'
+		| 'o3high'
+		| 'gpt45'
+		| 'grok'
 		| 'gemini'
-		| 'geminiPro'
+		| 'geminipro'
 		| 'image'
 		| 'fala';
 
@@ -200,6 +206,34 @@ export async function handleBlackbox(
 
 			ctx.streamReply(reader, onComplete);
 		},
+		'o3high': async () => {
+			const { reader, onComplete } = await BlackboxaiService.generateText(
+				userKey,
+				quote,
+				message!.replace('o3high:', ''),
+				o3miniHigh,
+			);
+
+			ctx.streamReply(reader, onComplete);
+		},
+		'gpt45': async () => {
+			const { reader, onComplete } = await BlackboxaiService.generateText(
+				userKey,
+				quote,
+				message!.replace('gpt45:', ''),
+				gpt45Preview,
+			);
+			ctx.streamReply(reader, onComplete);
+		},
+		'grok': async () => {
+			const { reader, onComplete } = await BlackboxaiService.generateText(
+				userKey,
+				quote,
+				message!.replace('grok:', ''),
+				grok3Beta,
+			);
+			ctx.streamReply(reader, onComplete);
+		},
 		'gemini': async () => {
 			const { reader, onComplete } = await BlackboxaiService.generateText(
 				userKey,
@@ -210,11 +244,11 @@ export async function handleBlackbox(
 
 			ctx.streamReply(reader, onComplete);
 		},
-		'geminiPro': async () => {
+		'geminipro': async () => {
 			const { reader, onComplete } = await BlackboxaiService.generateText(
 				userKey,
 				quote,
-				message!.replace('geminiPro:', ''),
+				message!.replace('geminipro:', ''),
 				geminiProModel,
 			);
 

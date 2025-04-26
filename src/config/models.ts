@@ -31,7 +31,7 @@ export const blackboxModels = {
 	reasoningModelOffline: 'deepseek-reasoner|DeepSeek-R1',
 	gptOnline: 'gpt-3.5-turbo',
 	gptModel: 'GPT-4o|GPT-4o',
-	llamaModel: 'meta-llama/Llama-4-Maverick-17B-128E-Instruct-FP8|Llama-4-Maverick-17B-128E',
+	llamaModel: 'meta-llama/llama-4-maverick|Llama 4 Maverick',
 	mixtralModel: 'mistralai/Mistral-Small-24B-Instruct-2501|Mistral-Small-24B-Instruct-2501',
 	qwenModel: 'Qwen/QwQ-32B-Preview|Qwen-QwQ-32B-Preview',
 	deepseekv3: 'deepseek-chat|DeepSeek-V3',
@@ -71,6 +71,7 @@ export type ModelCommand =
 	| '/geminiPro'
 	| '/o3mini'
 	| '/o4mini'
+	| '/grok'
 	| '/phind';
 
 /**
@@ -90,6 +91,7 @@ export const modelCommands: ModelCommand[] = [
 	'/geminiPro',
 	'/o3mini',
 	'/o4mini',
+	'/grok',
 	'/phind',
 ];
 
@@ -103,5 +105,6 @@ export const WHITELISTED_MODELS: ModelCommand[] = [
 	'/gemini',
 	'/claude',
 	'/o3mini',
+	'/grok',
 	'/phind',
 ];
