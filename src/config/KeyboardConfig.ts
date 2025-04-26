@@ -25,7 +25,7 @@ const adminCommandButtons = [
 		['Mixtral', '/mixtral'],
 	],
 	[
-		['Claude 2.7 Sonnet', '/claude'],
+		['Claude 3.7 Sonnet', '/claude'],
 		['GPT o3 Mini', '/o3mini'],
 	],
 	[
@@ -56,7 +56,7 @@ const userCommandButtons = [
 		['Gemini 2.0 Flash', '/gemini'],
 	],
 	[
-		['Claude 2.7 Sonnet', '/claude'],
+		['Claude 3.7 Sonnet', '/claude'],
 		['GPT o3 Mini', '/o3mini'],
 	],
 	[['Limpar Histórico', '/clear']],

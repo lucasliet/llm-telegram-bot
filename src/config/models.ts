@@ -40,6 +40,10 @@ export const blackboxModels = {
 	claudeModel: 'Claude-sonnet-3.7|Claude-sonnet-3.7',
 	o1Model: 'o1|o1',
 	o3MiniModel: 'o3-mini|o3-mini',
+	o3miniHigh: 'openai/o3-mini-high|o3 Mini High',
+	gpt41: 'openai/gpt-4.1|GPT-4.1',
+	gpt45Preview: 'openai/gpt-4.5-preview|GPT-4.5 (Preview)',
+	grok3Beta: 'x-ai/grok-3-beta|Grok 3',
 };
 
 export const duckduckgoModels = {
