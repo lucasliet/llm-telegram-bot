@@ -1,4 +1,4 @@
-import { compressObject, compressText, decompressObject, decompressText } from 'https://deno.land/x/textcompress@v1.0.0/mod.ts';
+import { compressObject, compressText, decompressObject, decompressText } from 'textcompress';
 import { Content } from 'npm:@google/generative-ai';
 import { ApiKeyNotFoundError } from '@/error/ApiKeyNotFoundError.ts';
 import { ModelCommand } from '@/config/models.ts';

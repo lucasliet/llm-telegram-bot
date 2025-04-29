@@ -1,7 +1,7 @@
 import { assertEquals, assertRejects } from 'asserts';
 import { MockKvStore } from '../test_helpers.ts';
 import { ApiKeyNotFoundError } from '../../src/error/ApiKeyNotFoundError.ts';
-import { compressText } from 'https://deno.land/x/textcompress@v1.0.0/mod.ts';
+import { compressText } from 'textcompress';
 
 const mockKv = new MockKvStore();
 const originalOpenKv = Deno.openKv;

@@ -17,6 +17,7 @@
 		"grammy-types": "https://deno.land/x/grammy@v1.17.2/types.deno.ts",
 		"oak": "https://deno.land/x/oak@v12.6.1/mod.ts",
 		"oak-cors": "https://deno.land/x/cors@v1.2.2/mod.ts",
+		"textcompress": "jsr:@lucasliet/textcompress",
 		"@/": "./src/"
 	},
 	"compilerOptions": {
