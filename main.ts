@@ -8,6 +8,7 @@ import { adminHelpMessage, adminKeyboard, userHelpMessage, userKeyboard } from '
 
 import '@/prototype/StringExtensionPrototype.ts';
 import '@/prototype/ContextExtensionPrototype.ts';
+import '@/prototype/ReadableStreamDefaultReaderPrototype.ts';
 
 const TOKEN: string = Deno.env.get('BOT_TOKEN') as string;
 const PORT: number = parseInt(Deno.env.get('PORT') as string) || 3333;

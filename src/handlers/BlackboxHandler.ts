@@ -14,6 +14,7 @@ const {
 	deepseekv3,
 	geminiModel,
 	geminiProModel,
+	gptModel,
 	o1Model,
 	o3MiniModel,
 	o3miniHigh,
@@ -148,33 +149,15 @@ export async function handleBlackbox(
 				quote,
 				'max_token limit this answer to 500 characters, it will be converted to limited voice message: ' +
 					message!.replace('fala:', ''),
-				claudeModel,
+				gptModel,
 			);
 
-			let fullText = '';
-			let done = false;
-
-			while (!done) {
-				const result = await reader.read();
-				if (result.done) {
-					done = true;
-				} else if (result.value) {
-					const decoder = new TextDecoder();
-					fullText += decoder.decode(result.value);
-				}
-			}
-
-			fullText = fullText.removeThinkingChatCompletion();
+			const fullText = (await reader.text())
+				.removeThinkingChatCompletion();
 
 			if (onComplete) await onComplete(fullText);
 
-			if (fullText.length > 500) {
-				await ctx.reply('O texto gerado excede o limite da API (500 caracteres). Apenas os primeiros 500 caracteres serão convertidos em áudio.', {
-					reply_to_message_id: ctx.message?.message_id,
-				});
-			}
-
-			await textToSpeech(ctx, fullText);
+			textToSpeech(ctx, fullText);
 		},
 		'claude': async () => {
 			const { reader, onComplete } = await BlackboxaiService.generateText(
