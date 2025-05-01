@@ -23,7 +23,7 @@ export const cloudflareModels = {
 	visionTextModel: '@cf/llava-hf/llava-1.5-7b-hf',
 	sqlModel: '@cf/defog/sqlcoder-7b-2',
 	codeModel: '@hf/thebloke/deepseek-coder-6.7b-instruct-awq',
-	sttModel: '@cf/openai/whisper',
+	sttModel: '@cf/openai/whisper-large-v3-turbo',
 };
 
 export const blackboxModels = {
