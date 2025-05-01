@@ -8,3 +8,4 @@ export { handlePuter } from './PuterHandler.ts';
 export { handleDuckDuckGo } from './DuckDuckGoHandler.ts';
 export { handleGithubCopilot } from './GithubCopilotHandler.ts';
 export { handlePhind } from './PhindHandler.ts';
+export { handleOpenWebUI } from './OpenWebUIHandler.ts';

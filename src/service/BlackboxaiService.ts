@@ -6,7 +6,7 @@ import { createSession, getSession } from '@/repository/SessionRepository.ts';
 /**
  * Constants and configuration
  */
-const { reasoningModel, reasoningModelOffline, gptOnline } = blackboxModels;
+const { reasoningModelOnline, reasoningModel, gptOnline } = blackboxModels;
 const BLACKBOX_MAX_TOKENS = 8000;
 
 /**
@@ -38,7 +38,7 @@ export default {
 		userKey: string,
 		quote: string = '',
 		prompt: string,
-		model = blackboxModels.reasoningModelOffline,
+		model = blackboxModels.reasoningModel,
 	): Promise<StreamReplyResponse> {
 		const geminiHistory = await getChatHistory(userKey);
 
@@ -67,10 +67,10 @@ export default {
 					name: modelName,
 				},
 				maxTokens: BLACKBOX_MAX_TOKENS,
-				deepSearchMode: model === reasoningModel,
-				beastMode: model === reasoningModel || model === reasoningModelOffline,
+				deepSearchMode: model === reasoningModelOnline,
+				beastMode: model === reasoningModel || model === reasoningModelOnline,
 				isPremium: true,
-				webSearchModePrompt: model !== reasoningModelOffline,
+				webSearchModePrompt: model !== reasoningModel,
 				trendingAgentMode: {},
 				userSelectedModel: gptOnline === model ? null : modelName,
 				validated: '00f37b34-a166-4efb-bce5-1312d87f2f94',

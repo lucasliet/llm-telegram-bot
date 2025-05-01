@@ -155,8 +155,14 @@ Context.prototype.streamReply = async function (
 		);
 	}
 
-	const sanitizedResult = result.removeThinkingChatCompletion()
+	let sanitizedResult = result.removeThinkingChatCompletion()
 		.convertBlackBoxWebSearchSourcesToMarkdown();
+
+	if(sanitizedResult.length > 4093) {
+		const remainingChunk = sanitizedResult.substring(4093);
+		sanitizedResult = sanitizedResult.substring(0, 4093) + '...';
+		this.replyInChunks(remainingChunk);
+	}
 
 	this.api.editMessageText(this.chat!.id, message_id, sanitizedResult, {
 		parse_mode: 'Markdown',
@@ -232,7 +238,7 @@ async function editMessageWithCompletionEvery3Seconds(
 			await ctx.api.editMessageText(ctx.chat!.id, messageId, displayMessage, {
 				parse_mode: 'Markdown',
 			});
-		} catch (error) {
+		} catch {
 			console.warn(MARKDOWN_ERROR_MESSAGE, displayMessage);
 			await ctx.api.editMessageText(ctx.chat!.id, messageId, displayMessage);
 		}

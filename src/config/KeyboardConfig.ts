@@ -14,8 +14,12 @@ const adminCommandButtons = [
 		['Copilot GPT o4 Mini', '/o4mini'],
 	],
 	[
-		['Deepseek R1 Online', '/r1'],
-		['Deepseek R1', '/r1off'],
+		['Claude 3.7 Sonnet', '/claude'],
+		['GPT o3 Mini', '/o3mini'],
+	],
+	[
+		['Deepseek R1', '/r1'],
+		['Gemini 2.5 Pro', '/geminiPro'],
 	],
 	[
 		['Llama 4 Maverick', '/llama'],
@@ -26,12 +30,12 @@ const adminCommandButtons = [
 		['Mixtral', '/mixtral'],
 	],
 	[
-		['Claude 3.7 Sonnet', '/claude'],
-		['GPT o3 Mini', '/o3mini'],
-	],
-	[
 		['Sonar', '/perplexity'],
 		['Sonar Reasoning', '/perplexityReasoning'],
+	],
+	[
+		['PPLX GPT 4.5', '/pplxgpt'],
+		['PPLX Grok 3', '/pplxgrok'],
 	],
 	[['Limpar Histórico', '/clear']],
 ];
@@ -42,12 +46,12 @@ const adminCommandButtons = [
 const userCommandButtons = [
 	[['Modelo Atual', '/currentmodel']],
 	[
-		['Grok 3', '/grok'],
 		['Phind', '/phind'],
+		['GPT o3 Mini', '/o3mini'],
 	],
 	[
-		['Deepseek R1 Online', '/r1'],
-		['Deepseek R1', '/r1off'],
+		['Deepseek R1', '/r1'],
+		['Grok 3', '/grok'],
 	],
 	[
 		['Qwen', '/qwen'],
@@ -56,10 +60,6 @@ const userCommandButtons = [
 	[
 		['Llama 4 Maverick', '/llama'],
 		['Gemini 2.0 Flash', '/gemini'],
-	],
-	[
-		['Claude 3.7 Sonnet', '/claude'],
-		['GPT o3 Mini', '/o3mini'],
 	],
 	[['Limpar Histórico', '/clear']],
 ];
@@ -78,26 +78,30 @@ export const userKeyboard = InlineKeyboard.from(
 export const adminHelpMessage = `*Comandos inline*:
 \\- \`cloudflareImage:\` mensagem \\- Gera imagens com __Stable Diffusion__
 \\- \`gptImage:\` mensagem \\- Gera imagens com __DALL\\-e__
-\\- \`gpt:\` mensagem \\- Gera texto com __GPT 4o__
-\\- \`llama:\` mensagem \\- Gera texto com o __Llama 3\\.3__
+\\- \`gpt:\` mensagem \\- Gera texto com __GPT 4\\.1__
+\\- \`llama:\` mensagem \\- Gera texto com o __Llama 4 Maverick__
 \\- \`sql:\` mensagem \\- Gera sql com modelo __SQL Coder__
 \\- \`code:\` mensagem \\- Gera código com modelo __Deepseek Coder__
-\\- \`phind:\` mensagem \\- Faz uma pergunta usando o modelo __Phind__
+\\- \`phind:\` mensagem \\- Faz uma pergunta usando o modelo __Phind__ com acesso web
 \\- \`perplexity:\` mensagem \\- Faz uma pergunta usando o modelo perplexity\\.ai
 \\- \`search:\` mensagem \\- Faz uma pergunta usando o modelo perplexity\\.ai
 \\- \`reasonSearch:\` mensagem \\- Faz uma pergunta usando o modelo perplexity\\.ai com o uso de __Deepseek\\-R1__
-\\- \`r1off:\` mensagem \\- Faz uma pergunta usando o modelo __Deepseek\\-R1__ pela __BlackboxAI__
 \\- \`r1:\` mensagem \\- Faz uma pergunta usando o modelo __Deepseek\\-R1__ pela __BlackboxAI__ Online
+\\- \`r1online:\` mensagem \\- Faz uma pergunta usando o modelo __Deepseek\\-R1__ pela __BlackboxAI__ com Deep Research
 \\- \`qwen:\` mensagem \\- Faz uma pergunta usando o modelo __Qwen__ pela __BlackboxAI__
 \\- \`mixtral:\` mensagem \\- Faz uma pergunta usando o modelo __Mixtral__ pela __BlackboxAI__
 \\- \`claude:\` mensagem \\- Faz uma pergunta usando o modelo __Claude__ pela __BlackboxAI__
 \\- \`gemini:\` mensagem \\- Faz uma pergunta usando o modelo __Gemini__ pela __BlackboxAI__
 \\- \`geminiPro:\` mensagem \\- Faz uma pergunta usando o modelo __GeminiPro__ pela __BlackboxAI__
+\\- \`duck:\` mensagem \\- Faz uma pergunta usando o modelo __o3mini__ __DuckDuckGo__
+\\- \`duckgo:\` mensagem \\- Faz uma pergunta usando o modelo __o3mini__ __DuckDuckGo__ com acesso Web
 \\- \`o3mini:\` mensagem \\- Faz uma pergunta usando o modelo __o3mini__ pela __DuckDuckGo__
 \\- \`o3high:\` mensagem \\- Faz uma pergunta usando o modelo __o3high__ pela __BlackboxAI__
 \\- \`gpt45:\` mensagem \\- Faz uma pergunta usando o modelo __gpt45__ pela __BlackboxAI__
 \\- \`o4mini:\` mensagem \\- Faz uma pergunta usando o modelo __o4mini__ pelo __Github Copilot__
 \\- \`grok:\` mensagem \\- Faz uma pergunta usando o modelo __Grok 3__ pela __BlackboxAI__
+\\- \`pgpt:\` mensagem \\- Faz uma pergunta usando o modelo __PPLX GPT 4\\.5__ pela __Perplexity__
+\\- \`pgrok:\` mensagem \\- Faz uma pergunta usando o modelo __PPLX Grok 3__ pela __Perplexity__
 \\- \`fala:\` mensagem \\- Faz uma pergunta usando __Elevenlabs__ para TTS
 
 *Seleção de modelos de linguagem*:`;
@@ -106,17 +110,16 @@ export const adminHelpMessage = `*Comandos inline*:
  * Help message for regular users (limited commands)
  */
 export const userHelpMessage = `*Comandos inline*:
-\\- \`gpt:\` mensagem \\- Gera texto com __GPT 4o mini__
-\\- \`llama:\` mensagem \\- Gera texto com o __Llama 3\\.3__
-\\- \`phind:\` mensagem \\- Faz uma pergunta usando o modelo __Phind__
-\\- \`r1off:\` mensagem \\- Faz uma pergunta usando o modelo __Deepseek\\-R1__ pela __BlackboxAI__
+\\- \`phind:\` mensagem \\- Faz uma pergunta usando o modelo __Phind__ com acesso web
+\\- \`grok:\` mensagem \\- Faz uma pergunta usando o modelo __Grok 3__ pela __BlackboxAI__
+\\- \`o3mini:\` mensagem \\- Faz uma pergunta usando o modelo __o3mini__ pela __DuckDuckGo__
+\\- \`duck:\` mensagem \\- Faz uma pergunta usando o modelo __o3mini__ __DuckDuckGo__
+\\- \`duckgo:\` mensagem \\- Faz uma pergunta usando o modelo __o3mini__ __DuckDuckGo__ com acesso Web
+\\- \`llama:\` mensagem \\- Gera texto com o __Llama 4 Maverick__
+\\- \`gemini:\` mensagem \\- Faz uma pergunta usando o modelo __Gemini__ pela __BlackboxAI__
 \\- \`r1:\` mensagem \\- Faz uma pergunta usando o modelo __Deepseek\\-R1__ pela __BlackboxAI__
+\\- \`r1online:\` mensagem \\- Faz uma pergunta usando o modelo __Deepseek\\-R1__ pela __BlackboxAI__ com Deep Research
 \\- \`qwen:\` mensagem \\- Faz uma pergunta usando o modelo __Qwen__ pela __BlackboxAI__
 \\- \`mixtral:\` mensagem \\- Faz uma pergunta usando o modelo __Mixtral__ pela __BlackboxAI__
-\\- \`claude:\` mensagem \\- Faz uma pergunta usando o modelo __Claude__ pela __BlackboxAI__
-\\- \`gemini:\` mensagem \\- Faz uma pergunta usando o modelo __Gemini__ pela __BlackboxAI__
-\\- \`o3mini:\` mensagem \\- Faz uma pergunta usando o modelo __o3mini__ pela __DuckDuckGo__
-\\- \`grok:\` mensagem \\- Faz uma pergunta usando o modelo __Grok 3__ pela __BlackboxAI__
-\\- \`cloudflareImage:\` mensagem \\- Gera imagens com __Stable Diffusion__
 
 *Seleção de modelos de linguagem*:`;

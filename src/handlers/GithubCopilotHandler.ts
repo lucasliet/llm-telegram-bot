@@ -2,6 +2,16 @@ import { Context } from 'grammy-context';
 import { FileUtils } from '@/util/FileUtils.ts';
 import GithubCopilotService from '@/service/openai/GithubCopilotService.ts';
 
+import { copilotModels } from '@/config/models.ts';
+
+const modelMap = {
+	'geminiPro': copilotModels.gemini,
+	'gpt': copilotModels.gpt41,
+	'o4mini': copilotModels.o4mini,
+	'claude': copilotModels.sonnetThinking,
+	none: undefined,
+};
+
 /**
  * Handles requests for OpenRouter models
  * @param ctx - Telegram context
@@ -16,9 +26,9 @@ export async function handleGithubCopilot(
 
 	const message = commandMessage || contextMessage;
 
-	const command = message?.split(':')[0]?.toLowerCase();
+	const command = message?.split(':')[0]?.toLowerCase() || 'none';
 
-	const model = command === 'gpt' ? 'gpt-4.1' : 'o4-mini';
+	const model = modelMap[command as keyof typeof modelMap];
 
 	const openAIService = new GithubCopilotService(model);
 

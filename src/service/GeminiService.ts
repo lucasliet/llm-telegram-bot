@@ -68,7 +68,7 @@ export default class GeminiService {
 
       Devo sempre respeitar a linguagem de marcação Markdown, evitando abrir marcações sem fecha-las.
 
-      SEMPRE INCLUA SUAS FONTES DE PESQUISA NAS RESPOSTAS, COM LINKS ASSOCIADOS
+      Caso tenha buscado informações atualizadas na internet, indique suas fontes de informação.
     `;
 	}
 

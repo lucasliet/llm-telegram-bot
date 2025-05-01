@@ -2,7 +2,6 @@ import { assertEquals, assertRejects } from 'https://deno.land/std@0.214.0/asser
 import { afterEach, beforeEach, describe, it } from 'https://deno.land/std@0.214.0/testing/bdd.ts';
 import { assertSpyCalls, Spy, spy } from 'https://deno.land/std@0.214.0/testing/mock.ts';
 import BlackboxaiService from '../../src/service/BlackboxaiService.ts';
-import { text } from 'node:stream/consumers';
 
 describe('BlackboxaiService', () => {
 	let mockFetch: Spy;

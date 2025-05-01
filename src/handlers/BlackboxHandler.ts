@@ -5,8 +5,8 @@ import { textToSpeech } from '@/service/TelegramService.ts';
 
 const {
 	gptOnline,
+	reasoningModelOnline,
 	reasoningModel,
-	reasoningModelOffline,
 	mixtralModel,
 	qwenModel,
 	llamaModel,
@@ -45,7 +45,7 @@ export async function handleBlackbox(
 	type CommandHandlerKey =
 		| 'black'
 		| 'gptonline'
-		| 'r1off'
+		| 'r1online'
 		| 'r1'
 		| 'mixtral'
 		| 'qwen'
@@ -93,12 +93,12 @@ export async function handleBlackbox(
 
 			ctx.streamReply(reader, onComplete);
 		},
-		'r1off': async () => {
+		'r1online': async () => {
 			const { reader, onComplete } = await BlackboxaiService.generateText(
 				userKey,
 				quote,
-				message!.replace('r1off:', ''),
-				reasoningModelOffline,
+				message!.replace('r1online:', ''),
+				reasoningModelOnline,
 			);
 
 			ctx.streamReply(reader, onComplete);

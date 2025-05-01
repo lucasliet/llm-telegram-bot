@@ -28,7 +28,7 @@ export const cloudflareModels = {
 
 export const blackboxModels = {
 	reasoningModel: 'deepseek-reasoner|DeepSeek-R1',
-	reasoningModelOffline: 'deepseek-reasoner|DeepSeek-R1',
+	reasoningModelOnline: 'deepseek-reasoner|DeepSeek-R1',
 	gptOnline: 'gpt-3.5-turbo',
 	gptModel: 'GPT-4o|GPT-4o',
 	llamaModel: 'meta-llama/llama-4-maverick|Llama 4 Maverick',
@@ -54,6 +54,18 @@ export const duckduckgoModels = {
 	mixtral: 'mistralai/Mixtral-8x7B-Instruct-v0.1',
 };
 
+export const copilotModels = {
+	gemini: 'gemini-2.5-pro',
+	o4mini: 'o4-mini',
+	gpt41: 'gpt-4.1',
+	sonnetThinking: 'claude-3.7-sonnet-thought',
+}
+
+export const openWebUiModels = {
+	gpt45: 'pplx.gpt-4.5-search',
+	grok: 'pplx.grok-3-beta-search'
+}
+
 /**
  * Type definitions
  */
@@ -64,7 +76,7 @@ export type ModelCommand =
 	| '/perplexity'
 	| '/perplexityReasoning'
 	| '/r1'
-	| '/r1off'
+	| '/r1online'
 	| '/qwen'
 	| '/mixtral'
 	| '/claude'
@@ -72,7 +84,9 @@ export type ModelCommand =
 	| '/o3mini'
 	| '/o4mini'
 	| '/grok'
-	| '/phind';
+	| '/phind'
+	| '/pplxgpt'
+	| '/pplxgrok';
 
 /**
  * Available model commands
@@ -84,7 +98,7 @@ export const modelCommands: ModelCommand[] = [
 	'/perplexity',
 	'/perplexityReasoning',
 	'/r1',
-	'/r1off',
+	'/r1online',
 	'/qwen',
 	'/mixtral',
 	'/claude',
@@ -93,17 +107,17 @@ export const modelCommands: ModelCommand[] = [
 	'/o4mini',
 	'/grok',
 	'/phind',
+	'/pplxgpt',
+	'/pplxgrok'
 ];
 
 export const WHITELISTED_MODELS: ModelCommand[] = [
 	'/llama',
-	'/r1off',
+	'/r1online',
 	'/r1',
 	'/qwen',
 	'/mixtral',
-	'/gpt',
 	'/gemini',
-	'/claude',
 	'/o3mini',
 	'/grok',
 	'/phind',
