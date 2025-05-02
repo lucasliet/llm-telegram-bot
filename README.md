@@ -40,6 +40,14 @@ esse projeto utiliza o [Deno deploy](https://deno.com/deploy) e [Deno kv](https:
   ./devrun.sh
   ```
 
+## Mudando a Fonte de um Modelo para Outro Provedor
+
+Para mudar a fonte de um modelo para outro provedor disponível, consulte o arquivo [CHANGE_PROVIDER.md](./.github/CHANGE_PROVIDER.md).
+
+## Uso de Ferramentas com Provedores Compatíveis com OpenAI
+
+Provedores compatíveis com OpenAI que estendem a classe `openai` e suportam o uso de ferramentas podem utilizar o `searxng` para obter respostas atualizadas. Para mais informações, consulte o arquivo [TOOL_USAGE.md](./.github/TOOL_USAGE.md).
+
 ## Testes
 
 Este projeto inclui um conjunto abrangente de testes automatizados para garantir a qualidade e estabilidade do código.
