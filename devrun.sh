@@ -13,13 +13,6 @@ then
     exec $SHELL;
 fi
 
-if ! command -v denon &> /dev/null
-then
-    echo "denon could not be found, installing...";
-    deno install -qAf --global --unstable https://deno.land/x/denon/denon.ts;
-    exec $SHELL;
-fi
-
 if [ -f .env ]; then
     set -a;
     source .env;
@@ -31,9 +24,8 @@ export BOT_TOKEN=${BOT_TOKEN:-$TELEGRAM_CHAT_BOT_TOKEN};
 export ADMIN_USER_IDS=${ADMIN_USER_IDS:-$TELEGRAM_USER_ID};
 export CLOUDFLARE_API_KEY=${CLOUDFLARE_API_KEY:-$CLOUDFLARE_AI_API_KEY};
 export CLOUDFLARE_ACCOUNT_ID=${CLOUDFLARE_ACCOUNT_ID:-$CLOUDFLARE_AI_ACCOUNT_ID};
-export OPENROUTER_API_KEY=${OPENROUTER_API_KEY:-$OPENROUTER_AI_API_KEY};
 
-denon run --allow-env --allow-net --allow-read --allow-write --allow-import --unstable-kv --unstable-cron main.ts;
+deno run --watch --allow-env --allow-net --allow-read --allow-write --allow-import --unstable-kv --unstable-cron main.ts;
 
 curl -X POST "https://api.telegram.org/bot$BOT_TOKEN/setWebhook" \
 -H "Content-Type: application/json" \

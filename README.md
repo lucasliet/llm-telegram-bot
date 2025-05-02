@@ -4,7 +4,7 @@
 
 acesse o bot via telegram [@llm_gemini_bot](https://t.me/llm_gemini_bot)
 
-esse bot utiliza o modelo gratuito Deepseek-V3 da [BlackboxAI](https://www.blackbox.ai/) para responder as mensagens por padrão, para uso dos outros modelos é
+esse bot utiliza o modelo gratuito Phind 70B da [Phind](https://www.phind.com/) para responder as mensagens por padrão, para uso dos outros modelos é
 necessário implantar código no seu [próprio bot](https://core.telegram.org/bots/tutorial), rodando localmente ou em um servidor, e configurando o seu ID do
 telegram como a variavel ambiente `ADMIN_USER_IDS`
 
@@ -32,6 +32,8 @@ esse projeto utiliza o [Deno deploy](https://deno.com/deploy) e [Deno kv](https:
   - `OPENAI_API_KEY` - api key da [OpenAI](https://platform.openai.com/api-keys) para uso do modelo pago
   - `PERPLEXITY_API_KEY` - api key da [Perplexity](https://docs.perplexity.ai/guides/getting-started) para uso do modelo pago
   - `GEMINI_API_KEY` - api key da [Google](https://aistudio.google.com/app/apikey?hl=pt-br) para uso do modelo pago
+  - `OPENROUTER_API_KEY` - api key da [OpenRouter](https://openrouter.ai/settings/keys) para uso do modelo pago
+  - `COPILOT_TOKEN` - token do [Copilot](https://github.com/features/copilot) para uso do modelo pago. Para obter o token, configure a extensão do Copilot no VSCode e extraia o token do arquivo `~/.config/github-copilot/apps.json`.
 
 - crie um arquivo .env na raiz do projeto e configure as variaveis de ambiente nele, no formato `VARIAVEL=valor`
   ```bash
