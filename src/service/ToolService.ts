@@ -69,28 +69,21 @@ export default class ToolService {
 					'Pragma': 'no-cache',
 				};
 
+				const buildUrl = (baseUrl: string) =>
+					`${baseUrl}/search?${new URLSearchParams({ q: query, format: 'json', language: 'pt-BR' }).toString()}`;
+
+				const fetchJson = async (url: string) => {
+					const res = await fetch(url, { headers });
+					if (!res.ok) throw new Error(`SearxNG search failed: ${res.statusText}`);
+					return res.json();
+				};
+
 				let lastError = null;
 
 				for (const baseUrl of instances) {
 					try {
-						const params = new URLSearchParams({
-							q: query,
-							format: 'json',
-							language: 'pt-BR',
-						});
-
-						const url = `${baseUrl}/search?${params.toString()}`;
-						console.log(`Tentando busca em: ${baseUrl}`);
-
-						const response = await fetch(url, { headers });
-
-						if (!response.ok) {
-							throw new Error(`SearxNG search failed: ${response.statusText}`);
-						}
-
-						const data = await response.json();
-
-						console.log(`Busca bem-sucedida em: ${baseUrl}`);
+						console.log(`Fetching from SearxNG instance: ${baseUrl}`);
+						const data = await fetchJson(buildUrl(baseUrl));
 
 						const results: SearxResult[] = (data.results || [])
 							.slice(0, num_results)
@@ -101,6 +94,8 @@ export default class ToolService {
 								content: result.content,
 								time: result.time,
 							}));
+
+						console.log(`Fetched ${results.length} results from ${baseUrl}`);
 
 						return results;
 					} catch (error) {
@@ -210,7 +205,7 @@ export default class ToolService {
 					return items.flatMap(p => {
 						const start = Number(p['@_t'] || 0);
 						const duration = Number(p['@_d'] || 0);
-						const texts = p.s ? (Array.isArray(p.s) ? p.s : [p.s]).map(s => typeof s === 'string' ? s : s['#text'] || '') : [p['#text'] || ''];
+						const texts = p.s ? (Array.isArray(p.s) ? p.s : [p.s]).map((s: any) => typeof s === 'string' ? s : s['#text'] || '') : [p['#text'] || ''];
 						return texts.join('').trim() ? [{ text: texts.join('').trim(), startInMs: start, duration }] : [];
 					});
 				};

@@ -20,6 +20,13 @@
 		"textcompress": "jsr:@lucasliet/textcompress",
 		"@/": "./src/"
 	},
+	"lint": {
+		"rules": {
+			"exclude": [
+				"no-explicit-any"
+			]
+		}
+	},
 	"compilerOptions": {
 		"strict": true
 	}
