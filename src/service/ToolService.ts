@@ -1,5 +1,6 @@
 import OpenAi from 'npm:openai';
 import { XMLParser } from "npm:fast-xml-parser";
+import { parse } from "npm:node-html-parser";
 /**
  * Represents a search result from SearxNG.
  */
@@ -140,6 +141,14 @@ export default class ToolService {
 					throw new Error(`Fetch failed: ${response.statusText}`);
 				}
 				console.log('Fetch successful');
+				const contentType = response.headers.get('content-type') || '';
+				if (contentType.includes('text/html')) {
+					const html = await response.text();
+					const root = parse(html);
+					const body = root.getElementsByTagName("body")[0];
+					body.removeChild(body.getElementsByTagName("script")[0]);
+					return body.children.map((child) => child.text.trim().replace(/\s+/g, ' ')).join(' ');;
+				}
 				return await response.text();
 			},
 		}],
