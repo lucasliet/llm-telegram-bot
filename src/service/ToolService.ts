@@ -1,5 +1,5 @@
 import OpenAi from 'npm:openai';
-
+import { XMLParser } from "npm:fast-xml-parser";
 /**
  * Represents a search result from SearxNG.
  */
@@ -11,12 +11,21 @@ export interface SearxResult {
 	time: string;
 }
 
+/**
+	* Represents a segment of a YouTube transcript.
+	*/
+interface YouTubeTranscriptSegment {
+	text: string;
+	startInMs: number;
+	duration: number;
+}
+
 export default class ToolService {
 	/**
 	 * Maps function schemas to their corresponding functions.
 	 */
 	// deno-lint-ignore ban-types
-	static tools = new Map<string, { schema: OpenAi.Chat.Completions.ChatCompletionTool; fn: Function }>([
+	static tools = new Map<string, { schema: OpenAi.ChatCompletionTool; fn: Function }>([
 		['search_searx', {
 			schema: {
 				type: 'function',
@@ -139,7 +148,106 @@ export default class ToolService {
 				return await response.text();
 			},
 		}],
+		['transcript_yt', {
+			schema: {
+				type: 'function',
+				function: {
+					name: 'transcript_yt',
+					description: 'Busca a transcrição de um vídeo do YouTube a partir de sua URL., pode ser utilizado para responder perguntas sobre qualquer vídeo com "youtube" na URL',
+					parameters: {
+						type: 'object',
+						properties: {
+							videoUrl: {
+								type: 'string',
+								description: 'A URL completa do vídeo do YouTube.',
+							},
+							preferredLanguages: {
+								type: 'array',
+								items: { type: 'string' },
+								description: "Uma lista opcional de códigos de idioma preferenciais (ex: ['pt-BR', 'en']).",
+							},
+						},
+						required: ['videoUrl'],
+						additionalProperties: false,
+					},
+					strict: true,
+				},
+			},
+			/**
+			* Busca a transcrição de um vídeo do YouTube a partir de sua URL.
+			* pode ser utilizado para responder perguntas sobre qualquer vídeo com "youtube" na URL'
+			* @param args - Objeto contendo os parâmetros.
+			* @param args.videoUrl - A URL completa do vídeo do YouTube.
+			* @param args.preferredLanguages - (Opcional) Uma lista de códigos de idioma preferenciais (ex: ['pt-BR', 'en']).
+			* @returns Uma promessa que resolve para um array de objetos de transcrição ou null se a transcrição não for encontrada ou ocorrer um erro.
+			*/
+			fn: async (args: { videoUrl: string; preferredLanguages?: string[] }): Promise<YouTubeTranscriptSegment[] | null> => {
+				const extractVideoId = (url: string): string | null => {
+					const match = url.match(/(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/(?:watch\?v=|embed\/|v\/)|youtu\.be\/)([\w-]{11})/);
+					return match ? match[1] : null;
+				};
+				const fetchText = async (url: string, headers: Record<string, string> = {}): Promise<string> => {
+					const res = await fetch(url, { headers });
+					if (!res.ok) throw new Error(res.statusText);
+					return res.text();
+				};
+				const parsePlayerResponse = (html: string): any => {
+					const jsonMatch = html.match(/ytInitialPlayerResponse\s*=\s*({.+?});/);
+					return jsonMatch ? JSON.parse(jsonMatch[1]) : null;
+				};
+				const chooseTrack = (tracks: any[], langs?: string[]): { url: string; lang: string } | null => {
+					for (const lang of langs || []) {
+						const t = tracks.find(t => t.languageCode.startsWith(lang) && t.baseUrl);
+						if (t) return { url: `${t.baseUrl}&fmt=srv3`, lang: t.languageCode };
+					}
+					const first = tracks[0];
+					return first?.baseUrl ? { url: `${first.baseUrl}&fmt=srv3`, lang: first.languageCode } : null;
+				};
+				const parseSegments = (xml: string): YouTubeTranscriptSegment[] => {
+					const parser = new XMLParser({ ignoreAttributes: false, attributeNamePrefix: '@_', trimValues: false });
+					const body = parser.parse(xml)?.timedtext?.body?.p || [];
+					const items = Array.isArray(body) ? body : [body];
+					return items.flatMap(p => {
+						const start = Number(p['@_t'] || 0);
+						const duration = Number(p['@_d'] || 0);
+						const texts = p.s ? (Array.isArray(p.s) ? p.s : [p.s]).map(s => typeof s === 'string' ? s : s['#text'] || '') : [p['#text'] || ''];
+						return texts.join('').trim() ? [{ text: texts.join('').trim(), startInMs: start, duration }] : [];
+					});
+				};
+				try {
+					const id = extractVideoId(args.videoUrl);
+					if (!id) {
+						console.error('Invalid YouTube URL');
+						return null;
+					};
+					console.log(`Fetching video ID: ${id}`);
+					const html = await fetchText(args.videoUrl, { 'Accept-Language': 'en-US,en;q=0.9' });
+					const player = parsePlayerResponse(html);
+					const tracks = player?.captions?.playerCaptionsTracklistRenderer?.captionTracks || [];
+					if (!tracks.length) {
+						console.error('No captions found');
+						return null;
+					};
+					const track = chooseTrack(tracks, args.preferredLanguages);
+					if (!track) {
+						console.error('No suitable track found');
+						return null;
+					};
+					const xml = await fetchText(track.url);
+					const segments = parseSegments(xml);
+					if (!segments.length) {
+						console.error('No segments found');
+						return null;
+					};
+					return segments;
+				} catch {
+					return null;
+				}
+			},
+		}],
 	]);
 
-	static schemas: OpenAi.Chat.Completions.ChatCompletionTool[] = Array.from(ToolService.tools.values()).map((tool) => tool.schema);
+	static schemas: OpenAi.ChatCompletionTool[] = Array.from(ToolService.tools.values()).map((tool) => tool.schema);
 }
+
+
