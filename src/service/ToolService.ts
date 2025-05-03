@@ -103,6 +103,42 @@ export default class ToolService {
 				throw lastError || new Error('Todas as instâncias SearxNG falharam');
 			},
 		}],
+		['fetch', {
+			schema: {
+				type: 'function',
+				function: {
+					name: 'fetch',
+					description: 'Fetches a URL via HTTP GET and returns its content in response as text',
+					parameters: {
+						type: 'object',
+						properties: {
+							url: { type: 'string', description: 'URL to fetch' },
+						},
+						required: ['url'],
+						additionalProperties: false,
+					},
+					strict: true,
+				},
+			},
+			/**
+			 * Fetches the given URL and returns the text response.
+			 *
+			 * @param args - The fetch parameters.
+			 * @param args.url - The URL to fetch.
+			 * @returns A promise that resolves to the response.
+			 * @throws An error if the fetch fails or response is not ok.
+			 */
+			fn: async (args: { url: string }): Promise<string> => {
+				const { url } = args;
+				console.log(`Fetching URL: ${url}`);
+				const response = await fetch(url);
+				if (!response.ok) {
+					throw new Error(`Fetch failed: ${response.statusText}`);
+				}
+				console.log('Fetch successful');
+				return await response.text();
+			},
+		}],
 	]);
 
 	static schemas: OpenAi.Chat.Completions.ChatCompletionTool[] = Array.from(ToolService.tools.values()).map((tool) => tool.schema);

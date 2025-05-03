@@ -66,7 +66,7 @@ export default class OpenAiService {
 			stream: true,
 		});
 
-		const reader = completion.toReadableStream().getReader();
+		const reader = completion.toReadableStream().getReader() as ReadableStreamDefaultReader<Uint8Array>;
 
 		const onComplete = (completedAnswer: string) =>
 			addContentToChatHistory(
@@ -111,8 +111,10 @@ export default class OpenAiService {
 			...availableTools,
 			max_tokens: maxTokens,
 			stream: true,
+			parallel_tool_calls: true,
+			reasoning_effort: 'high',
 		});
-		const initialReader = initialResponse.toReadableStream().getReader();
+		const initialReader = initialResponse.toReadableStream().getReader() as ReadableStreamDefaultReader<Uint8Array>;
 
 		const combinedStream = extractToolCalls(
 			openai,
