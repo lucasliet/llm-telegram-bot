@@ -266,13 +266,13 @@ export class ToolUsageAdapter {
 	mapResponse(
 		reader: ReadableStreamDefaultReader<Uint8Array>,
 		exit: boolean = false,
+		responseMap?: (responseBody: string) => string,
 	): ReadableStreamDefaultReader<Uint8Array> {
 		// deno-lint-ignore no-this-alias
 		const self = this;
 		return new ReadableStream<Uint8Array>({
 			async start(controller) {
 				try {
-
 					while (true) {
 						const { done, value } = await reader.read();
 
@@ -280,7 +280,8 @@ export class ToolUsageAdapter {
 							break;
 						}
 
-						const text = decoder.decode(value);
+						const textFromProvider = decoder.decode(value);
+						const text = responseMap ? responseMap(textFromProvider) : textFromProvider;
 						const response = exit ? self.createChatFormatter(text) : OpenaiResponseMap(text);
 						controller.enqueue(encoder.encode(response));
 					}
@@ -347,7 +348,6 @@ export class ToolUsageAdapter {
 		};
 		return JSON.stringify(response);
 	}
-
 
 	private processToolCalls(text: string): ToolCallsProcessing {
 		const results: ToolCallResult[] = [];

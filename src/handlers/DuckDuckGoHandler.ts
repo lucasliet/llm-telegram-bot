@@ -1,6 +1,5 @@
 import { Context } from 'grammy-context';
 import duckDuckGoService from '@/service/DuckDuckGoService.ts';
-
 /**
  * Handles requests for OpenRouter models
  * @param ctx - Telegram context

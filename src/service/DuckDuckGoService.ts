@@ -1,8 +1,10 @@
 import { addContentToChatHistory, ExpirableContent, getChatHistory, getVqdHeader, setVqdHeader } from '@/repository/ChatRepository.ts';
 import { convertGeminiHistoryToGPT, replaceGeminiConfigFromTone, StreamReplyResponse } from '@/util/ChatConfigUtil.ts';
-import OpenAi from 'npm:openai';
+import OpenAi, { OpenAI } from 'npm:openai';
 
 import { duckduckgoModels } from '@/config/models.ts';
+import ToolUsageAdapter from '../adapter/ToolUsageAdapter.ts';
+import ToolService from './ToolService.ts';
 
 const { o3mini } = duckduckgoModels;
 
@@ -30,30 +32,33 @@ export default {
 
 		const requestPrompt = quote ? `quote: "${quote}"\n\n${prompt}` : prompt;
 
-		const apiResponse = await fetch('https://duckduckgo.com/duckchat/v1/chat', {
-			method: 'POST',
-			headers: {
-				...requestHeaders,
-				'x-vqd-4': vqdHeader,
+		const messages: OpenAI.ChatCompletionMessageParam[] = [
+			{
+				role: 'user',
+				content: `your system prompt: ${replaceGeminiConfigFromTone('DuckDuckGo', model, maxTokens)}`,
 			},
-			body: JSON.stringify({
-				messages: [
-					{
-						role: 'user',
-						content: `your system prompt: ${replaceGeminiConfigFromTone('DuckDuckGo', model, maxTokens)}`,
-					},
-					..._convertChatHistoryToDuckDuckGo(geminiHistory),
-					{ role: 'user', content: requestPrompt },
-				],
-				model,
-			}),
-		});
+			..._convertChatHistoryToDuckDuckGo(geminiHistory),
+			{ role: 'user', content: requestPrompt },
+		];
+
+		const messagesWithToolOptions = ToolUsageAdapter.modifyMessagesWithToolInfo(messages, { tools: ToolService.schemas });
+
+		const apiResponse = await fetchResponse(messagesWithToolOptions, model, vqdHeader);
 
 		if (!apiResponse.ok) {
 			throw new Error(`Failed to generate text: ${apiResponse.statusText}`);
 		}
 
-		const reader = apiResponse.body!.getReader();
+		const originalReader = apiResponse.body!.getReader();
+
+		const reader = ToolUsageAdapter.processModelResponse(
+			generateFollowupResponse,
+			originalReader,
+			messages,
+			responseMap,
+			model,
+			vqdHeader,
+		);
 
 		const onComplete = (completedAnswer: string) =>
 			addContentToChatHistory(
@@ -64,9 +69,34 @@ export default {
 				userKey,
 			);
 
-		return { reader, onComplete, responseMap };
+		return { reader, onComplete };
 	},
 };
+
+function fetchResponse(messages: OpenAI.ChatCompletionMessageParam[], model: string, vqdHeader: string) {
+	return fetch('https://duckduckgo.com/duckchat/v1/chat', {
+		method: 'POST',
+		headers: {
+			...requestHeaders,
+			'x-vqd-4': vqdHeader,
+		},
+		body: JSON.stringify({
+			messages,
+			model,
+		}),
+	});
+}
+
+function generateFollowupResponse(
+	messages: OpenAI.ChatCompletionMessageParam[],
+	model: string,
+	vqdHeader: string,
+): Promise<ReadableStreamDefaultReader<Uint8Array>> {
+	const cleanMessages = cleanNonUserRoles(messages);
+	return fetchResponse(cleanMessages, model, vqdHeader)
+		.then((r) => r.body!.getReader())
+		.then((reader) => ToolUsageAdapter.mapResponse(reader, true, responseMap));
+}
 
 async function _fetchVqdHeader(): Promise<string> {
 	const statusResponse = await fetch(
@@ -121,4 +151,21 @@ function responseMap(responseBody: string): string {
 	}
 
 	return result;
+}
+
+function cleanNonUserRoles(messages: OpenAi.Chat.Completions.ChatCompletionMessageParam[]): OpenAi.Chat.Completions.ChatCompletionMessageParam[] {
+	return messages.map((msg) => {
+		const originalRole = msg.role;
+		const originalContent = msg.content;
+		let newContent = originalContent;
+
+		if (originalRole !== 'user' && typeof originalContent === 'string') {
+			newContent = `${originalRole}: ${originalContent}`;
+		}
+
+		return {
+			role: 'user',
+			content: newContent,
+		} as OpenAi.Chat.Completions.ChatCompletionMessageParam;
+	});
 }
