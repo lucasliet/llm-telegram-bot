@@ -1,7 +1,6 @@
 import OpenAi from 'npm:openai';
 import { executeToolCalls, responseMap as OpenaiResponseMap } from '../service/openai/OpenAIService.ts';
 
-// Definindo interfaces para as ferramentas
 export interface ToolOptions {
 	tools?: OpenAi.Chat.Completions.ChatCompletionTool[];
 	tool_choice?: OpenAi.Chat.Completions.ChatCompletionToolChoiceOption;
@@ -9,23 +8,17 @@ export interface ToolOptions {
 	function_call?: 'auto' | 'none' | { name: string };
 }
 
-// Tipo utilitário para toolCalls
 export type ToolCall = {
-	id: string;
-	type: string;
-	function: { name: string; arguments: string };
+	index?: number;
+	id?: string;
+	type?: string;
+	function?: { name?: string; arguments?: string };
 };
-
-interface ToolCallsProcessing {
-	processed: boolean;
-	toolCalls: ToolCall[] | null;
-	results: ToolCallResult[];
-}
 
 interface ToolCallResult {
 	choices: Array<{
 		delta: {
-			content: string;
+			content: string | null;
 			tool_calls?: ToolCall[];
 		};
 		finish_reason?: string | null;
@@ -35,32 +28,29 @@ interface ToolCallResult {
 export interface OpenAiStreamResponse {
 	choices: Array<{
 		delta: {
-			content: string;
-			tool_calls?: Array<{
-				index: number;
-				id?: string;
-				type?: string;
-				function?: {
-					name?: string;
-					arguments?: string;
-				};
-			}>;
+			content: string | null;
+			tool_calls?: ToolCall[];
 		};
 		finish_reason: string | null;
 	}>;
 }
 
-const decoder = new TextDecoder();
-const encoder = new TextEncoder();
+const TEXT_DECODER = new TextDecoder();
+const TEXT_ENCODER = new TextEncoder();
+const FUNCTION_CALL_PATTERN = /```(?:function|json)?\s*\n([\s\S]*?)\n```/g;
+const TOOL_CALL_ADAPTER_KEY = '__adapter_tool_calls';
+const TOOL_BLOCK_START_REGEX = /```(function|json)?\s*\n?/;
+const TOOL_BLOCK_END_REGEX = /\n```/;
 
 /**
- * ToolUsageAdapter - Adapta e gerencia o uso de ferramentas para Chatbots somente textuais
+ * Adapts tool usage for text-only Chatbots, enabling function calling
+ * by formatting instructions and parsing responses.
  */
 export class ToolUsageAdapter {
 	/**
-	 * Prepara um objeto de ferramenta para ser incluído na mensagem
+	 * Formats a tool definition for inclusion in the prompt.
 	 */
-	private formatToolForMessage(tool: OpenAi.Chat.Completions.ChatCompletionTool) {
+	private _formatToolForMessage(tool: OpenAi.Chat.Completions.ChatCompletionTool) {
 		if (tool.type === 'function' && tool.function) {
 			return {
 				name: tool.function.name,
@@ -68,7 +58,6 @@ export class ToolUsageAdapter {
 				parameters: tool.function.parameters,
 			};
 		}
-		// Para outros tipos de ferramentas, retornar uma estrutura genérica
 		return {
 			name: 'unknown_tool',
 			description: '',
@@ -77,9 +66,9 @@ export class ToolUsageAdapter {
 	}
 
 	/**
-	 * Prepara uma função para ser incluída na mensagem
+	 * Formats a function definition for inclusion in the prompt.
 	 */
-	private formatFunctionForMessage(func: OpenAi.ChatCompletionCreateParams.Function) {
+	private _formatFunctionForMessage(func: OpenAi.ChatCompletionCreateParams.Function) {
 		return {
 			name: func.name,
 			description: func.description || '',
@@ -88,10 +77,9 @@ export class ToolUsageAdapter {
 	}
 
 	/**
-	 * Valida se um objeto é uma chamada de função válida
+	 * Validates if an object represents a valid function call structure.
 	 */
-	private isValidFunctionCall(obj: any): obj is { name: string; arguments: object } {
-		// Aqui você pode adicionar mais restrições se necessário
+	private _isValidFunctionCall(obj: any): obj is { name: string; arguments: object } {
 		return (
 			typeof obj === 'object' &&
 			typeof obj.name === 'string' &&
@@ -103,21 +91,24 @@ export class ToolUsageAdapter {
 	}
 
 	/**
-	 * Detecta chamadas de ferramentas na resposta do modelo e as formata
+	 * Extracts structured tool calls from the model's text response.
+	 * Removes the tool call blocks from the original content.
 	 */
-	private extractToolCalls(content: string): {
+	private _extractToolCalls(content: string): {
 		toolCalls: ToolCall[] | null;
 		cleanedContent: string;
 	} {
-		const functionCallPattern = /```(?:function|json)?\s*\n([\s\S]*?)\n```/g;
 		const toolCalls: ToolCall[] = [];
 		let cleanedContent = content;
 		let match;
-		while ((match = functionCallPattern.exec(content)) !== null) {
+
+		FUNCTION_CALL_PATTERN.lastIndex = 0;
+
+		while ((match = FUNCTION_CALL_PATTERN.exec(content)) !== null) {
 			const functionData = match[1].trim();
 			try {
 				const functionObj = JSON.parse(functionData);
-				if (this.isValidFunctionCall(functionObj)) {
+				if (this._isValidFunctionCall(functionObj)) {
 					toolCalls.push({
 						id: crypto.randomUUID(),
 						type: 'function',
@@ -127,13 +118,19 @@ export class ToolUsageAdapter {
 						},
 					});
 					cleanedContent = cleanedContent.replace(match[0], '');
+				} else {
+					console.warn('Parsed function object is not valid:', functionObj);
 				}
 			} catch (error) {
-				// Loga erro e contexto para debug
-				console.warn('Invalid function data:', functionData.substring(0, 50), '...\nContent:', content.substring(0, 100), '\nError:', error);
-				continue;
+				console.warn(
+					'Failed to parse potential function call JSON:',
+					functionData.substring(0, 100),
+					'Error:',
+					error,
+				);
 			}
 		}
+
 		return {
 			toolCalls: toolCalls.length > 0 ? toolCalls : null,
 			cleanedContent: cleanedContent.trim(),
@@ -141,150 +138,165 @@ export class ToolUsageAdapter {
 	}
 
 	/**
-	 * Modifica as mensagens para incluir informações sobre as ferramentas disponíveis
+	 * Converts a message with the 'tool' role to an 'assistant' role message
+	 * containing the tool result, formatted for text-only models.
+	 */
+	private _convertToolRoleMessage(
+		message: OpenAi.Chat.Completions.ChatCompletionToolMessageParam,
+	): OpenAi.Chat.Completions.ChatCompletionAssistantMessageParam {
+		const toolCallId = message.tool_call_id;
+		const toolResult = message.content;
+		const formattedContent =
+			`This was the result of the tool call with ID ${toolCallId}, I will use it to formulate my next response: \`\`\`json\n${JSON.stringify(toolResult)
+			}\n\`\`\``;
+		return {
+			role: 'assistant',
+			content: formattedContent,
+		};
+	}
+
+	/**
+	 * Generates the informational text about available tools and how to use them.
+	 */
+	private _generateToolsInfoString(toolOptions?: ToolOptions): string {
+		if (!toolOptions || (!toolOptions.tools?.length && !toolOptions.functions?.length)) {
+			return '';
+		}
+
+		let toolsInfo = '\n\nYou have access to the following tools:\n';
+
+		if (toolOptions.tools?.length) {
+			toolsInfo += '\nTOOLS:\n';
+			toolOptions.tools.forEach((tool, index) => {
+				const formattedTool = this._formatToolForMessage(tool);
+				toolsInfo += `${index + 1}. ${formattedTool.name}: ${formattedTool.description}\n`;
+				toolsInfo += `   Parameters: ${JSON.stringify(formattedTool.parameters, null, 2)}\n\n`;
+			});
+		}
+
+		if (toolOptions.functions?.length) {
+			toolsInfo += '\nFUNCTIONS:\n';
+			toolOptions.functions.forEach((func, index) => {
+				const formattedFunc = this._formatFunctionForMessage(func);
+				toolsInfo += `${index + 1}. ${formattedFunc.name}: ${formattedFunc.description}\n`;
+				toolsInfo += `   Parameters: ${JSON.stringify(formattedFunc.parameters, null, 2)}\n\n`;
+			});
+		}
+
+		toolsInfo += '\nTo call a tool, respond using this exact markdown format:\n';
+		toolsInfo += '```function\n';
+		toolsInfo += '{\n';
+		toolsInfo += '  "name": "function_name",\n';
+		toolsInfo += '  "arguments": {\n';
+		toolsInfo += '    "param1": "value1",\n';
+		toolsInfo += '    "param2": "value2"\n';
+		toolsInfo += '  }\n';
+		toolsInfo += '}\n';
+		toolsInfo += '```\n\n';
+		toolsInfo += 'Before calling the tool, state what you are going to do. The very last part of your response must be the tool call block.\n';
+
+		const choice = toolOptions?.tool_choice;
+		const legacyFunctionCall = toolOptions?.function_call;
+
+		if (choice) {
+			if (choice === 'none') {
+				toolsInfo += 'Do not use any tools unless absolutely necessary.\n\n';
+			} else if (typeof choice === 'object' && choice.type === 'function' && choice.function?.name) {
+				toolsInfo += `You must use the tool "${choice.function.name}" to answer this query.\n\n`;
+			}
+		} else if (legacyFunctionCall) {
+			if (legacyFunctionCall === 'none') {
+				toolsInfo += 'Do not use any functions unless absolutely necessary.\n\n';
+			} else if (typeof legacyFunctionCall === 'object' && legacyFunctionCall.name) {
+				toolsInfo += `You must use the function "${legacyFunctionCall.name}" to answer this query.\n\n`;
+			}
+		}
+
+		return toolsInfo;
+	}
+
+	/**
+	 * Modifies the message history to include tool information and adapt tool messages.
 	 */
 	modifyMessagesWithToolInfo(
 		messages: OpenAi.Chat.Completions.ChatCompletionMessageParam[],
 		toolOptions?: ToolOptions,
 	): OpenAi.Chat.Completions.ChatCompletionMessageParam[] {
-		const modifiedMessages = [...messages];
-
-		// Converter mensagens com role "tool" para "assistant"
-		for (let i = 0; i < modifiedMessages.length; i++) {
-			const message = modifiedMessages[i];
-			if (message.role === 'tool') {
-				// Extrair tool_call_id e content
-				const toolCallId = message.tool_call_id;
-				const toolResult = message.content;
-
-				// Substituir a mensagem com nova formatação para compatibilidade com chatbox blackbox
-				// isso é necessário pois o chatbox não aceita mensagens com role "tool"
-				// e processa somente mensagens de texto padrão com role system, user ou assistant
-				// porém essa adaptação permite que o LLM se comporte igual ao esperado pelo sdk openai
-				modifiedMessages[i] = {
-					role: 'assistant',
-					content: `essa foi a resposta da ferramenta ${toolCallId}, usarei para compor minha próxima resposta: \`\`\`json\n${
-						JSON.stringify(toolResult)
-					}\n\`\`\``,
-				};
-			}
-		}
+		const modifiedMessages = messages.map((message) =>
+			message.role === 'tool' ? this._convertToolRoleMessage(message) : message
+		);
 
 		const lastUserMessageIndex = modifiedMessages.findLastIndex(
 			(message) => message.role === 'user',
 		);
 
-		// Somente adicionar informações de ferramentas se houver ferramentas disponíveis
-		if (
-			lastUserMessageIndex >= 0 &&
-			(toolOptions?.tools?.length || toolOptions?.functions?.length)
-		) {
-			const lastUserMessage = modifiedMessages[lastUserMessageIndex];
-			const userContent = typeof lastUserMessage.content === 'string' ? lastUserMessage.content : '';
+		if (lastUserMessageIndex >= 0) {
+			const toolsInfoString = this._generateToolsInfoString(toolOptions);
+			if (toolsInfoString) {
+				const lastUserMessage = modifiedMessages[lastUserMessageIndex];
+				const originalContent = typeof lastUserMessage.content === 'string'
+					? lastUserMessage.content
+					: (Array.isArray(lastUserMessage.content)
+						? lastUserMessage.content.map(part => part.type === 'text' ? part.text : '').join('')
+						: '');
 
-			let toolsInfo = '\n\nVocê tem acesso às seguintes ferramentas:\n';
-
-			// Adicionar informações de tools
-			if (toolOptions?.tools?.length) {
-				toolsInfo += '\nFERRAMENTAS:\n';
-				toolOptions.tools.forEach((tool, index) => {
-					const formattedTool = this.formatToolForMessage(tool);
-					toolsInfo += `${index + 1}. ${formattedTool.name}: ${formattedTool.description}\n`;
-					toolsInfo += `   Parâmetros: ${JSON.stringify(formattedTool.parameters, null, 2)}\n\n`;
-				});
+				modifiedMessages[lastUserMessageIndex] = {
+					...lastUserMessage,
+					content: `${originalContent}${toolsInfoString}`,
+				};
 			}
-
-			// Adicionar informações de functions
-			if (toolOptions?.functions?.length) {
-				toolsInfo += '\nFUNÇÕES:\n';
-				toolOptions.functions.forEach((func, index) => {
-					const formattedFunc = this.formatFunctionForMessage(func);
-					toolsInfo += `${index + 1}. ${formattedFunc.name}: ${formattedFunc.description}\n`;
-					toolsInfo += `   Parâmetros: ${JSON.stringify(formattedFunc.parameters, null, 2)}\n\n`;
-				});
-			}
-
-			// Adicionar instruções sobre como chamar as ferramentas
-			toolsInfo += '\nPara chamar uma ferramenta, responda usando o formato exato, utilizando markdown:\n';
-			toolsInfo += '```function\n';
-			toolsInfo += '{\n';
-			toolsInfo += '  "name": "nome_da_função",\n';
-			toolsInfo += '  "arguments": {\n';
-			toolsInfo += '    "parametro1": "valor1",\n';
-			toolsInfo += '    "parametro2": "valor2"\n';
-			toolsInfo += '  }\n';
-			toolsInfo += '}\n';
-			toolsInfo +=
-				'```\n\n antes de chamar a ferramenta, indique o que vai fazer, a ultima coisa que disser precisa ser a chamada da ferramenta para poder usa-la\n';
-
-			// Instruções para tool_choice
-			if (toolOptions?.tool_choice && toolOptions.tool_choice !== 'auto') {
-				if (toolOptions.tool_choice === 'none') {
-					toolsInfo += 'Não use nenhuma ferramenta, a menos que seja absolutamente necessário.\n\n';
-				} else if (typeof toolOptions.tool_choice === 'object' && toolOptions.tool_choice.function) {
-					toolsInfo += `Use a ferramenta "${toolOptions.tool_choice.function.name}" para responder a esta pergunta.\n\n`;
-				}
-			}
-
-			// Adicionar instruções para function_call
-			if (toolOptions?.function_call) {
-				if (toolOptions.function_call === 'none') {
-					toolsInfo += 'Não use nenhuma função, a menos que seja absolutamente necessário.\n\n';
-				} else if (typeof toolOptions.function_call === 'object' && toolOptions.function_call.name) {
-					toolsInfo += `Use a função "${toolOptions.function_call.name}" para responder a esta pergunta.\n\n`;
-				}
-			}
-
-			modifiedMessages[lastUserMessageIndex] = {
-				...lastUserMessage,
-				content: `${userContent}${toolsInfo}`,
-			};
 		}
 
 		return modifiedMessages;
 	}
 
 	/**
-	 * Processa a resposta do modelo para extrair chamadas de ferramentas e transformar o stream
+	 * Processes the model's response stream, extracts tool calls, executes them,
+	 * and returns a stream compatible with the OpenAI SDK format.
 	 */
 	processModelResponse(
-		generateText: (messages: OpenAi.Chat.Completions.ChatCompletionMessageParam[], ...args: any[]) => Promise<ReadableStreamDefaultReader<Uint8Array>>,
-		originalReader: ReadableStreamDefaultReader<Uint8Array>,
+		generateTextFn: (messages: OpenAi.Chat.Completions.ChatCompletionMessageParam[], ...args: any[]) => Promise<ReadableStreamDefaultReader<Uint8Array>>,
+		initialModelStreamReader: ReadableStreamDefaultReader<Uint8Array>,
 		messages: OpenAi.Chat.ChatCompletionMessageParam[],
-		responseMap?: (responseBody: string) => string,
+		responseChunkMapFn?: (responseBody: string) => string,
 		...generateTextArgs: any[]
 	): ReadableStreamDefaultReader<Uint8Array> {
-		const extractedToolCallsReader = this.extractToolCallsReader(originalReader, responseMap);
-
-		const openaiFormatedToolCallsReader = this.formatToolCallsInOpenaiInterface(extractedToolCallsReader);
-
-		const postToolExcecutionReader = executeToolCalls(generateText, openaiFormatedToolCallsReader, messages, ...generateTextArgs);
-
-		return this.mapResponse(postToolExcecutionReader);
+		const toolCallExtractionReader = this._extractToolCallsFromStream(initialModelStreamReader, responseChunkMapFn);
+		const openaiFormattedReader = this._formatStreamToOpenAIInterface(toolCallExtractionReader);
+		const finalResponseReader = executeToolCalls(generateTextFn, openaiFormattedReader, messages, ...generateTextArgs);
+		return this.mapResponse(finalResponseReader, false, OpenaiResponseMap);
 	}
 
+	/**
+	 * Maps the raw text chunks from a stream using an optional mapping function
+	 * and encodes them back to Uint8Array. Optionally formats as OpenAI stream chunks.
+	 */
 	mapResponse(
 		reader: ReadableStreamDefaultReader<Uint8Array>,
-		exit: boolean = false,
-		responseMap?: (responseBody: string) => string,
+		formatAsOpenAIChunk: boolean = false,
+		responseChunkMapFn?: (responseBody: string) => string,
 	): ReadableStreamDefaultReader<Uint8Array> {
-		// deno-lint-ignore no-this-alias
-		const self = this;
 		return new ReadableStream<Uint8Array>({
 			async start(controller) {
 				try {
 					while (true) {
 						const { done, value } = await reader.read();
+						if (done) break;
 
-						if (done) {
-							break;
-						}
+						const rawChunkText = TEXT_DECODER.decode(value);
+						const mappedText = responseChunkMapFn ? responseChunkMapFn(rawChunkText) : rawChunkText;
 
-						const textFromProvider = decoder.decode(value);
-						const text = responseMap ? responseMap(textFromProvider) : textFromProvider;
-						const response = exit ? self.createChatFormatter(text) : OpenaiResponseMap(text);
-						controller.enqueue(encoder.encode(response));
+						if (!mappedText && !(formatAsOpenAIChunk && mappedText === '')) continue;
+
+						const outputChunk = formatAsOpenAIChunk
+							? ToolUsageAdapter._createOpenAIStreamChunk(mappedText)
+							: mappedText;
+
+						controller.enqueue(TEXT_ENCODER.encode(outputChunk));
 					}
+				} catch (error) {
+					console.error('Error in mapResponse stream:', error);
+					controller.error(error);
 				} finally {
 					controller.close();
 					reader.releaseLock();
@@ -293,183 +305,210 @@ export class ToolUsageAdapter {
 		}).getReader();
 	}
 
-	private formatToolCallsInOpenaiInterface<T>(
-		reader: ReadableStreamDefaultReader<Uint8Array>,
-	): ReadableStreamDefaultReader<Uint8Array> {
-		// deno-lint-ignore no-this-alias
-		const self = this;
-
-		return new ReadableStream<Uint8Array>({
-			async start(controller) {
-				try {
-					let toolCalls: ToolCall[] | null = null;
-
-					while (true) {
-						const { done, value } = await reader.read();
-
-						if (done) {
-							break;
-						}
-
-						const text = decoder.decode(value);
-
-						const toolCallsProcessing = self.processToolCalls(text);
-						if (toolCallsProcessing.processed) {
-							toolCalls = toolCallsProcessing.toolCalls;
-							for (const result of toolCallsProcessing.results) {
-								controller.enqueue(encoder.encode(JSON.stringify(result)));
-							}
-							reader.releaseLock();
-							break;
-						}
-
-						controller.enqueue(encoder.encode(self.createChatFormatter(text)));
-					}
-
-					if (!toolCalls) {
-						controller.enqueue(encoder.encode(self.createChatFormatter('')));
-					}
-				} finally {
-					controller.close();
-					reader.releaseLock();
-				}
-			},
-		}).getReader();
-	}
-
-	private createChatFormatter(text: string): string {
+	/**
+	 * Creates a JSON string formatted as an OpenAI stream chunk.
+	 */
+	private static _createOpenAIStreamChunk(text: string): string {
 		const response: OpenAiStreamResponse = {
 			choices: [{
-				delta: {
-					content: text,
-				},
+				delta: { content: text },
 				finish_reason: text === '' ? 'stop' : null,
 			}],
 		};
 		return JSON.stringify(response);
 	}
 
-	private processToolCalls(text: string): ToolCallsProcessing {
-		const results: ToolCallResult[] = [];
-		let toolCalls: ToolCall[] = [];
+	/**
+	 * Processes a stream chunk containing the special adapter key for tool calls.
+	 * Parses the JSON and formats it into OpenAI SDK compatible tool call chunks.
+	 */
+	private _processAdapterToolCallChunk(textChunk: string): {
+		processed: boolean;
+		toolCalls: Array<{ index: number; id?: string; type?: string; function?: { name?: string; arguments?: string } }> | null;
+		formattedChunks: ToolCallResult[];
+	} {
+		const formattedChunks: ToolCallResult[] = [];
+		let toolCalls: Array<{ index: number; id?: string; type?: string; function?: { name?: string; arguments?: string } }> = [];
 		let processed = false;
 
-		if (text.includes('"__adapter_tool_calls"')) {
+		if (textChunk.includes(`"${TOOL_CALL_ADAPTER_KEY}"`)) {
 			try {
-				const data = JSON.parse(text);
-				if (data.__adapter_tool_calls) {
+				const data = JSON.parse(textChunk);
+				if (data[TOOL_CALL_ADAPTER_KEY]) {
 					processed = true;
-					const extractedToolCalls = data.__adapter_tool_calls;
+					const extractedToolCalls: ToolCall[] = data[TOOL_CALL_ADAPTER_KEY];
 
-					toolCalls = extractedToolCalls.map((call: ToolCall, index: number) => ({
-						index,
+					toolCalls = extractedToolCalls.map((call, index) => ({
+						index: index,
 						id: call.id,
 						type: call.type,
 						function: call.function,
 					}));
 
 					for (const toolCall of toolCalls) {
-						results.push({
+						formattedChunks.push({
 							choices: [{
-								delta: {
-									content: '',
-									tool_calls: [toolCall],
-								},
+								delta: { content: null, tool_calls: [toolCall] },
 								finish_reason: null,
 							}],
 						});
 					}
 
-					results.push({
+					formattedChunks.push({
 						choices: [{
-							delta: {
-								content: '',
-							},
+							delta: { content: null },
 							finish_reason: 'tool_calls',
 						}],
 					});
 				}
 			} catch (error) {
-				console.error('Erro ao processar chamadas de ferramentas:', error);
+				console.error('Error processing adapter tool call chunk:', error, 'Chunk:', textChunk);
+				processed = false;
+				toolCalls = [];
 			}
 		}
 
-		return { processed, toolCalls, results };
+		return { processed, toolCalls: toolCalls.length > 0 ? toolCalls : null, formattedChunks };
 	}
 
-	private extractToolCallsReader(
-		originalReader: ReadableStreamDefaultReader<Uint8Array>,
-		responseMap?: (responseBody: string) => string,
+	/**
+	 * Reads a stream, identifies chunks containing adapter-formatted tool calls,
+	 * processes them, and passes through other chunks formatted as OpenAI stream chunks.
+	 */
+	private _formatStreamToOpenAIInterface(
+		reader: ReadableStreamDefaultReader<Uint8Array>,
 	): ReadableStreamDefaultReader<Uint8Array> {
 		// deno-lint-ignore no-this-alias
 		const self = this;
 		return new ReadableStream<Uint8Array>({
 			async start(controller) {
-				let buffer = '';
-				let toolBlockStarted = false;
-				let toolBlockBuffer = '';
-				let doneReading = false;
+				let toolCallsDetected = false;
+				try {
+					while (true) {
+						const { done, value } = await reader.read();
+						if (done) break;
 
-				const toolStartRegex = /```(function|json)?\s*\n?/;
-				const toolEndRegex = /\n```/;
+						const textChunk = TEXT_DECODER.decode(value);
 
-				while (!doneReading) {
-					const { done, value } = await originalReader.read();
-					if (done) doneReading = true;
-					const chunk = value ? decoder.decode(value, { stream: true }) : '';
-					const text = responseMap ? responseMap(chunk) : chunk;
-					buffer += text;
+						const toolProcessingResult = self._processAdapterToolCallChunk(textChunk);
 
-					if (toolBlockStarted) {
-						toolBlockBuffer += text;
-						const endIdx = toolBlockBuffer.search(toolEndRegex);
-						if (endIdx !== -1) {
-							const blockEnd = endIdx + 4;
-							const fullBlock = toolBlockBuffer.slice(0, blockEnd);
-							const rest = toolBlockBuffer.slice(blockEnd);
-							const { toolCalls, cleanedContent } = self.extractToolCalls(fullBlock);
-							if (cleanedContent) controller.enqueue(encoder.encode(cleanedContent));
-							if (toolCalls) controller.enqueue(encoder.encode(JSON.stringify({ __adapter_tool_calls: toolCalls })));
-							if (rest) controller.enqueue(encoder.encode(rest));
-							toolBlockStarted = false;
-							toolBlockBuffer = '';
-							buffer = '';
+						if (toolProcessingResult.processed) {
+							toolCallsDetected = true;
+							for (const result of toolProcessingResult.formattedChunks) {
+								controller.enqueue(TEXT_ENCODER.encode(JSON.stringify(result)));
+							}
+						} else {
+							controller.enqueue(TEXT_ENCODER.encode(ToolUsageAdapter._createOpenAIStreamChunk(textChunk)));
 						}
-						continue;
 					}
 
-					const startMatch = buffer.match(toolStartRegex);
-					if (startMatch) {
-						toolBlockStarted = true;
-						const idx = buffer.indexOf(startMatch[0]);
-						const beforeBlock = buffer.slice(0, idx);
-						if (beforeBlock) controller.enqueue(encoder.encode(beforeBlock));
-						toolBlockBuffer = buffer.slice(idx);
-						buffer = '';
-						continue;
+					if (!toolCallsDetected) {
+						controller.enqueue(TEXT_ENCODER.encode(ToolUsageAdapter._createOpenAIStreamChunk('')));
 					}
-
-					if (buffer) {
-						controller.enqueue(encoder.encode(buffer));
-						buffer = '';
-					}
+				} catch (error) {
+					console.error('Error in _formatStreamToOpenAIInterface:', error);
+					controller.error(error);
+				} finally {
+					controller.close();
+					reader.releaseLock();
 				}
+			},
+		}).getReader();
+	}
 
-				// Finaliza bloco se necessário
-				if (toolBlockStarted && toolBlockBuffer) {
-					const { toolCalls, cleanedContent } = self.extractToolCalls(toolBlockBuffer);
-					if (cleanedContent) controller.enqueue(encoder.encode(cleanedContent));
-					if (toolCalls) controller.enqueue(encoder.encode(JSON.stringify({ __adapter_tool_calls: toolCalls })));
-				} else if (buffer) {
-					controller.enqueue(encoder.encode(buffer));
+	/**
+	 * Reads a stream from the model, identifies markdown blocks potentially containing
+	 * function calls, extracts them, and yields either regular text chunks or
+	 * a special JSON chunk containing the extracted tool calls.
+	 */
+	private _extractToolCallsFromStream(
+		modelStreamReader: ReadableStreamDefaultReader<Uint8Array>,
+		responseChunkMapFn?: (responseBody: string) => string,
+	): ReadableStreamDefaultReader<Uint8Array> {
+		// deno-lint-ignore no-this-alias
+		const self = this;
+		return new ReadableStream<Uint8Array>({
+			async start(controller) {
+				let chunkBuffer = '';
+				let toolBlockBuffer = '';
+				let isInsideToolBlock = false;
+				let streamFinished = false;
+
+				try {
+					while (!streamFinished) {
+						const { done, value } = await modelStreamReader.read();
+						if (done) streamFinished = true;
+
+						const rawChunk = value ? TEXT_DECODER.decode(value, { stream: true }) : '';
+						const currentChunk = responseChunkMapFn ? responseChunkMapFn(rawChunk) : rawChunk;
+
+						if (isInsideToolBlock) {
+							toolBlockBuffer += currentChunk;
+							const endMatchIndex = toolBlockBuffer.search(TOOL_BLOCK_END_REGEX);
+
+							if (endMatchIndex !== -1) {
+								const blockEndMarkerLength = toolBlockBuffer.match(TOOL_BLOCK_END_REGEX)![0].length;
+								const fullBlock = toolBlockBuffer.slice(0, endMatchIndex + blockEndMarkerLength);
+								const remainingChunkPart = toolBlockBuffer.slice(endMatchIndex + blockEndMarkerLength);
+
+								const { toolCalls, cleanedContent } = self._extractToolCalls(fullBlock);
+								if (cleanedContent) controller.enqueue(TEXT_ENCODER.encode(cleanedContent));
+								if (toolCalls) {
+									controller.enqueue(TEXT_ENCODER.encode(JSON.stringify({ [TOOL_CALL_ADAPTER_KEY]: toolCalls })));
+								}
+
+								isInsideToolBlock = false;
+								toolBlockBuffer = '';
+								chunkBuffer = remainingChunkPart;
+							}
+						} else {
+							chunkBuffer += currentChunk;
+							const startMatch = chunkBuffer.match(TOOL_BLOCK_START_REGEX);
+
+							if (startMatch) {
+								const blockStartIndex = chunkBuffer.indexOf(startMatch[0]);
+								const textBeforeBlock = chunkBuffer.slice(0, blockStartIndex);
+
+								if (textBeforeBlock) controller.enqueue(TEXT_ENCODER.encode(textBeforeBlock));
+
+								isInsideToolBlock = true;
+								toolBlockBuffer = chunkBuffer.slice(blockStartIndex);
+								chunkBuffer = '';
+							} else if (streamFinished) {
+								if (chunkBuffer) controller.enqueue(TEXT_ENCODER.encode(chunkBuffer));
+								chunkBuffer = '';
+							} else {
+								const lastPotentialStart = chunkBuffer.lastIndexOf('```');
+								const safeEnqueueLength = lastPotentialStart === -1 ? chunkBuffer.length : lastPotentialStart;
+
+								if (safeEnqueueLength > 0) {
+									controller.enqueue(TEXT_ENCODER.encode(chunkBuffer.slice(0, safeEnqueueLength)));
+									chunkBuffer = chunkBuffer.slice(safeEnqueueLength);
+								}
+							}
+						}
+					}
+
+					if (isInsideToolBlock && toolBlockBuffer) {
+						console.warn('Stream ended while inside a tool block. Processing incomplete block.');
+						const { toolCalls, cleanedContent } = self._extractToolCalls(toolBlockBuffer);
+						if (cleanedContent) controller.enqueue(TEXT_ENCODER.encode(cleanedContent));
+						if (toolCalls) {
+							controller.enqueue(TEXT_ENCODER.encode(JSON.stringify({ [TOOL_CALL_ADAPTER_KEY]: toolCalls })));
+						}
+					} else if (chunkBuffer) {
+						controller.enqueue(TEXT_ENCODER.encode(chunkBuffer));
+					}
+				} catch (error) {
+					console.error('Error in _extractToolCallsFromStream:', error);
+					controller.error(error);
+				} finally {
+					controller.close();
+					modelStreamReader.releaseLock();
 				}
-
-				controller.close();
-				originalReader.releaseLock();
 			},
 		}).getReader();
 	}
 }
 
-// Exportar uma instância singleton do adaptador
 export default new ToolUsageAdapter();
