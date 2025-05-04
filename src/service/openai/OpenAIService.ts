@@ -224,7 +224,13 @@ function readInitialStreamAndExtract(
 						tool_calls[index] = call;
 					}
 
-					tool_calls[index].function.arguments += call.function.arguments;
+					try {
+						if(!tool_calls[index].function.arguments || JSON.parse(tool_calls[index].function.arguments)) 
+							JSON.parse(call.function.arguments);
+						tool_calls[index].function.arguments = call.function.arguments;
+					} catch {
+						tool_calls[index].function.arguments += call.function.arguments;
+					}
 				}
 				continue;
 			} catch (e) {
@@ -256,7 +262,13 @@ async function handleFunctionCallFollowUp(
 ) {
 	for (const tool_call of tool_calls) {
 		const fnName = tool_call.function.name;
-		const args = JSON.parse(tool_call.function.arguments);
+		let args = null;
+		try {
+			args = JSON.parse(tool_call.function.arguments);
+		} catch (e) {
+			console.error('Error parsing function arguments:', tool_call);
+			continue;
+		}
 
 		const fn = ToolService.tools.get(fnName)?.fn;
 		if (!fn) {
