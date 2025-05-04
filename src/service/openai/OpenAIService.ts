@@ -188,11 +188,26 @@ function extractToolCalls(
 ) {
 	return new ReadableStream<Uint8Array>({
 		async start(controller) {
-			const tool_calls = await readInitialStreamAndExtract(initialReader, controller);
-			if (tool_calls.length > 0) {
-				await handleFunctionCallFollowUp(openai, messages, model, maxTokens, tool_calls, controller);
+			try{
+				const tool_calls = await readInitialStreamAndExtract(initialReader, controller);
+				if (tool_calls.length > 0) {
+					await handleFunctionCallFollowUp(openai, messages, model, maxTokens, tool_calls, controller);
+				}
+			} catch (e) {
+				const errorMessage = `Eita, algo deu errado: ${e instanceof Error ? e.message : e}`;
+				const openAiContent = JSON.stringify({
+					choices: [
+						{
+							delta: {
+								content: errorMessage,
+							},
+						},
+					],
+				});
+				controller.enqueue(new TextEncoder().encode(openAiContent));
+			} finally {
+				controller.close();
 			}
-			controller.close();
 		},
 	});
 }
