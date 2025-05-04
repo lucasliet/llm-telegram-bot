@@ -116,15 +116,15 @@ export default class OpenAiService {
 		});
 		const initialReader = initialResponse.toReadableStream().getReader() as ReadableStreamDefaultReader<Uint8Array>;
 
-		const combinedStream = extractToolCalls(
-			openai,
+		const reader = executeToolCalls(
+			generateFollowupResponse,
 			initialReader,
 			messages,
+			openai,
 			model,
 			maxTokens,
 		);
 
-		const reader = combinedStream.getReader();
 		const onComplete = (completedAnswer: string) => addContentToChatHistory(geminiHistory, quote, requestPrompt, completedAnswer, userKey);
 
 		return { reader, onComplete, responseMap };
@@ -146,8 +146,12 @@ export default class OpenAiService {
 			style,
 		});
 
-		const imageUrls = response.data.map((image: OpenAi.Images.Image) => image.url!);
+		const imageUrls = response.data?.map((image: OpenAi.Images.Image) => image.url!);
 		console.log('dall-e generated images: ', imageUrls);
+
+		if (!imageUrls || imageUrls.length === 0) {
+			throw new Error('No images generated.');
+		}
 
 		return imageUrls;
 	}
@@ -165,7 +169,7 @@ export default class OpenAiService {
 	}
 }
 
-function responseMap(responseBody: string): string {
+export function responseMap(responseBody: string): string {
 	return JSON.parse(responseBody).choices[0]?.delta?.content || '';
 }
 
@@ -179,19 +183,18 @@ function responseMap(responseBody: string): string {
  * @param maxTokens Token limit for the response
  * @returns ReadableStream of Uint8Array containing all chunks of the response
  */
-function extractToolCalls(
-	openai: OpenAi,
+export function executeToolCalls(
+	generateText: (messages: OpenAi.Chat.Completions.ChatCompletionMessageParam[], ...args: any[]) => Promise<ReadableStreamDefaultReader<Uint8Array>>,
 	initialReader: ReadableStreamDefaultReader<Uint8Array>,
 	messages: OpenAi.Chat.ChatCompletionMessageParam[],
-	model: string,
-	maxTokens: number,
+	...generateTextArgs: any[]
 ) {
 	return new ReadableStream<Uint8Array>({
 		async start(controller) {
-			try{
+			try {
 				const tool_calls = await readInitialStreamAndExtract(initialReader, controller);
 				if (tool_calls.length > 0) {
-					await handleFunctionCallFollowUp(openai, messages, model, maxTokens, tool_calls, controller);
+					await handleFunctionCallFollowUp(generateText, messages, tool_calls, controller, ...generateTextArgs);
 				}
 			} catch (e) {
 				const errorMessage = `Eita, algo deu errado: ${e instanceof Error ? e.message : e}`;
@@ -209,7 +212,7 @@ function extractToolCalls(
 				controller.close();
 			}
 		},
-	});
+	}).getReader();
 }
 
 /**
@@ -219,42 +222,40 @@ function extractToolCalls(
  * @param controller Controller to enqueue chunks in the output stream
  * @returns Promise that resolves with an array of tool calls containing the function name and arguments
  */
-function readInitialStreamAndExtract(
+async function readInitialStreamAndExtract(
 	initialReader: ReadableStreamDefaultReader<Uint8Array>,
 	controller: ReadableStreamDefaultController<Uint8Array>,
 ): Promise<OpenAi.Chat.Completions.ChatCompletionMessageToolCall[]> {
-	return (async () => {
-		const tool_calls: OpenAi.Chat.Completions.ChatCompletionMessageToolCall[] = [];
-		while (true) {
-			const { done, value } = await initialReader.read();
-			if (done) break;
-			controller.enqueue(value);
-			try {
-				const text = new TextDecoder().decode(value);
-				const toolCalls = JSON.parse(text)?.choices?.[0]?.delta?.tool_calls;
-				for (const call of toolCalls || []) {
-					const { index } = call;
+	const tool_calls: OpenAi.Chat.Completions.ChatCompletionMessageToolCall[] = [];
+	while (true) {
+		const { done, value } = await initialReader.read();
+		if (done) break;
+		controller.enqueue(value);
+		try {
+			const text = new TextDecoder().decode(value);
+			const toolCalls = JSON.parse(text)?.choices?.[0]?.delta?.tool_calls;
+			for (const call of toolCalls || []) {
+				const { index } = call;
 
-					if (!tool_calls[index]) {
-						tool_calls[index] = call;
-					}
-
-					try {
-						if(!tool_calls[index].function.arguments || JSON.parse(tool_calls[index].function.arguments)) 
-							JSON.parse(call.function.arguments);
-						tool_calls[index].function.arguments = call.function.arguments;
-					} catch {
-						tool_calls[index].function.arguments += call.function.arguments;
-					}
+				if (!tool_calls[index]) {
+					tool_calls[index] = call;
 				}
-				continue;
-			} catch (e) {
-				console.error('Error decoding initial chunk:', e);
-				throw e;
+
+				try {
+					if (!tool_calls[index].function.arguments || JSON.parse(tool_calls[index].function.arguments))
+						JSON.parse(call.function.arguments);
+					tool_calls[index].function.arguments = call.function.arguments;
+				} catch {
+					tool_calls[index].function.arguments += call.function.arguments;
+				}
 			}
+			continue;
+		} catch (e) {
+			console.error('Error decoding initial chunk:', e);
+			throw e;
 		}
-		return tool_calls;
-	})();
+	}
+	return tool_calls;
 }
 
 /**
@@ -268,19 +269,18 @@ function readInitialStreamAndExtract(
  * @param controller Controller to enqueue chunks in the output stream
  */
 async function handleFunctionCallFollowUp(
-	openai: OpenAi,
+	generateText: (messages: OpenAi.Chat.Completions.ChatCompletionMessageParam[], ...args: any[]) => Promise<ReadableStreamDefaultReader<Uint8Array>>,
 	messages: OpenAi.Chat.ChatCompletionMessageParam[],
-	model: string,
-	maxTokens: number,
 	tool_calls: OpenAi.Chat.Completions.ChatCompletionMessageToolCall[],
 	controller: ReadableStreamDefaultController<Uint8Array>,
+	...generateTextArgs: any[]
 ) {
 	for (const tool_call of tool_calls) {
 		const fnName = tool_call.function.name;
 		let args = null;
 		try {
 			args = JSON.parse(tool_call.function.arguments);
-		} catch (e) {
+		} catch {
 			console.error('Error parsing function arguments:', tool_call);
 			continue;
 		}
@@ -304,17 +304,24 @@ async function handleFunctionCallFollowUp(
 		});
 	}
 
-	const followupResponse = await openai.chat.completions.create({
-		model: model === 'o3-mini' || model === 'o4-mini' ? 'gpt-4o' : model,
-		messages,
-		stream: true,
-		max_tokens: maxTokens,
-	});
-
-	const followReader = followupResponse.toReadableStream().getReader();
+	const followupReader = await generateText(messages, ...generateTextArgs);
 	while (true) {
-		const { done, value } = await followReader.read();
+		const { done, value } = await followupReader.read();
 		if (done) break;
 		controller.enqueue(value);
 	}
+}
+
+function generateFollowupResponse(
+	messages: OpenAi.Chat.ChatCompletionMessageParam[],
+	openai: OpenAi,
+	model: string,
+	maxTokens: number,
+): Promise<ReadableStreamDefaultReader<Uint8Array>> {
+	return openai.chat.completions.create({
+		model,
+		messages,
+		stream: true,
+		max_tokens: maxTokens,
+	}).then(r => r.toReadableStream().getReader() as ReadableStreamDefaultReader<Uint8Array>);
 }

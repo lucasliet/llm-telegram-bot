@@ -2,6 +2,9 @@ import { addContentToChatHistory, getChatHistory } from '@/repository/ChatReposi
 import { convertGeminiHistoryToGPT, replaceGeminiConfigFromTone, StreamReplyResponse } from '@/util/ChatConfigUtil.ts';
 import { blackboxModels } from '@/config/models.ts';
 import { createSession, getSession } from '@/repository/SessionRepository.ts';
+import ToolUsageAdapter, { ToolOptions } from '../adapter/ToolUsageAdapter.ts';
+import OpenAI from 'npm:openai';
+import ToolService from './ToolService.ts';
 
 /**
  * Constants and configuration
@@ -41,48 +44,41 @@ export default {
 		model = blackboxModels.reasoningModel,
 	): Promise<StreamReplyResponse> {
 		const geminiHistory = await getChatHistory(userKey);
-
+		const requestPrompt = quote ? `quote: "${quote}"\n\n${prompt}` : prompt;
 		const [modelId, modelName] = model.split('|');
 
-		const requestPrompt = quote ? `quote: "${quote}"\n\n${prompt}` : prompt;
+		const messages: OpenAI.ChatCompletionMessageParam[] = [
+			{
+				role: 'system',
+				content: replaceGeminiConfigFromTone(
+					'BlackboxAI',
+					modelName,
+					BLACKBOX_MAX_TOKENS,
+				),
+			},
+			...convertGeminiHistoryToGPT(geminiHistory),
+			{ role: 'user', content: requestPrompt },
+		];
 
-		const apiResponse = await fetch(`https://www.blackbox.ai/api/chat`, {
-			...REQUEST_OPTIONS,
-			body: JSON.stringify({
-				messages: [
-					{
-						role: 'system',
-						content: replaceGeminiConfigFromTone(
-							'BlackboxAI',
-							modelName,
-							BLACKBOX_MAX_TOKENS,
-						),
-					},
-					...convertGeminiHistoryToGPT(geminiHistory),
-					{ role: 'user', content: requestPrompt },
-				],
-				agentMode: gptOnline === model ? {} : {
-					mode: true,
-					id: modelId,
-					name: modelName,
-				},
-				maxTokens: BLACKBOX_MAX_TOKENS,
-				deepSearchMode: model === reasoningModelOnline,
-				beastMode: model === reasoningModel || model === reasoningModelOnline,
-				isPremium: true,
-				webSearchModePrompt: model !== reasoningModel,
-				trendingAgentMode: {},
-				userSelectedModel: gptOnline === model ? null : modelName,
-				validated: '00f37b34-a166-4efb-bce5-1312d87f2f94',
-				session: await getOrCreateSession(),
-			}),
-		});
+		const messagesWithToolOptions = ToolUsageAdapter.modifyMessagesWithToolInfo(messages, { tools: ToolService.schemas });
+
+		const apiResponse = await fetchResponse(messagesWithToolOptions, model, modelId, modelName);
 
 		if (!apiResponse.ok) {
 			throw new Error(`Failed to generate text: ${apiResponse.statusText}`);
 		}
 
-		const reader = apiResponse.body!.getReader();
+		const originalReader = apiResponse.body!.getReader();
+
+		const reader = ToolUsageAdapter.processModelResponse(
+			generateFollowupResponse,
+			originalReader,
+			messages,
+			undefined,
+			model,
+			modelId,
+			modelName
+		);
 
 		const onComplete = (completedAnswer: string) =>
 			addContentToChatHistory(
@@ -134,6 +130,40 @@ export default {
 		return imageUrl;
 	},
 };
+
+async function fetchResponse(messages: OpenAI.ChatCompletionMessageParam[], model: string, modelId: string, modelName: string) {
+	return fetch(`https://www.blackbox.ai/api/chat`, {
+		...REQUEST_OPTIONS,
+		body: JSON.stringify({
+			messages,
+			agentMode: gptOnline === model ? {} : {
+				mode: true,
+				id: modelId,
+				name: modelName,
+			},
+			maxTokens: BLACKBOX_MAX_TOKENS,
+			deepSearchMode: model === reasoningModelOnline,
+			beastMode: model === reasoningModel || model === reasoningModelOnline,
+			isPremium: true,
+			webSearchModePrompt: model !== reasoningModel,
+			trendingAgentMode: {},
+			userSelectedModel: gptOnline === model ? null : modelName,
+			validated: '00f37b34-a166-4efb-bce5-1312d87f2f94',
+			session: await getOrCreateSession(),
+		}),
+	});
+}
+
+function generateFollowupResponse(
+	messages: OpenAI.ChatCompletionMessageParam[],
+	model: string,
+	modelId: string,
+	modelName: string,
+): Promise<ReadableStreamDefaultReader<Uint8Array>> {
+	return fetchResponse(messages, model, modelId, modelName)
+		.then(r => r.body!.getReader())
+		.then(reader => ToolUsageAdapter.mapResponse(reader, true))
+}
 
 const firstNames = [
 	'Alice',
