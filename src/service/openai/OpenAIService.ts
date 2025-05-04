@@ -319,7 +319,7 @@ function generateFollowupResponse(
 	maxTokens: number,
 ): Promise<ReadableStreamDefaultReader<Uint8Array>> {
 	return openai.chat.completions.create({
-		model,
+		model: model === 'o3-mini' || model === 'o4-mini' ? 'gpt-4o' : model,
 		messages,
 		stream: true,
 		max_tokens: maxTokens,

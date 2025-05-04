@@ -2,9 +2,8 @@ import { addContentToChatHistory, getChatHistory } from '@/repository/ChatReposi
 import { convertGeminiHistoryToGPT, replaceGeminiConfigFromTone, StreamReplyResponse } from '@/util/ChatConfigUtil.ts';
 import { blackboxModels } from '@/config/models.ts';
 import { createSession, getSession } from '@/repository/SessionRepository.ts';
-import ToolUsageAdapter, { ToolOptions } from '../adapter/ToolUsageAdapter.ts';
+import ToolUsageAdapter from '../adapter/ToolUsageAdapter.ts';
 import OpenAI from 'npm:openai';
-import ToolService from './ToolService.ts';
 
 /**
  * Constants and configuration
@@ -42,6 +41,7 @@ export default {
 		quote: string = '',
 		prompt: string,
 		model = blackboxModels.reasoningModel,
+		tools?: OpenAI.Chat.Completions.ChatCompletionTool[],
 	): Promise<StreamReplyResponse> {
 		const geminiHistory = await getChatHistory(userKey);
 		const requestPrompt = quote ? `quote: "${quote}"\n\n${prompt}` : prompt;
@@ -60,7 +60,7 @@ export default {
 			{ role: 'user', content: requestPrompt },
 		];
 
-		const messagesWithToolOptions = ToolUsageAdapter.modifyMessagesWithToolInfo(messages, { tools: ToolService.schemas });
+		const messagesWithToolOptions = ToolUsageAdapter.modifyMessagesWithToolInfo(messages, { tools });
 
 		const apiResponse = await fetchResponse(messagesWithToolOptions, model, modelId, modelName);
 
