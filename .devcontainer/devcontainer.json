@@ -4,7 +4,7 @@
 	"features": {
 		"ghcr.io/devcontainers-community/features/deno": {}
 	},
-	"postCreateCommand": "deno install",
+	"postCreateCommand": "deno install --allow-import",
 	"customizations": {
 		"vscode": {
 			"extensions": [ "denoland.vscode-deno" ]

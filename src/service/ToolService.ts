@@ -145,9 +145,13 @@ export default class ToolService {
 				if (contentType.includes('text/html')) {
 					const html = await response.text();
 					const root = parse(html);
-					const body = root.getElementsByTagName("body")[0];
-					body.removeChild(body.getElementsByTagName("script")[0]);
-					return body.children.map((child) => child.text.trim().replace(/\s+/g, ' ')).join(' ');;
+					try {
+						const body = root.getElementsByTagName("body")[0];
+						return body.children.filter((child) => child.tagName !== 'script')
+							.map((child) => child.text.trim().replace(/\s+/g, ' ')).join(' ');
+					} catch {
+						// Fallback to raw text if parsing fails
+					}
 				}
 				return await response.text();
 			},
