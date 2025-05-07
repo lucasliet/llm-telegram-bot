@@ -1,5 +1,5 @@
 import { addContentToChatHistory, getChatHistory } from '@/repository/ChatRepository.ts';
-import { convertGeminiHistoryToGPT, replaceGeminiConfigFromTone, StreamReplyResponse } from '@/util/ChatConfigUtil.ts';
+import { convertGeminiHistoryToGPT, getSystemPrompt, StreamReplyResponse } from '@/util/ChatConfigUtil.ts';
 
 const PUTER_TOKEN = Deno.env.get('PUTER_TOKEN') as string;
 
@@ -38,7 +38,7 @@ export default {
 					messages: [
 						{
 							role: 'system',
-							content: replaceGeminiConfigFromTone('Claude', model, 8000),
+							content: getSystemPrompt('Claude', model, 8000),
 						},
 						...convertGeminiHistoryToGPT(geminiHistory),
 						{ role: 'user', content: requestPrompt },

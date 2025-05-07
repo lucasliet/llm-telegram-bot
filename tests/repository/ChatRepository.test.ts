@@ -1,20 +1,15 @@
-import { assertEquals, assertRejects } from 'asserts';
+import { assertEquals } from 'asserts';
 import { MockKvStore } from '../test_helpers.ts';
-import { ApiKeyNotFoundError } from '../../src/error/ApiKeyNotFoundError.ts';
-import { compressText } from 'textcompress';
 
 const mockKv = new MockKvStore();
 const originalOpenKv = Deno.openKv;
 Deno.openKv = () => Promise.resolve(mockKv as unknown as Deno.Kv);
 
 const userKey = 'user:12345';
-const testApiKey = 'test-api-key';
 const testModel = '/gpt';
 
 Deno.test('ChatRepository', async (t) => {
 	const {
-		setUserGeminiApiKeysIfAbsent,
-		getUserGeminiApiKeys,
 		getChatHistory,
 		addContentToChatHistory,
 		clearChatHistory,
@@ -29,44 +24,6 @@ Deno.test('ChatRepository', async (t) => {
 			(mockKv as any).store.delete(key);
 		}
 	};
-
-	await t.step(
-		'setUserGeminiApiKeysIfAbsent should store API key',
-		async () => {
-			resetKv();
-
-			const result = await setUserGeminiApiKeysIfAbsent(
-				userKey,
-				'key:test-api-key',
-			);
-			assertEquals(result, true);
-
-			const storedKey = await (mockKv as any).get([userKey, 'api-key']);
-			assertEquals(typeof storedKey.value, 'string');
-
-			const noKeyResult = await setUserGeminiApiKeysIfAbsent(
-				userKey,
-				'hello world',
-			);
-			assertEquals(noKeyResult, false);
-		},
-	);
-
-	await t.step('getUserGeminiApiKeys should retrieve API key', async () => {
-		resetKv();
-
-		await (mockKv as any).set([userKey, 'api-key'], compressText(testApiKey));
-
-		const key = await getUserGeminiApiKeys(userKey);
-		assertEquals(key, testApiKey);
-
-		await (mockKv as any).delete([userKey, 'api-key']);
-		await assertRejects(
-			() => getUserGeminiApiKeys(userKey),
-			ApiKeyNotFoundError,
-			'API key not found',
-		);
-	});
 
 	await t.step(
 		'getChatHistory should return empty array for new users',

@@ -1,5 +1,5 @@
 import { addContentToChatHistory, ExpirableContent, getChatHistory, getVqdHeader, setVqdHeader } from '@/repository/ChatRepository.ts';
-import { convertGeminiHistoryToGPT, replaceGeminiConfigFromTone, StreamReplyResponse } from '@/util/ChatConfigUtil.ts';
+import { convertGeminiHistoryToGPT, getSystemPrompt, StreamReplyResponse } from '@/util/ChatConfigUtil.ts';
 import OpenAi, { OpenAI } from 'npm:openai';
 
 import { duckduckgoModels } from '@/config/models.ts';
@@ -35,7 +35,7 @@ export default {
 		const messages: OpenAI.ChatCompletionMessageParam[] = [
 			{
 				role: 'user',
-				content: `your system prompt: ${replaceGeminiConfigFromTone('DuckDuckGo', model, maxTokens)}`,
+				content: `your system prompt: ${getSystemPrompt('DuckDuckGo', model, maxTokens)}`,
 			},
 			..._convertChatHistoryToDuckDuckGo(geminiHistory),
 			{ role: 'user', content: requestPrompt },

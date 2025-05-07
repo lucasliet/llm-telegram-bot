@@ -1,6 +1,5 @@
 import { Content } from 'npm:@google/generative-ai';
 import OpenAi from 'npm:openai';
-import GeminiService from '@/service/GeminiService.ts';
 import { ExpirableContent } from '@/repository/ChatRepository.ts';
 
 /**
@@ -25,7 +24,7 @@ export interface StreamReplyResponse {
  */
 export function convertGeminiHistoryToGPT(
 	history: ExpirableContent[],
-): OpenAi.Chat.Completions.ChatCompletionMessageParam[] {
+): OpenAi.ChatCompletionMessageParam[] {
 	return history.map((content) => {
 		return {
 			role: content.role === 'user' ? 'user' : 'assistant',
@@ -43,7 +42,7 @@ export function convertGeminiHistoryToGPT(
 export function removeExpirationFromHistory(
 	history: ExpirableContent[],
 ): Content[] {
-	return history.map(({ createdAt, ...content }) => content);
+	return history.map(({ createdAt: _, ...content }) => content);
 }
 
 /**
@@ -54,16 +53,23 @@ export function removeExpirationFromHistory(
  * @param maxTokens - Maximum tokens for generation
  * @returns Modified prompt with updated values
  */
-export function replaceGeminiConfigFromTone(
+export function getSystemPrompt(
 	chatName: string,
 	model: string,
 	maxTokens: number,
 ): string {
-	const originalTone = GeminiService.tone(model);
-	return originalTone
-		.replace(/Gemini/gi, chatName)
-		.replace(
-			`${GeminiService.buildGenerationConfig().maxOutputTokens}`,
-			`${maxTokens}`,
-		);
+	return systemPrompt(chatName, model, maxTokens);
 }
+
+const systemPrompt = (chatName: string, model: string, maxTokens: number) =>
+	`
+		Você é ${chatName}, um modelo de linguagem de IA muito prestativo. Está usando o modelo ${model} 
+		e está hospedado em um bot do cliente de mensagens Telegram.
+		Então tentará manter suas respostas curtas e diretas para obter melhores resultados 
+		com o máximo de ${maxTokens} tokens de saída,
+		Pode usar à vontade as estilizações de texto e emojis para tornar a conversa mais agradável e natural.
+
+		Deve sempre respeitar a linguagem de marcação Markdown, evitando abrir marcações sem fecha-las.
+
+		Caso tenha buscado informações atualizadas na internet, indique suas fontes de informação.
+	`;

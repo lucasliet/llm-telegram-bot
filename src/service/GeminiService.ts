@@ -1,150 +1,181 @@
-import {
-	ChatSession,
-	Content,
-	GenerationConfig,
-	GenerativeModel,
-	GoogleGenerativeAI,
-	HarmCategory,
-	InlineDataPart,
-	SafetySetting,
-} from 'npm:@google/generative-ai';
-import { Base64 } from 'https://deno.land/x/bb64@1.1.0/mod.ts';
-import { getChatHistory, getUserGeminiApiKeys } from '@/repository/ChatRepository.ts';
+import { streamText, CoreMessage } from 'npm:ai';
+import { createGoogleGenerativeAI, GoogleGenerativeAIProvider } from "npm:@ai-sdk/google";
+
+import { ExpirableContent, getChatHistory } from '@/repository/ChatRepository.ts';
 import { addContentToChatHistory } from '@/repository/ChatRepository.ts';
-import { ApiKeyNotFoundError } from '@/error/ApiKeyNotFoundError.ts';
-import { HarmBlockThreshold } from 'npm:@google/generative-ai';
-import { geminiModel } from '@/config/models.ts';
-import { downloadTelegramFile } from './TelegramService.ts';
-import { removeExpirationFromHistory } from '@/util/ChatConfigUtil.ts';
+import { convertGeminiHistoryToGPT, getSystemPrompt, StreamReplyResponse } from '@/util/ChatConfigUtil.ts';
+import OpenAI from 'npm:openai';
 
 const GEMINI_API_KEY = Deno.env.get('GEMINI_API_KEY') as string;
 
+/**
+ * GeminiService - Provides text and image generation using Gemini models
+ */
 export default class GeminiService {
-	private userKey: string;
-	private genAi: GoogleGenerativeAI;
-	private model: GenerativeModel;
+	private model: string;
+	private googleAI: GoogleGenerativeAIProvider;
 
-	private constructor(userKey: string, genAi: GoogleGenerativeAI) {
-		this.userKey = userKey;
-		this.genAi = genAi;
-		this.model = this.genAi.getGenerativeModel({
-			model: geminiModel,
-			safetySettings: GeminiService.buildSafetySettings(),
-			systemInstruction: GeminiService.tone(geminiModel),
+	/**
+	 * Constructs a new GeminiService instance.
+	 * @param model - The Gemini model name to be used.
+	 */
+	constructor(model: string) {
+		this.model = model;
+		this.googleAI = createGoogleGenerativeAI({
+			apiKey: GEMINI_API_KEY,
 		});
 	}
 
-	static async of(userKey: string): Promise<GeminiService> {
-		try {
-			const apiKey = await getUserGeminiApiKeys(userKey);
-			return new GeminiService(userKey, new GoogleGenerativeAI(apiKey));
-		} catch (err) {
-			if (err instanceof ApiKeyNotFoundError) {
-				return new GeminiService(
-					userKey,
-					new GoogleGenerativeAI(GEMINI_API_KEY),
-				);
-			}
-			throw err;
-		}
+	/**
+	 * Handles the streaming of responses from the AI model and updates chat history.
+	 * @private
+	 * @param modelName - The specific model identifier (e.g., 'models/gemini-pro').
+	 * @param messages - The array of messages to send to the model.
+	 * @param geminiHistoryForUpdate - The chat history to be updated upon completion.
+	 * @param originalQuote - The original quote included in the user's prompt.
+	 * @param originalPrompt - The original text prompt from the user.
+	 * @param userKey - The user's unique key for chat history management.
+	 * @returns A promise that resolves to a StreamReplyResponse object.
+	 */
+	private async _streamResponse(
+		modelName: string,
+		messages: CoreMessage[],
+		geminiHistoryForUpdate: ExpirableContent[],
+		originalQuote: string,
+		originalPrompt: string,
+		userKey: string,
+	): Promise<StreamReplyResponse> {
+		const { textStream } = streamText({
+			model: this.googleAI(modelName),
+			messages,
+		});
+
+		const textEncoder = new TextEncoder();
+		const transformStream = new TransformStream<string, Uint8Array>({
+			transform(chunk, controller) {
+				controller.enqueue(textEncoder.encode(chunk));
+			},
+		});
+
+		const transformedStream = textStream.pipeThrough(transformStream);
+		const reader = transformedStream.getReader();
+
+		const onComplete = (completedAnswer: string) =>
+			addContentToChatHistory(
+				geminiHistoryForUpdate,
+				originalQuote,
+				originalPrompt,
+				completedAnswer,
+				userKey,
+			);
+
+		return { reader, onComplete };
 	}
 
-	static getModel(): string {
-		return geminiModel;
-	}
-
-	static tone(model: string): string {
-		return `
-      Eu sou Gemini, um modelo de linguagem de IA muito prestativo. Estou usando o modelo ${model} 
-      e estou hospedado em um bot do cliente de mensagens Telegram.
-      Minha configuração de geração é: ${JSON.stringify(GeminiService.buildGenerationConfig())},
-      então tentarei manter minhas respostas curtas e diretas para obter melhores resultados. 
-      Com o máximo de ${GeminiService.buildGenerationConfig().maxOutputTokens} tokens de saída,
-      caso eu pretenda responder mensagens maiores do que isso, terminarei a mensagem com '...' 
-      indicando que a você pedir caso deseja que eu continue a mensagem.
-      minhas configurações de sefetismo são: ${JSON.stringify(GeminiService.buildSafetySettings())}.
-      Usarei à vontade as estilizações de texto e emojis para tornar a conversa mais agradável e natural.
-      Sempre tentarei terminar as mensagens com emojis.
-
-      Devo sempre respeitar a linguagem de marcação Markdown, evitando abrir marcações sem fecha-las.
-
-      Caso tenha buscado informações atualizadas na internet, indique suas fontes de informação.
-    `;
-	}
-
-	async sendTextMessage(quote: string = '', prompt: string): Promise<string> {
-		const history = await getChatHistory(this.userKey);
-		const geminiHistory = removeExpirationFromHistory(history);
-		const chat = GeminiService.buildChat(this.model, geminiHistory);
-		const message = quote ? [quote, prompt] : [prompt];
-		const response = (await chat.sendMessage(message)).response.text();
-		addContentToChatHistory(history, quote, prompt, response, this.userKey);
-		return response;
-	}
-
-	async sendPhotoMessage(
-		quote: string = '',
-		photoUrls: Promise<string>[],
-		prompt: string,
-	): Promise<string> {
-		const history = await getChatHistory(this.userKey);
-		const geminiHistory = removeExpirationFromHistory(history);
-		const chat = GeminiService.buildChat(this.model, geminiHistory);
-		const urls = await Promise.all(photoUrls);
-		const imageParts = await Promise.all(urls.map(this.fileToGenerativePart));
-
-		const message = quote ? [quote, prompt, ...imageParts] : [prompt, ...imageParts];
-
-		const response = (await chat.sendMessage(message)).response.text();
-		addContentToChatHistory(history, quote, prompt, response, this.userKey);
-		return response;
-	}
-
-	private static buildChat(
-		model: GenerativeModel,
-		history: Content[],
-	): ChatSession {
-		return model.startChat({
-			history,
-			generationConfig: GeminiService.buildGenerationConfig(),
+	/**
+	 * Maps OpenAI formatted chat history messages to CoreMessage format.
+	 * @private
+	 * @static
+	 * @param openAiHistory - An array of chat messages in OpenAI.ChatCompletionMessageParam format.
+	 * @returns An array of CoreMessage objects.
+	 */
+	private static _mapOpenAiHistoryToCoreMessages(
+		openAiHistory: OpenAI.ChatCompletionMessageParam[],
+	): CoreMessage[] {
+		return openAiHistory.map(msg => {
+			const role: 'user' | 'assistant' = msg.role === 'assistant' ? 'assistant' : 'user';
+			return {
+				role,
+				content: msg.content as string,
+			};
 		});
 	}
 
-	static buildGenerationConfig(): GenerationConfig {
-		return {
-			maxOutputTokens: 1000,
-			topP: 0.9,
-			temperature: 0.8,
-		};
-	}
+	/**
+	 * Generates a text-based response from the Gemini model.
+	 * @param userKey - The user key for accessing and updating chat history.
+	 * @param quote - An optional quote to prepend to the prompt.
+	 * @param prompt - The main text prompt for the AI.
+	 * @returns A promise that resolves to a StreamReplyResponse object,
+	 *          containing the response stream and an onComplete callback.
+	 */
+	async generateText(userKey: string, quote: string = '', prompt: string): Promise<StreamReplyResponse> {
+		const geminiHistory: ExpirableContent[] = await getChatHistory(this.model);
+		const history: OpenAI.ChatCompletionMessageParam[] = convertGeminiHistoryToGPT(geminiHistory);
+		const requestPrompt = quote ? `quote: "${quote}"\n\n${prompt}` : prompt;
 
-	private static buildSafetySettings(): SafetySetting[] {
-		return [
-			{
-				category: HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT,
-				threshold: HarmBlockThreshold.BLOCK_NONE,
-			},
-			{
-				category: HarmCategory.HARM_CATEGORY_HARASSMENT,
-				threshold: HarmBlockThreshold.BLOCK_NONE,
-			},
-			{
-				category: HarmCategory.HARM_CATEGORY_HATE_SPEECH,
-				threshold: HarmBlockThreshold.BLOCK_NONE,
-			},
-			{
-				category: HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT,
-				threshold: HarmBlockThreshold.BLOCK_NONE,
-			},
+		const systemMessageContent = getSystemPrompt('Gemini', this.model, 1000);
+		const mappedHistory = GeminiService._mapOpenAiHistoryToCoreMessages(history);
+
+		const finalMessagesForApi: CoreMessage[] = [
+			{ role: 'system', content: systemMessageContent },
+			...mappedHistory,
+			{ role: 'user', content: requestPrompt },
 		];
+
+		return this._streamResponse(
+			`models/${this.model}`,
+			finalMessagesForApi,
+			geminiHistory,
+			quote,
+			requestPrompt,
+			userKey,
+		);
 	}
 
-	private async fileToGenerativePart(url: string): Promise<InlineDataPart> {
-		return {
-			inlineData: {
-				data: Base64.fromUint8Array(await downloadTelegramFile(url)).toString(),
-				mimeType: 'image/jpeg',
+	/**
+	 * Generates a text response from the Gemini model based on images and a text prompt.
+	 * @param userKey - The user key for accessing and updating chat history.
+	 * @param quote - An optional quote to prepend to the text prompt.
+	 * @param photosUrl - An array of promises, each resolving to a URL of an image.
+	 * @param prompt - The main text prompt accompanying the images.
+	 * @returns A promise that resolves to a StreamReplyResponse object,
+	 *          containing the response stream and an onComplete callback.
+	 */
+	async generateTextFromImage(
+		userKey: string,
+		quote: string = '',
+		photosUrl: Promise<string>[],
+		prompt: string,
+	): Promise<StreamReplyResponse> {
+		const geminiHistory: ExpirableContent[] = await getChatHistory(this.model);
+		const historyMessages: OpenAI.ChatCompletionMessageParam[] = convertGeminiHistoryToGPT(geminiHistory);
+
+		const resolvedImageUrls = await Promise.all(photosUrl);
+		const imageContentParts = await Promise.all(
+			resolvedImageUrls.map((url) => {
+				return { type: 'image' as const, image: url };
+			}),
+		);
+
+		const textualPrompt = quote ? `quote: "${quote}"\n\n${prompt}` : prompt;
+		const userPromptContent: (
+			| { type: 'text'; text: string }
+			| { type: 'image'; image: string; mimeType?: string }
+		)[] = [
+			{ type: 'text', text: textualPrompt },
+			...imageContentParts,
+		];
+
+		const systemMessageContent = getSystemPrompt('Gemini', this.model, 1000);
+		const mappedHistory = GeminiService._mapOpenAiHistoryToCoreMessages(historyMessages);
+
+		const messagesForApi: CoreMessage[] = [
+			{
+				role: 'system',
+				content: systemMessageContent,
 			},
-		};
+			...mappedHistory,
+			{ role: 'user', content: userPromptContent },
+		];
+
+		return this._streamResponse(
+			`models/${this.model}`,
+			messagesForApi,
+			geminiHistory,
+			quote,
+			prompt,
+			userKey,
+		);
 	}
 }

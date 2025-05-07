@@ -1,6 +1,5 @@
-import { compressObject, compressText, decompressObject, decompressText } from 'textcompress';
+import { compressObject, decompressObject } from 'textcompress';
 import { Content } from 'npm:@google/generative-ai';
-import { ApiKeyNotFoundError } from '@/error/ApiKeyNotFoundError.ts';
 import { ModelCommand } from '@/config/models.ts';
 
 /**
@@ -16,36 +15,6 @@ const THIRTY_DAYS_IN_MILLIS = ONE_DAY_IN_MILLIS * 30;
 
 export interface ExpirableContent extends Content {
 	createdAt: number;
-}
-
-/**
- * Store API key for Gemini if user provides it
- */
-export async function setUserGeminiApiKeysIfAbsent(
-	userKey: string,
-	message: string | undefined,
-): Promise<boolean> {
-	if (message && message.startsWith('key:')) {
-		const apiKey = message.replace('key:', '');
-		const compressedKey = compressText(apiKey);
-		await kv.set([userKey, 'api-key'], compressedKey);
-		return true;
-	}
-	return false;
-}
-
-/**
- * Retrieve user's Gemini API key
- * @throws ApiKeyNotFoundError if the key doesn't exist
- */
-export async function getUserGeminiApiKeys(userKey: string): Promise<string> {
-	const compressedKey = (await kv.get<string>([userKey, 'api-key'])).value;
-
-	if (!compressedKey) {
-		throw new ApiKeyNotFoundError('API key not found');
-	}
-
-	return decompressText(compressedKey);
 }
 
 /**

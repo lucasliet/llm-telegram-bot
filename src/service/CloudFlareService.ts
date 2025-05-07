@@ -1,5 +1,5 @@
 import { addContentToChatHistory, getChatHistory } from '@/repository/ChatRepository.ts';
-import { convertGeminiHistoryToGPT, replaceGeminiConfigFromTone, StreamReplyResponse } from '@/util/ChatConfigUtil.ts';
+import { convertGeminiHistoryToGPT, getSystemPrompt, StreamReplyResponse } from '@/util/ChatConfigUtil.ts';
 import { cloudflareModels } from '@/config/models.ts';
 import { downloadTelegramFile } from './TelegramService.ts';
 
@@ -105,7 +105,7 @@ export default {
 					messages: [
 						{
 							role: 'system',
-							content: replaceGeminiConfigFromTone(
+							content: getSystemPrompt(
 								'Llama',
 								textModel,
 								CLOUDFLARE_MAX_TOKENS,

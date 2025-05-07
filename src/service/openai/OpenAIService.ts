@@ -1,6 +1,6 @@
 import OpenAi, { toFile } from 'npm:openai';
 import { addContentToChatHistory, getChatHistory } from '@/repository/ChatRepository.ts';
-import { convertGeminiHistoryToGPT, replaceGeminiConfigFromTone, StreamReplyResponse } from '@/util/ChatConfigUtil.ts';
+import { convertGeminiHistoryToGPT, getSystemPrompt, StreamReplyResponse } from '@/util/ChatConfigUtil.ts';
 import { openAIModels } from '@/config/models.ts';
 import * as path from 'jsr:@std/path';
 import ToolService from '@/service/ToolService.ts';
@@ -42,7 +42,7 @@ export default class OpenAiService {
 			messages: [
 				{
 					role: 'system',
-					content: replaceGeminiConfigFromTone(
+					content: getSystemPrompt(
 						'OpenAI',
 						this.model,
 						this.maxTokens,
@@ -88,7 +88,7 @@ export default class OpenAiService {
 		const geminiHistory = await getChatHistory(userKey);
 		const requestPrompt = quote ? `quote: "${quote}"\n\n${prompt}` : prompt;
 		const messages: OpenAi.Chat.ChatCompletionMessageParam[] = [
-			{ role: 'system', content: replaceGeminiConfigFromTone('OpenAI', this.model, this.maxTokens) },
+			{ role: 'system', content: getSystemPrompt('OpenAI', this.model, this.maxTokens) },
 			...convertGeminiHistoryToGPT(geminiHistory),
 			{ role: 'user', content: requestPrompt },
 		];

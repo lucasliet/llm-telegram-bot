@@ -1,5 +1,5 @@
 import { addContentToChatHistory, getChatHistory } from '@/repository/ChatRepository.ts';
-import { convertGeminiHistoryToGPT, replaceGeminiConfigFromTone, StreamReplyResponse } from '@/util/ChatConfigUtil.ts';
+import { convertGeminiHistoryToGPT, getSystemPrompt, StreamReplyResponse } from '@/util/ChatConfigUtil.ts';
 import { blackboxModels } from '@/config/models.ts';
 import { createSession, getSession } from '@/repository/SessionRepository.ts';
 import ToolUsageAdapter from '../adapter/ToolUsageAdapter.ts';
@@ -50,7 +50,7 @@ export default {
 		const messages: OpenAI.ChatCompletionMessageParam[] = [
 			{
 				role: 'system',
-				content: replaceGeminiConfigFromTone(
+				content: getSystemPrompt(
 					'BlackboxAI',
 					modelName,
 					BLACKBOX_MAX_TOKENS,
@@ -121,7 +121,7 @@ export default {
 		const imageUrlMatch = markdown.match(/\!\[.*\]\((.*)\)/);
 
 		if (!imageUrlMatch || !imageUrlMatch[1]) {
-			throw new Error('Failed to extract image URL from response');
+			throw new Error('Failed to extract image URL from response: ' + markdown);
 		}
 
 		const imageUrl = imageUrlMatch[1];

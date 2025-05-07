@@ -1,5 +1,5 @@
 import { addContentToChatHistory, getChatHistory } from '@/repository/ChatRepository.ts';
-import { convertGeminiHistoryToGPT, replaceGeminiConfigFromTone, StreamReplyResponse } from '@/util/ChatConfigUtil.ts';
+import { convertGeminiHistoryToGPT, getSystemPrompt, StreamReplyResponse } from '@/util/ChatConfigUtil.ts';
 
 export class PhindService {
 	private readonly headers = {
@@ -33,7 +33,7 @@ export class PhindService {
 			message_history: [
 				{
 					role: 'system',
-					content: replaceGeminiConfigFromTone(
+					content: getSystemPrompt(
 						'Phind',
 						this.model,
 						this.maxTokens,
