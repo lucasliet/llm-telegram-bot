@@ -16,7 +16,7 @@ fi
 if ! command -v denon &> /dev/null
 then
     echo "denon could not be found, installing...";
-    deno install -qAf --global --unstable https://deno.land/x/denon/denon.ts;
+    deno install -qAf --global --unstable "https://deno.land/x/denon/denon.ts";
     exec $SHELL;
 fi
 

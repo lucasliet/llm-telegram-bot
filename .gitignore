@@ -4,3 +4,4 @@ deno.lock
 temp_*
 /coverage/**
 *.log
+.aider*
