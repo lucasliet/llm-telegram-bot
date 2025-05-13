@@ -4,6 +4,7 @@ import { convertGeminiHistoryToGPT, getSystemPrompt, StreamReplyResponse } from 
 import { openAIModels } from '@/config/models.ts';
 import * as path from 'jsr:@std/path';
 import ToolService from '@/service/ToolService.ts';
+import { encodeBase64 } from 'jsr:@std/encoding/base64';
 
 const { imageModel, gptModel, sttModel } = openAIModels;
 
@@ -30,12 +31,13 @@ export default class OpenAiService {
 		quote: string = '',
 		photosUrl: Promise<string>[],
 		prompt: string,
+		usePhotoBase64: boolean = false,
 	): Promise<StreamReplyResponse> {
 		const geminiHistory = await getChatHistory(userKey);
 
 		const requestPrompt = quote ? `quote: "${quote}"\n\n${prompt}` : prompt;
 
-		const urls = await Promise.all(photosUrl);
+		const urls = usePhotoBase64 ? await getImageBase64String(photosUrl) : await Promise.all(photosUrl);
 
 		const completion = await this.openai.chat.completions.create({
 			model: this.model,
@@ -63,7 +65,7 @@ export default class OpenAiService {
 				},
 			],
 			max_tokens: this.maxTokens,
-			stream: true,
+			stream: true
 		});
 
 		const reader = completion.toReadableStream().getReader() as ReadableStreamDefaultReader<Uint8Array>;
@@ -324,4 +326,34 @@ function generateFollowupResponse(
 		stream: true,
 		max_tokens: maxTokens,
 	}).then(r => r.toReadableStream().getReader() as ReadableStreamDefaultReader<Uint8Array>);
+}
+
+function getImageBase64String(
+	photoUrls: Promise<string>[],
+): Promise<string[]> {
+	const promises = photoUrls.map(async (photoUrl) => {
+		try {
+			const response = await fetch(await photoUrl);
+			if (!response.ok) {
+				console.warn(
+					`Failed to fetch image ${photoUrl}: ${response.statusText}`,
+				);
+				return photoUrl;
+			}
+			const arrayBuffer = await response.arrayBuffer();
+			const base64String = encodeBase64(arrayBuffer);
+
+			const extension = path.extname(await photoUrl).toLowerCase();
+			const ext = extension.slice(1).toLowerCase();
+			const mimeType = ext && ext !== 'jpg' ? `image/${ext}` : 'image/jpeg';
+
+			console.log(mimeType)
+
+			return `data:${mimeType};base64,${base64String}`;
+		} catch (e) {
+			console.error(`Error processing image ${photoUrl}:`, e);
+			return photoUrl;
+		}
+	});
+	return Promise.all(promises);
 }

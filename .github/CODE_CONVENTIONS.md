@@ -6,8 +6,9 @@ When writing code, do not add // comments. Just write the code.
 ## Ensure proper formatting
 Maintain consistent indentation and spacing throughout the code.
 
-## JSDocs on functions
-When writing functions, always include JSDoc comments to describe the function's purpose, parameters, and return value.
+## TSDocs on functions
+When writing functions, always include TSDoc comments to describe the function's purpose, parameters, and return value.
+since its typescript, there is no need to add types in the function signature. unless the code is javascript.
 
 ## Clean code
 Write clean, readable code. Avoid unnecessary complexity and ensure that the code is easy to understand. Follow best practices for clean code and the programming language being used.
