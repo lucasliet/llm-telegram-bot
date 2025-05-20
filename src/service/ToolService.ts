@@ -1,6 +1,8 @@
 import OpenAi from 'npm:openai';
 import { XMLParser } from "npm:fast-xml-parser";
 import { parse } from "npm:node-html-parser";
+import { tool } from 'ai';
+import { z } from 'zod';
 /**
  * Represents a search result from SearxNG.
  */
@@ -256,6 +258,110 @@ export default class ToolService {
 	]);
 
 	static schemas: OpenAi.ChatCompletionTool[] = Array.from(ToolService.tools.values()).map((tool) => tool.schema);
+
+	// Helper function to convert JSON schema to Zod schema
+	private static jsonSchemaToZod(schema: any): z.ZodTypeAny {
+		if (!schema) return z.any();
+
+		switch (schema.type) {
+			case 'object': {
+				const shape: Record<string, z.ZodTypeAny> = {};
+				for (const key in schema.properties) {
+					const propSchema = schema.properties[key];
+					let zodProp = this.jsonSchemaToZod(propSchema);
+					if (schema.required && !schema.required.includes(key)) {
+						zodProp = zodProp.optional();
+					}
+					// Apply description last
+					if (propSchema.description) {
+						zodProp = zodProp.describe(propSchema.description);
+					}
+					shape[key] = zodProp;
+				}
+				let objectSchema = z.object(shape);
+				if (schema.additionalProperties === false) {
+					objectSchema = objectSchema.strict();
+				}
+				// Apply description last
+				if (schema.description) {
+					objectSchema = objectSchema.describe(schema.description);
+				}
+				return objectSchema;
+			}
+			case 'string': {
+				let stringSchema;
+				if (schema.enum) {
+					// Zod's enum type requires a non-empty array.
+					const enumValues = schema.enum as [string, ...string[]];
+					if (enumValues && enumValues.length > 0) {
+						stringSchema = z.enum(enumValues);
+					} else {
+						// Fallback to string if enum is empty or invalid
+						stringSchema = z.string();
+					}
+				} else {
+					stringSchema = z.string();
+				}
+				// Apply description last
+				if (schema.description) {
+					return stringSchema.describe(schema.description);
+				}
+				return stringSchema;
+			}
+			case 'number':
+			case 'integer': {
+				let numSchema = z.number();
+				// Apply description last
+				if (schema.description) {
+					numSchema = numSchema.describe(schema.description);
+				}
+				return numSchema;
+			}
+			case 'boolean': {
+				let boolSchema = z.boolean();
+				// Apply description last
+				if (schema.description) {
+					boolSchema = boolSchema.describe(schema.description);
+				}
+				return boolSchema;
+			}
+			case 'array': {
+				let itemSchema = z.any();
+				if (schema.items) {
+					itemSchema = this.jsonSchemaToZod(schema.items);
+				}
+				let arraySchema = z.array(itemSchema);
+				// Apply description last
+				if (schema.description) {
+					arraySchema = arraySchema.describe(schema.description);
+				}
+				return arraySchema;
+			}
+			default:
+				return z.any();
+		}
+	}
+
+	// Static method to get Vercel AI tools
+	public static getVercelAITools(): Record<string, ReturnType<typeof tool>> {
+		const vercelTools: Record<string, ReturnType<typeof tool>> = {};
+		for (const [toolName, entry] of this.tools) {
+			const openAISchema = entry.schema;
+			if (openAISchema.type !== 'function' || !openAISchema.function.parameters) {
+				console.warn(`Skipping tool ${toolName} due to missing or invalid function schema.`);
+				continue;
+			}
+			const jsonParamsSchema = openAISchema.function.parameters;
+			const zodSchema = this.jsonSchemaToZod(jsonParamsSchema);
+
+			vercelTools[toolName] = tool({
+				description: openAISchema.function.description,
+				parameters: zodSchema,
+				execute: entry.fn as any, // Cast fn to any for now
+			});
+		}
+		return vercelTools;
+	}
 }
 
 

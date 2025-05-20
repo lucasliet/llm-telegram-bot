@@ -19,6 +19,7 @@
 		"oak-cors": "https://deno.land/x/cors@v1.2.2/mod.ts",
 		"textcompress": "jsr:@lucasliet/textcompress",
 		"npm:openai": "npm:openai@4.98.0",
+		"zod": "npm:zod@^3.23.8",
 		"@/": "./src/"
 	},
 	"lint": {
