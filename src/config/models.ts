@@ -1,4 +1,4 @@
-export const geminiModel = 'gemini-2.0-flash-lite-preview-02-05';
+export const geminiModel = 'gemini-2.5-pro-preview-05-06';
 
 export const perplexityModels = {
 	textModel: 'sonar',
