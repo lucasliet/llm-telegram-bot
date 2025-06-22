@@ -65,8 +65,12 @@ function registerBotCommands() {
 		(ctx) => TelegramService.callAdminModel(ctx, TelegramService.callGithubCopilotModel),
 	);
 	BOT.hears(
-		/^(black|gptonline|llama|r1online|r1|v3|mixtral|qwen|gemini|o1|o3Mini|o3High|gpt45|grok|image|fala):/gi,
+		/^(black|gptonline|llama|r1online|r1|v3|mixtral|qwen|o1|o3Mini|o3High|gpt45|grok|image|fala):/gi,
 		(ctx) => TelegramService.callAdminModel(ctx, TelegramService.callBlackboxModel),
+	);
+	BOT.hears(
+		/^(gemini):/gi,
+		(ctx) => TelegramService.callAdminModel(ctx, TelegramService.callGeminiModel),
 	);
 	BOT.hears(
 		/^(duck|duckgo):/gi,

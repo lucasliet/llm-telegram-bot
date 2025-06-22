@@ -6,7 +6,7 @@ import { InlineKeyboard } from 'grammy';
 const adminCommandButtons = [
 	[['Modelo Atual', '/currentmodel']],
 	[
-		['Grok 3', '/grok'],
+		['Claude 3.7 Sonnet', '/claude'],
 		['Phind', '/phind'],
 	],
 	[
@@ -14,20 +14,20 @@ const adminCommandButtons = [
 		['Copilot GPT o4 Mini', '/o4mini'],
 	],
 	[
-		['Claude 3.7 Sonnet', '/claude'],
-		['GPT o3 Mini', '/o3mini'],
+		// ['Grok 3', '/grok'],
+		// ['GPT o3 Mini', '/o3mini'],
 	],
 	[
-		['Deepseek R1', '/r1'],
-		['Gemini 2.5 Pro', '/geminiPro'],
+		// ['Deepseek R1', '/r1'],
+		// ['Gemini 2.5 Pro', '/geminiPro'],
 	],
 	[
 		['Llama 4 Maverick', '/llama'],
-		['Gemini 2.0 Flash', '/gemini'],
+		['Gemini 2.5 Pro', '/gemini'],
 	],
 	[
-		['Qwen', '/qwen'],
-		['Mixtral', '/mixtral'],
+		// ['Qwen', '/qwen'],
+		// ['Mixtral', '/mixtral'],
 	],
 	[
 		['Sonar', '/perplexity'],
@@ -47,19 +47,19 @@ const userCommandButtons = [
 	[['Modelo Atual', '/currentmodel']],
 	[
 		['Phind', '/phind'],
-		['GPT o3 Mini', '/o3mini'],
+		// ['GPT o3 Mini', '/o3mini'],
 	],
 	[
-		['Deepseek R1', '/r1'],
-		['Grok 3', '/grok'],
+		// ['Deepseek R1', '/r1'],
+		// ['Grok 3', '/grok'],
 	],
 	[
-		['Qwen', '/qwen'],
-		['Mixtral', '/mixtral'],
+		// ['Qwen', '/qwen'],
+		// ['Mixtral', '/mixtral'],
 	],
 	[
 		['Llama 4 Maverick', '/llama'],
-		['Gemini 2.0 Flash', '/gemini'],
+		['Gemini 2.5 Pro', '/gemini'],
 	],
 	[['Limpar Histórico', '/clear']],
 ];
@@ -86,20 +86,9 @@ export const adminHelpMessage = `*Comandos inline*:
 \\- \`perplexity:\` mensagem \\- Faz uma pergunta usando o modelo perplexity\\.ai
 \\- \`search:\` mensagem \\- Faz uma pergunta usando o modelo perplexity\\.ai
 \\- \`reasonSearch:\` mensagem \\- Faz uma pergunta usando o modelo perplexity\\.ai com o uso de __Deepseek\\-R1__
-\\- \`r1:\` mensagem \\- Faz uma pergunta usando o modelo __Deepseek\\-R1__ pela __BlackboxAI__ Online
-\\- \`r1online:\` mensagem \\- Faz uma pergunta usando o modelo __Deepseek\\-R1__ pela __BlackboxAI__ com Deep Research
-\\- \`qwen:\` mensagem \\- Faz uma pergunta usando o modelo __Qwen__ pela __BlackboxAI__
-\\- \`mixtral:\` mensagem \\- Faz uma pergunta usando o modelo __Mixtral__ pela __BlackboxAI__
-\\- \`claude:\` mensagem \\- Faz uma pergunta usando o modelo __Claude__ pela __BlackboxAI__
-\\- \`gemini:\` mensagem \\- Faz uma pergunta usando o modelo __Gemini__ pela __BlackboxAI__
-\\- \`geminiPro:\` mensagem \\- Faz uma pergunta usando o modelo __GeminiPro__ pela __BlackboxAI__
-\\- \`duck:\` mensagem \\- Faz uma pergunta usando o modelo __o3mini__ __DuckDuckGo__
-\\- \`duckgo:\` mensagem \\- Faz uma pergunta usando o modelo __o3mini__ __DuckDuckGo__ com acesso Web
-\\- \`o3mini:\` mensagem \\- Faz uma pergunta usando o modelo __o3mini__ pela __DuckDuckGo__
-\\- \`o3high:\` mensagem \\- Faz uma pergunta usando o modelo __o3high__ pela __BlackboxAI__
-\\- \`gpt45:\` mensagem \\- Faz uma pergunta usando o modelo __gpt45__ pela __BlackboxAI__
+\\- \`claude:\` mensagem \\- Faz uma pergunta usando o modelo __Claude__
+\\- \`gemini:\` mensagem \\- Faz uma pergunta usando o modelo __Gemini__
 \\- \`o4mini:\` mensagem \\- Faz uma pergunta usando o modelo __o4mini__ pelo __Github Copilot__
-\\- \`grok:\` mensagem \\- Faz uma pergunta usando o modelo __Grok 3__ pela __BlackboxAI__
 \\- \`pgpt:\` mensagem \\- Faz uma pergunta usando o modelo __PPLX GPT 4\\.5__ pela __Perplexity__
 \\- \`pgrok:\` mensagem \\- Faz uma pergunta usando o modelo __PPLX Grok 3__ pela __Perplexity__
 \\- \`fala:\` mensagem \\- Faz uma pergunta usando __Elevenlabs__ para TTS
@@ -111,15 +100,7 @@ export const adminHelpMessage = `*Comandos inline*:
  */
 export const userHelpMessage = `*Comandos inline*:
 \\- \`phind:\` mensagem \\- Faz uma pergunta usando o modelo __Phind__ com acesso web
-\\- \`grok:\` mensagem \\- Faz uma pergunta usando o modelo __Grok 3__ pela __BlackboxAI__
-\\- \`o3mini:\` mensagem \\- Faz uma pergunta usando o modelo __o3mini__ pela __DuckDuckGo__
-\\- \`duck:\` mensagem \\- Faz uma pergunta usando o modelo __o3mini__ __DuckDuckGo__
-\\- \`duckgo:\` mensagem \\- Faz uma pergunta usando o modelo __o3mini__ __DuckDuckGo__ com acesso Web
 \\- \`llama:\` mensagem \\- Gera texto com o __Llama 4 Maverick__
 \\- \`gemini:\` mensagem \\- Faz uma pergunta usando o modelo __Gemini__ pela __BlackboxAI__
-\\- \`r1:\` mensagem \\- Faz uma pergunta usando o modelo __Deepseek\\-R1__ pela __BlackboxAI__
-\\- \`r1online:\` mensagem \\- Faz uma pergunta usando o modelo __Deepseek\\-R1__ pela __BlackboxAI__ com Deep Research
-\\- \`qwen:\` mensagem \\- Faz uma pergunta usando o modelo __Qwen__ pela __BlackboxAI__
-\\- \`mixtral:\` mensagem \\- Faz uma pergunta usando o modelo __Mixtral__ pela __BlackboxAI__
 
 *Seleção de modelos de linguagem*:`;

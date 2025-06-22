@@ -1,4 +1,4 @@
-export const geminiModel = 'gemini-2.0-flash-lite-preview-02-05';
+export const geminiModel = 'gemini-2.5-pro-preview-06-05';
 
 export const perplexityModels = {
 	textModel: 'sonar',
@@ -75,15 +75,15 @@ export type ModelCommand =
 	| '/gpt'
 	| '/perplexity'
 	| '/perplexityReasoning'
-	| '/r1'
-	| '/r1online'
-	| '/qwen'
-	| '/mixtral'
+	// | '/r1'
+	// | '/r1online'
+	// | '/qwen'
+	// | '/mixtral'
 	| '/claude'
-	| '/geminiPro'
-	| '/o3mini'
+	// | '/geminiPro'
+	// | '/o3mini'
 	| '/o4mini'
-	| '/grok'
+	// | '/grok'
 	| '/phind'
 	| '/pplxgpt'
 	| '/pplxgrok';
@@ -97,15 +97,15 @@ export const modelCommands: ModelCommand[] = [
 	'/gpt',
 	'/perplexity',
 	'/perplexityReasoning',
-	'/r1',
-	'/r1online',
-	'/qwen',
-	'/mixtral',
+	// '/r1',
+	// '/r1online',
+	// '/qwen',
+	// '/mixtral',
 	'/claude',
-	'/geminiPro',
-	'/o3mini',
+	// '/geminiPro',
+	// '/o3mini',
 	'/o4mini',
-	'/grok',
+	// '/grok',
 	'/phind',
 	'/pplxgpt',
 	'/pplxgrok'
@@ -113,12 +113,12 @@ export const modelCommands: ModelCommand[] = [
 
 export const WHITELISTED_MODELS: ModelCommand[] = [
 	'/llama',
-	'/r1online',
-	'/r1',
-	'/qwen',
-	'/mixtral',
+	// '/r1online',
+	// '/r1',
+	// '/qwen',
+	// '/mixtral',
 	'/gemini',
-	'/o3mini',
-	'/grok',
+	// '/o3mini',
+	// '/grok',
 	'/phind',
 ];
