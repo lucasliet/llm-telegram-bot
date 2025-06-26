@@ -236,12 +236,14 @@ export default class ToolService {
 						console.error('No captions found');
 						return null;
 					};
+					console.debug('tracks url:', tracks.map(t => ({[t.languageCode]: t.baseUrl})))
 					const track = chooseTrack(tracks, args.preferredLanguages);
 					if (!track) {
 						console.error('No suitable track found');
 						return null;
 					};
 					const xml = await fetchText(track.url);
+					console.log('parsing segments from track url:', track.url, xml)
 					const segments = parseSegments(xml);
 					if (!segments.length) {
 						console.error('No segments found');

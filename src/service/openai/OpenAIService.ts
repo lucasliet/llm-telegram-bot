@@ -113,7 +113,7 @@ export default class OpenAiService {
 			...availableTools,
 			max_tokens: maxTokens,
 			stream: true,
-			parallel_tool_calls: true,
+			// parallel_tool_calls: true,
 			reasoning_effort: 'high',
 		});
 		const initialReader = initialResponse.toReadableStream().getReader() as ReadableStreamDefaultReader<Uint8Array>;
@@ -172,7 +172,7 @@ export default class OpenAiService {
 }
 
 export function responseMap(responseBody: string): string {
-	return JSON.parse(responseBody).choices[0]?.delta?.content || '';
+	return JSON.parse(responseBody).choices[0]?.delta?.content || '...';
 }
 
 /**
@@ -237,7 +237,7 @@ async function readInitialStreamAndExtract(
 			const text = new TextDecoder().decode(value);
 			const toolCalls = JSON.parse(text)?.choices?.[0]?.delta?.tool_calls;
 			for (const call of toolCalls || []) {
-				const { index } = call;
+				const index = call?.index || 0;
 
 				if (!tool_calls[index]) {
 					tool_calls[index] = call;

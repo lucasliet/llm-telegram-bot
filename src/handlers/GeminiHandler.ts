@@ -1,5 +1,5 @@
 import { Context } from 'grammy-context';
-import GeminiService from '@/service/GeminiService.ts';
+import GeminiService from '@/service/openai/GeminiService.ts';
 import { FileUtils } from '@/util/FileUtils.ts';
 import { geminiModel } from '@/config/models.ts';
 
@@ -21,10 +21,10 @@ export async function handleGemini(ctx: Context, commandMessage?: string): Promi
 
 	if (photos && caption) {
 		const photosUrl = FileUtils.getTelegramFilesUrl(ctx, photos);
-		const { reader, onComplete } = await geminiService.generateTextFromImage(userKey, quote, photosUrl, prompt!);
-		return ctx.streamReply(reader, onComplete);
+		const { reader, onComplete, responseMap } = await geminiService.generateTextFromImage(userKey, quote, photosUrl, prompt!);
+		return ctx.streamReply(reader, onComplete, responseMap);
 	}
 
-	const { reader, onComplete } = await geminiService.generateText(userKey, quote, prompt!);
-	return ctx.streamReply(reader, onComplete);
+	const { reader, onComplete, responseMap } = await geminiService.generateText(userKey, quote, prompt!);
+	return ctx.streamReply(reader, onComplete, responseMap);
 }

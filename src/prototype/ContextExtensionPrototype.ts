@@ -68,7 +68,7 @@ Context.prototype.replyOnLongAnswer = function (this: Context): number {
 		this.replyWithQuote(
 			'Estou processando sua solicitação, aguarde um momento...',
 		);
-	}, 6000);
+	}, 12000);
 };
 
 /**
