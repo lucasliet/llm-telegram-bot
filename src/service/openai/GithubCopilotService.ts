@@ -88,8 +88,6 @@ export default class GithubCopilotService extends OpenAiService {
 				defaultHeaders: {
 					'Copilot-Vision-Request': 'true',
 					'Editor-Version': 'vscode/1.95.0',
-					'User-Agent': 'GitHubCopilotChat/0.22.4',
-					'Accept': 'application/json',
 				},
 			}),
 			model,
@@ -97,18 +95,21 @@ export default class GithubCopilotService extends OpenAiService {
 	}
 
 	private async ensureAuthenticated(): Promise<void> {
-		const tokenManager = TokenManager.getInstance();
-		const copilotToken = await tokenManager.getToken(COPILOT_TOKEN);
-		this.openai = new OpenAi({
-			apiKey: copilotToken,
-			baseURL: 'https://api.individual.githubcopilot.com',
-			defaultHeaders: {
-				'Copilot-Vision-Request': 'true',
-				'Editor-Version': 'vscode/1.95.0',
-				'User-Agent': 'GitHubCopilotChat/0.22.4',
-				'Accept': 'application/json',
-			},
-		});
+		try {
+			const tokenManager = TokenManager.getInstance();
+			const copilotToken = await tokenManager.getToken(COPILOT_TOKEN);
+			this.openai = new OpenAi({
+				apiKey: copilotToken,
+				baseURL: 'https://api.individual.githubcopilot.com',
+				defaultHeaders: {
+					'Copilot-Vision-Request': 'true',
+					'Editor-Version': 'vscode/1.95.0',
+				},
+			});
+		} catch (error) {
+			console.warn('Failed to authenticate with GitHub Copilot, using fallback token:', error);
+			// Continue with the original token if authentication fails
+		}
 	}
 
 	override async generateText(
