@@ -1,7 +1,13 @@
 import { Context } from 'grammy-context';
 import GeminiService from '@/service/openai/GeminiService.ts';
 import { FileUtils } from '@/util/FileUtils.ts';
-import { geminiModel } from '@/config/models.ts';
+import { geminiModels } from '@/config/models.ts';
+
+const modelMap = {
+	'geminiPro': geminiModels.geminiPro,
+	'gemini': geminiModels.geminiFlash,
+	none: undefined,
+};
 
 /**
  * Handles requests for Google Gemini models
@@ -14,10 +20,12 @@ export async function handleGemini(ctx: Context, commandMessage?: string): Promi
 	const message = commandMessage || contextMessage;
 
 	const command = message?.split(':')[0]?.toLowerCase() || 'none';
+	
+	const model = modelMap[command as keyof typeof modelMap];
 
 	const prompt = (message || caption)?.replace(`${command}:`, '')
 
-	const geminiService = new GeminiService(geminiModel);
+	const geminiService = new GeminiService(model);
 
 	if (photos && caption) {
 		const photosUrl = FileUtils.getTelegramFilesUrl(ctx, photos);

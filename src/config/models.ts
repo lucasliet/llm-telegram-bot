@@ -1,4 +1,7 @@
-export const geminiModel = 'gemini-2.5-pro-preview-06-05';
+export const geminiModels = {
+	geminiPro: 'gemini-2.5-pro-preview-06-05',
+	geminiFlash: 'gemini-2.5-flash',
+};
 
 export const perplexityModels = {
 	textModel: 'sonar',
@@ -71,6 +74,7 @@ export const openWebUiModels = {
  * Type definitions
  */
 export type ModelCommand =
+	| '/geminiPro'
 	| '/gemini'
 	| '/llama'
 	| '/gpt'
@@ -93,6 +97,7 @@ export type ModelCommand =
  * Available model commands
  */
 export const modelCommands: ModelCommand[] = [
+	'/geminiPro',
 	'/gemini',
 	'/llama',
 	'/gpt',

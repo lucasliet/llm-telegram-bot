@@ -162,7 +162,7 @@ export default {
 			// '/mixtral': () => handleBlackbox(ctx, `mixtral: ${message}`),
 			// '/qwen': () => handleBlackbox(ctx, `qwen: ${message}`),
 			'/claude': () => handleGithubCopilot(ctx, `claude: ${message}`),
-			// '/geminiPro': () => handleGithubCopilot(ctx, `geminiPro: ${message}`),
+			'/geminiPro': () => handleGemini(ctx, `geminiPro: ${message}`),
 			'/gemini': () => handleGemini(ctx, `gemini: ${message}`),
 			// '/o3mini': () => handleDuckDuckGo(ctx, `duck: ${message}`),
 			'/o4mini': () => handleGithubCopilot(ctx, `o4mini: ${message}`),

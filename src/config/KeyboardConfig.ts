@@ -6,12 +6,15 @@ import { InlineKeyboard } from 'grammy';
 const adminCommandButtons = [
 	[['Modelo Atual', '/currentmodel']],
 	[
-		['Claude Sonnet 4', '/claude'],
+		['Llama 4 Maverick', '/llama'],
 		['Phind', '/phind'],
 	],
 	[
 		['Copilot GPT 4.1', '/gpt'],
 		['Copilot GPT o4 Mini', '/o4mini'],
+	],
+	[
+		['Copilot Sonnet 4', '/claude'],
 	],
 	[
 		// ['Grok 3', '/grok'],
@@ -22,8 +25,8 @@ const adminCommandButtons = [
 		// ['Gemini 2.5 Pro', '/geminiPro'],
 	],
 	[
-		['Llama 4 Maverick', '/llama'],
-		['Gemini 2.5 Pro', '/gemini'],
+		['Gemini 2.5 Flash', '/gemini'],
+		['Gemini 2.5 Pro', '/geminiPro'],
 	],
 	[
 		// ['Qwen', '/qwen'],
@@ -59,7 +62,7 @@ const userCommandButtons = [
 	],
 	[
 		['Llama 4 Maverick', '/llama'],
-		['Gemini 2.5 Pro', '/gemini'],
+		['Gemini 2.5 Flash', '/gemini'],
 	],
 	[['Limpar Histórico', '/clear']],
 ];
@@ -87,7 +90,8 @@ export const adminHelpMessage = `*Comandos inline*:
 \\- \`search:\` mensagem \\- Faz uma pergunta usando o modelo perplexity\\.ai
 \\- \`reasonSearch:\` mensagem \\- Faz uma pergunta usando o modelo perplexity\\.ai com o uso de __Deepseek\\-R1__
 \\- \`claude:\` mensagem \\- Faz uma pergunta usando o modelo __Claude__
-\\- \`gemini:\` mensagem \\- Faz uma pergunta usando o modelo __Gemini__
+\\- \`gemini:\` mensagem \\- Faz uma pergunta usando o modelo __Gemini Flash__
+\\- \`geminiPro:\` mensagem \\- Faz uma pergunta usando o modelo __Gemini Pro__
 \\- \`o4mini:\` mensagem \\- Faz uma pergunta usando o modelo __o4mini__ pelo __Github Copilot__
 \\- \`pgpt:\` mensagem \\- Faz uma pergunta usando o modelo __PPLX GPT 4\\.5__ pela __Perplexity__
 \\- \`pgrok:\` mensagem \\- Faz uma pergunta usando o modelo __PPLX Grok 3__ pela __Perplexity__
@@ -101,6 +105,6 @@ export const adminHelpMessage = `*Comandos inline*:
 export const userHelpMessage = `*Comandos inline*:
 \\- \`phind:\` mensagem \\- Faz uma pergunta usando o modelo __Phind__ com acesso web
 \\- \`llama:\` mensagem \\- Gera texto com o __Llama 4 Maverick__
-\\- \`gemini:\` mensagem \\- Faz uma pergunta usando o modelo __Gemini__ pela __BlackboxAI__
+\\- \`gemini:\` mensagem \\- Faz uma pergunta usando o modelo __Gemini Flash__
 
 *Seleção de modelos de linguagem*:`;

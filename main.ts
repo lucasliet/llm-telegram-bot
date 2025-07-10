@@ -69,7 +69,7 @@ function registerBotCommands() {
 		(ctx) => TelegramService.callAdminModel(ctx, TelegramService.callBlackboxModel),
 	);
 	BOT.hears(
-		/^(gemini):/gi,
+		/^(geminiPro|gemini):/gi,
 		(ctx) => TelegramService.callAdminModel(ctx, TelegramService.callGeminiModel),
 	);
 	BOT.hears(
