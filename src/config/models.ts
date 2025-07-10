@@ -58,6 +58,7 @@ export const copilotModels = {
 	gemini: 'gemini-2.5-pro',
 	o4mini: 'o4-mini',
 	gpt41: 'gpt-4.1',
+	claude: 'claude-sonnet-4',
 	sonnetThinking: 'claude-3.7-sonnet-thought',
 }
 

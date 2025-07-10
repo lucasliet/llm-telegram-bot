@@ -8,7 +8,7 @@ const modelMap = {
 	'geminiPro': copilotModels.gemini,
 	'gpt': copilotModels.gpt41,
 	'o4mini': copilotModels.o4mini,
-	'claude': copilotModels.sonnetThinking,
+	'claude': copilotModels.claude,
 	none: undefined,
 };
 

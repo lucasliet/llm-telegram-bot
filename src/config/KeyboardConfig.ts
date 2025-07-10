@@ -6,7 +6,7 @@ import { InlineKeyboard } from 'grammy';
 const adminCommandButtons = [
 	[['Modelo Atual', '/currentmodel']],
 	[
-		['Claude 3.7 Sonnet', '/claude'],
+		['Claude Sonnet 4', '/claude'],
 		['Phind', '/phind'],
 	],
 	[
