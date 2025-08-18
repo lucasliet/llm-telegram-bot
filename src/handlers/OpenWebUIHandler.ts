@@ -2,6 +2,7 @@ import { Context } from 'grammy-context';
 import OpenWebUIService from '@/service/openai/OpenWebUIService.ts';
 
 import { openWebUiModels } from '@/config/models.ts';
+import { FileUtils } from '../util/FileUtils.ts';
 
 const modelMap = {
 	'pgrok': openWebUiModels.grok,
@@ -23,18 +24,18 @@ export async function handleOpenWebUI(
 
 	const message = commandMessage || contextMessage;
 
-	if (photos && caption) {
-		ctx.replyWithVisionNotSupportedByModel();
-		return;
-	}
-	
 	const command = message!.split(':')[0].toLowerCase() || 'none';
 
 	const model = modelMap[command as keyof typeof modelMap];
 
-	const openAiService = new OpenWebUIService(model);
+	const openAIService = new OpenWebUIService(model);
 
-	const { reader, onComplete, responseMap } = await openAiService.generateText(
+	if (photos && caption) {
+		ctx.replyWithVisionNotSupportedByModel();
+		return;
+	}
+
+	const { reader, onComplete, responseMap } = await openAIService.generateText(
 		userKey,
 		quote,
 		message!.replace(`${command}:`, ''),

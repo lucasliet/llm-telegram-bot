@@ -154,6 +154,7 @@ export default {
 
 		const modelHandlers: Record<ModelCommand, () => Promise<void>> = {
 			'/gpt': () => handleGithubCopilot(ctx, `gpt: ${message}`),
+			'/gpt5': () => handleGithubCopilot(ctx, `gpt5: ${message}`),
 			'/perplexity': () => handlePerplexity(ctx, `perplexity: ${message}`),
 			'/perplexityReasoning': () => handlePerplexity(ctx, `perplexityReasoning: ${message}`),
 			'/llama': () => handleOpenRouter(ctx, `llama: ${message!}`),

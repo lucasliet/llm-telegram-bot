@@ -14,6 +14,7 @@ const adminCommandButtons = [
 		['Copilot GPT o4 Mini', '/o4mini'],
 	],
 	[
+		['Copilot GPT 5', '/gpt5'],
 		['Copilot Sonnet 4', '/claude'],
 	],
 	[

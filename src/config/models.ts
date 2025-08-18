@@ -9,7 +9,7 @@ export const perplexityModels = {
 };
 
 export const openAIModels = {
-	gptModel: 'gpt-4o-mini',
+	gptModel: 'gpt-4.1',
 	imageModel: 'dall-e-3',
 	sttModel: 'whisper-1',
 };
@@ -61,6 +61,7 @@ export const copilotModels = {
 	gemini: 'gemini-2.5-pro',
 	o4mini: 'o4-mini',
 	gpt41: 'gpt-4.1',
+	gpt5: 'gpt-5',
 	claude: 'claude-sonnet-4',
 	sonnetThinking: 'claude-3.7-sonnet-thought',
 }
@@ -78,6 +79,7 @@ export type ModelCommand =
 	| '/gemini'
 	| '/llama'
 	| '/gpt'
+	| '/gpt5'
 	| '/perplexity'
 	| '/perplexityReasoning'
 	// | '/r1'
@@ -101,6 +103,7 @@ export const modelCommands: ModelCommand[] = [
 	'/gemini',
 	'/llama',
 	'/gpt',
+	'/gpt5',
 	'/perplexity',
 	'/perplexityReasoning',
 	// '/r1',
