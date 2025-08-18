@@ -1,5 +1,5 @@
 export const geminiModels = {
-	geminiPro: 'gemini-2.5-pro-preview-06-05',
+	geminiPro: 'gemini-2.5-pro',
 	geminiFlash: 'gemini-2.5-flash',
 };
 
@@ -66,7 +66,7 @@ export const copilotModels = {
 }
 
 export const openWebUiModels = {
-	gpt45: 'pplx.gpt-4.5-search',
+	gpt45: 'pplx.gpt-5-search',
 	grok: 'pplx.grok-3-beta-search'
 }
 

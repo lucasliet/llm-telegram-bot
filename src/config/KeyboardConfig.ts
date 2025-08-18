@@ -37,8 +37,8 @@ const adminCommandButtons = [
 		['Sonar Reasoning', '/perplexityReasoning'],
 	],
 	[
-		['PPLX GPT 4.5', '/pplxgpt'],
-		['PPLX Grok 3', '/pplxgrok'],
+		['PPLX GPT 5', '/pplxgpt'],
+		['PPLX Grok 4', '/pplxgrok'],
 	],
 	[['Limpar Histórico', '/clear']],
 ];
