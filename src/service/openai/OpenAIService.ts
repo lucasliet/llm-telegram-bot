@@ -114,7 +114,7 @@ export default class OpenAiService {
 			max_tokens: maxTokens,
 			stream: true,
 			// parallel_tool_calls: true,
-			reasoning_effort: 'high',
+			...(model === 'gpt-4.1' ? {} : { reasoning_effort: 'high' }),
 		});
 		const initialReader = initialResponse.toReadableStream().getReader() as ReadableStreamDefaultReader<Uint8Array>;
 
@@ -321,7 +321,7 @@ function generateFollowupResponse(
 	maxTokens: number,
 ): Promise<ReadableStreamDefaultReader<Uint8Array>> {
 	return openai.chat.completions.create({
-		model: model === 'o3-mini' || model === 'o4-mini' ? 'gpt-4o' : model,
+		model: model === 'o3-mini' || model === 'o4-mini' ? 'gpt-4.1' : model,
 		messages,
 		stream: true,
 		max_tokens: maxTokens,
