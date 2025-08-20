@@ -22,7 +22,7 @@ export const openRouterModels = {
 
 export const cloudflareModels = {
 	imageModel: '@cf/black-forest-labs/flux-1-schnell',
-	textModel: '@cf/meta/llama-4-scout-17b-16e-instruct',
+	textModel: '@cf/openai/gpt-oss-120b',
 	visionTextModel: '@cf/llava-hf/llava-1.5-7b-hf',
 	sqlModel: '@cf/defog/sqlcoder-7b-2',
 	codeModel: '@hf/thebloke/deepseek-coder-6.7b-instruct-awq',

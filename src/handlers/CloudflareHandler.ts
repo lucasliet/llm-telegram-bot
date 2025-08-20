@@ -30,12 +30,12 @@ export async function handleCloudflare(
 	const message = commandMessage || contextMessage;
 	const cloudflareCommand = message!.split(':')[0].toLowerCase();
 
-	if (cloudflareCommand === 'llama') {
+	if (cloudflareCommand === 'oss') {
 		const { reader, onComplete, responseMap } = await CloudFlareService
 			.generateText(
 				userKey,
 				quote,
-				message!.replace('llama:', ''),
+				message!.replace('oss:', ''),
 			);
 
 		ctx.streamReply(reader, onComplete, responseMap);

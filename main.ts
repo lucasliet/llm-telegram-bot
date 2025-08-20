@@ -49,7 +49,7 @@ function registerBotCommands() {
 	BOT.command('clear', (ctx) => clearChatHistoryHandler(ctx));
 
 	BOT.hears(
-		/^(sql|code|cloudflareImage):/gi,
+		/^(oss|sql|code|cloudflareImage):/gi,
 		(ctx) => TelegramService.callAdminModel(ctx, TelegramService.callCloudflareModel),
 	);
 	BOT.hears(
