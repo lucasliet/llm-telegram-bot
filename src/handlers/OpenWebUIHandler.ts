@@ -6,7 +6,7 @@ import { FileUtils } from '../util/FileUtils.ts';
 
 const modelMap = {
 	'pgrok': openWebUiModels.grok,
-	'pgpt': openWebUiModels.gpt45,
+	'pgpt': openWebUiModels.gpt5,
 	none: undefined,
 };
 

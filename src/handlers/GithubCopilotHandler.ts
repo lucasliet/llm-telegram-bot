@@ -6,7 +6,7 @@ import { copilotModels } from '@/config/models.ts';
 
 const modelMap = {
 	'geminiPro': copilotModels.gemini,
-	'gpt': copilotModels.gpt41,
+	'gpt': copilotModels.gpt5mini,
 	'o4mini': copilotModels.o4mini,
 	'claude': copilotModels.claude,
 	none: undefined,

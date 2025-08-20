@@ -60,14 +60,14 @@ export const duckduckgoModels = {
 export const copilotModels = {
 	gemini: 'gemini-2.5-pro',
 	o4mini: 'o4-mini',
-	gpt41: 'gpt-4.1',
+	gpt5mini: 'gpt-5-mini',
 	gpt5: 'gpt-5',
 	claude: 'claude-sonnet-4',
 	sonnetThinking: 'claude-3.7-sonnet-thought',
 }
 
 export const openWebUiModels = {
-	gpt45: 'pplx.gpt-5-search',
+	gpt5: 'pplx.gpt-5-search',
 	grok: 'pplx.grok-3-beta-search'
 }
 
@@ -122,11 +122,12 @@ export const modelCommands: ModelCommand[] = [
 
 export const WHITELISTED_MODELS: ModelCommand[] = [
 	'/llama',
+	'/gpt',
 	// '/r1online',
 	// '/r1',
 	// '/qwen',
 	// '/mixtral',
-	'/gemini',
+	// '/gemini',
 	// '/o3mini',
 	// '/grok',
 	'/phind',

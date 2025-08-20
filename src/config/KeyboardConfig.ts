@@ -10,7 +10,7 @@ const adminCommandButtons = [
 		['Phind', '/phind'],
 	],
 	[
-		['Copilot GPT 4.1', '/gpt'],
+		['Copilot GPT 5 Mini', '/gpt'],
 		['Copilot GPT o4 Mini', '/o4mini'],
 	],
 	[
@@ -63,7 +63,7 @@ const userCommandButtons = [
 	],
 	[
 		['Llama 4 Maverick', '/llama'],
-		['Gemini 2.5 Flash', '/gemini'],
+		['Copilot GPT 5 Mini', '/gpt']
 	],
 	[['Limpar Histórico', '/clear']],
 ];
