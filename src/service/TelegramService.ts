@@ -102,6 +102,52 @@ export default {
 			});
 	},
 
+
+	/**
+	 * Retrieves and sends GitHub Copilot usage information to the user if the user is an admin.
+	 * @param ctx - The Telegram context.
+	 * @returns A promise that resolves when the usage information has been sent.
+	 */
+	async getUsage(ctx: Context): Promise<any> {
+		const { userId } = await ctx.extractContextKeys();
+		if (ADMIN_USER_IDS.includes(userId!)) {
+			const usage = await getUsage();
+			const premium = usage.quota_snapshots?.premium_interactions ?? {};
+			const chat = usage.quota_snapshots?.chat ?? {};
+			const completions = usage.quota_snapshots?.completions ?? {};
+
+			const usedPremium = (premium.entitlement ?? 0) - (premium.remaining ?? 0);
+
+			const prompt = `Olá! Aqui está o seu uso do Copilot:
+		
+		Assinatura: ${usage.access_type_sku ?? 'n/a'}
+		Plano Copilot: ${usage.copilot_plan ?? 'n/a'}
+		Data de atribuição: ${usage.assigned_date ?? 'n/a'}
+		Reset da cota (local): ${usage.quota_reset_date ?? 'n/a'}
+		
+		Interações premium:
+		- Total (entitlement): ${premium.entitlement ?? 0}
+		- Usadas: ${usedPremium}
+		- Restantes: ${premium.remaining ?? 0}
+		- Percentual restante: ${premium.percent_remaining?.toFixed(2) ?? 'n/a'}%
+		- Overage permitido: ${premium.overage_permitted ? 'sim' : 'não'}
+		
+		Chat:
+		- Ilimitado: ${chat.unlimited ? 'sim' : 'não'}
+		
+		Completions:
+		- Ilimitado: ${completions.unlimited ? 'sim' : 'não'}
+		
+		Observações:
+		- Seu tipo de plano aparente é "${usage.copilot_plan ?? usage.access_type_sku ?? 'desconhecido'}".
+		- Se alguma cota estiver marcada como "unlimited" você não terá limitação aplicada para esse tipo.
+		- Verifique a data de reset para saber quando as cotas serão renovadas.`;
+
+			ctx.reply(prompt)
+		}
+	},
+
+
 	/**
 	 * Returns admin IDs if the requesting user is an admin
 	 * @param ctx - Telegram context
@@ -247,4 +293,35 @@ export async function textToSpeech(
 	ctx.replyWithVoice(audioFile, {
 		reply_to_message_id: ctx.message?.message_id,
 	});
+}
+
+/**
+ * Retrieves Copilot usage information if the requesting user is an admin.
+ * @param ctx - Telegram context.
+ * @returns A promise that resolves to the Copilot usage data or an empty object if not authorized.
+	 */
+export async function getUsage() {
+	const url = 'https://api.github.com/copilot_internal/user';
+	const headers: Record<string, string> = {
+		'Accept': 'application/json',
+		'Authorization': `token ${Deno.env.get('COPILOT_TOKEN')}`,
+		'Editor-Version': 'vscode/1.98.1',
+		'Editor-Plugin-Version': 'copilot-chat/0.26.7',
+		'User-Agent': 'GitHubCopilotChat/0.26.7',
+		'X-Github-Api-Version': '2025-04-01',
+	};
+
+	const res = await fetch(url, { headers });
+	const text = await res.text();
+	if (!res.ok) {
+		let body: any;
+		try { body = JSON.parse(text); } catch { body = text; }
+		throw new Error(`Copilot API error ${res.status}: ${JSON.stringify(body)}`);
+	}
+
+	try {
+		return JSON.parse(text);
+	} catch {
+		return text;
+	}
 }
