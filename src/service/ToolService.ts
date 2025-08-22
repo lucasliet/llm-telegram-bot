@@ -156,6 +156,58 @@ export default class ToolService {
 				return await response.text();
 			},
 		}],
+		['copilot_usage', {
+			schema: {
+				type: 'function',
+				function: {
+					name: 'copilot_usage',
+					description: 'Checks GitHub Copilot usage associated with COPILOT_TOKEN environment variable and returns account usage info as JSON',
+					parameters: {
+						type: 'object',
+						properties: {},
+						additionalProperties: false,
+					},
+					strict: true,
+				},
+			},
+			/**
+			 * Checks GitHub Copilot usage associated with the COPILOT_TOKEN environment variable.
+			 *
+			 * @param _args - No arguments are expected for this function.
+			 * @returns A promise that resolves to the Copilot usage information as a JSON object.
+			 * @throws An error if the COPILOT_TOKEN environment variable is not set or if the API request fails.
+			 */
+			fn: async (_args: Record<PropertyKey, never>): Promise<any> => {
+				const token = Deno.env.get('COPILOT_TOKEN');
+				if (!token) {
+					throw new Error('COPILOT_TOKEN environment variable is not set');
+				}
+
+				const url = 'https://api.github.com/copilot_internal/user';
+				const headers: Record<string, string> = {
+					'Accept': 'application/json',
+					'Authorization': `token ${token}`,
+					'Editor-Version': 'vscode/1.98.1',
+					'Editor-Plugin-Version': 'copilot-chat/0.26.7',
+					'User-Agent': 'GitHubCopilotChat/0.26.7',
+					'X-Github-Api-Version': '2025-04-01',
+				};
+
+				const res = await fetch(url, { headers });
+				const text = await res.text();
+				if (!res.ok) {
+					let body: any;
+					try { body = JSON.parse(text); } catch { body = text; }
+					throw new Error(`Copilot API error ${res.status}: ${JSON.stringify(body)}`);
+				}
+
+				try {
+					return JSON.parse(text);
+				} catch {
+					return text;
+				}
+			},
+		}],
 		['transcript_yt', {
 			schema: {
 				type: 'function',
@@ -259,5 +311,3 @@ export default class ToolService {
 
 	static schemas: OpenAi.ChatCompletionTool[] = Array.from(ToolService.tools.values()).map((tool) => tool.schema);
 }
-
-
