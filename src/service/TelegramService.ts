@@ -111,39 +111,40 @@ export default {
 	async getUsage(ctx: Context): Promise<any> {
 		const { userId } = await ctx.extractContextKeys();
 		if (ADMIN_USER_IDS.includes(userId!)) {
-			const usage = await getUsage();
-			const premium = usage.quota_snapshots?.premium_interactions ?? {};
-			const chat = usage.quota_snapshots?.chat ?? {};
-			const completions = usage.quota_snapshots?.completions ?? {};
+			const data = await getUsage();
 
-			const usedPremium = (premium.entitlement ?? 0) - (premium.remaining ?? 0);
+			const quotas = (data as any).quota_snapshots ?? {};
+			const chat = quotas.chat as Quota | undefined;
+			const completions = quotas.completions as Quota | undefined;
+			const premium = quotas.premium_interactions as Quota | undefined;
 
-			const prompt = `Olá! Aqui está o seu uso do Copilot:
-		
-		Assinatura: ${usage.access_type_sku ?? 'n/a'}
-		Plano Copilot: ${usage.copilot_plan ?? 'n/a'}
-		Data de atribuição: ${usage.assigned_date ?? 'n/a'}
-		Reset da cota (local): ${usage.quota_reset_date ?? 'n/a'}
-		
-		Interações premium:
-		- Total (entitlement): ${premium.entitlement ?? 0}
-		- Usadas: ${usedPremium}
-		- Restantes: ${premium.remaining ?? 0}
-		- Percentual restante: ${premium.percent_remaining?.toFixed(2) ?? 'n/a'}%
-		- Overage permitido: ${premium.overage_permitted ? 'sim' : 'não'}
-		
-		Chat:
-		- Ilimitado: ${chat.unlimited ? 'sim' : 'não'}
-		
-		Completions:
-		- Ilimitado: ${completions.unlimited ? 'sim' : 'não'}
-		
-		Observações:
-		- Seu tipo de plano aparente é "${usage.copilot_plan ?? usage.access_type_sku ?? 'desconhecido'}".
-		- Se alguma cota estiver marcada como "unlimited" você não terá limitação aplicada para esse tipo.
-		- Verifique a data de reset para saber quando as cotas serão renovadas.`;
+			const formatted = `🤖 \`GitHub Copilot - Status de Uso\`
 
-			ctx.reply(prompt)
+📋 \`Informações Gerais:\`
+• *Plano*: ${(data as any).copilot_plan ?? 'n/a'}
+• *Tipo de acesso*: ${(data as any).access_type_sku?.replaceAll('_', '\\_') ?? 'n/a'}
+• *Chat habilitado*: ${(data as any).chat_enabled ? 'Sim' : 'Não'}
+• *Data de atribuição*: ${formatDate((data as any).assigned_date)}
+• *Próxima renovação de cota*: ${formatDate((data as any).quota_reset_date)}
+
+📊 \`Cotas de Uso:\`
+
+🗨️ \`Chat:\`
+• *Status*: ${formatQuota(chat)}
+• *Overage permitido*: ${chat?.overage_permitted ? 'Sim' : 'Não'}
+• *Contador de overage*: ${chat?.overage_count ?? 0}
+
+💡 \`Completions (Autocompletar):\`
+• *Status*: ${formatQuota(completions)}
+• *Overage permitido*: ${completions?.overage_permitted ? 'Sim' : 'Não'}
+• *Contador de overage*: ${completions?.overage_count ?? 0}
+
+⭐ \`Interações Premium:\`
+• *Status*: ${formatQuota(premium)}
+• *Overage permitido*: ${premium?.overage_permitted ? 'Sim' : 'Não'}
+• *Contador de overage*: ${premium?.overage_count ?? 0}`;
+
+			ctx.reply(formatted, {parse_mode: 'Markdown'})
 		}
 	},
 
@@ -324,4 +325,56 @@ export async function getUsage() {
 	} catch {
 		return text;
 	}
+}
+
+/**
+ * Formats a date value into a localized string (pt-BR).
+ * @param value - The date value to format. Can be a string, number, Date object, or undefined/null.
+ * @returns The formatted date string, or 'n/a' if the value is null/undefined, or the original string if parsing fails.
+ */
+function formatDate(value: string | number | Date | undefined | null): string {
+	if (!value) return 'n/a';
+	try {
+		const d = new Date(value as any);
+		if (isNaN(d.getTime())) return String(value);
+		return d.toLocaleString('pt-BR', {
+			day: '2-digit',
+			month: '2-digit',
+			year: 'numeric',
+			hour: '2-digit',
+			minute: '2-digit',
+		});
+	} catch {
+		return String(value);
+	}
+}
+
+type Quota = {
+	unlimited?: boolean;
+	entitlement?: number;
+	remaining?: number;
+	percent_remaining?: number;
+	overage_permitted?: boolean;
+	overage_count?: number;
+};
+
+/**
+ * Formats a Quota object into a human-readable string.
+ * @param q - The Quota object to format.
+ * @returns A string representing the quota status, e.g., 'Ilimitado', 'Usadas X de Y (Z% restante)', or 'n/a'.
+ */
+function formatQuota(q: Quota | undefined): string {
+	if (!q) return 'n/a';
+	if (q.unlimited) return 'Ilimitado';
+	const entitlement = q.entitlement ?? 0;
+	const remaining = q.remaining ?? 0;
+	if (entitlement > 0) {
+		const used = Math.max(0, entitlement - remaining);
+		const percent = Math.max(0, Math.min(100, (remaining / entitlement) * 100));
+		return `Usadas ${used} de ${entitlement} (${percent.toFixed(0)}% restante)`;
+	}
+	if (typeof q.percent_remaining === 'number') {
+		return `${q.percent_remaining.toFixed(0)}% restante`;
+	}
+	return 'n/a';
 }
