@@ -68,7 +68,9 @@ export const copilotModels = {
 
 export const openWebUiModels = {
 	gpt5: 'pplx.gpt-5-search',
-	grok: 'pplx.grok-3-beta-search'
+	grok: 'pplx.grok-4-search',
+	o3: 'pplx.o3-search',
+	sonnetThinking: 'pplx.claude-4.0-sonnet-think-search',
 }
 
 /**
@@ -93,7 +95,9 @@ export type ModelCommand =
 	// | '/grok'
 	| '/phind'
 	| '/pplxgpt'
-	| '/pplxgrok';
+	| '/pplxgrok'
+	| '/pplxo3'
+	| '/pplxclaude';
 
 /**
  * Available model commands
@@ -117,7 +121,9 @@ export const modelCommands: ModelCommand[] = [
 	// '/grok',
 	'/phind',
 	'/pplxgpt',
-	'/pplxgrok'
+	'/pplxgrok',
+	'/pplxo3',
+	'/pplxclaude',
 ];
 
 export const WHITELISTED_MODELS: ModelCommand[] = [

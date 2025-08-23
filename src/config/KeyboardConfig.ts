@@ -41,6 +41,10 @@ const adminCommandButtons = [
 		['PPLX GPT 5', '/pplxgpt'],
 		['PPLX Grok 4', '/pplxgrok'],
 	],
+	[
+		['PPLX o3', '/pplxo3'],
+		['PPLX Sonnet 4', '/pplxclaude'],
+	],
 	[['Limpar Histórico', '/clear']],
 ];
 
@@ -83,6 +87,7 @@ export const adminHelpMessage = `*Comandos inline*:
 \\- \`cloudflareImage:\` mensagem \\- Gera imagens com __Stable Diffusion__
 \\- \`gptImage:\` mensagem \\- Gera imagens com __DALL\\-e__
 \\- \`gpt:\` mensagem \\- Gera texto com __GPT 4\\.1__
+\\- \`gpt5:\` mensagem \\- Gera texto com __GPT 5__
 \\- \`llama:\` mensagem \\- Gera texto com o __Llama 4 Maverick__
 \\- \`sql:\` mensagem \\- Gera sql com modelo __SQL Coder__
 \\- \`code:\` mensagem \\- Gera código com modelo __Deepseek Coder__
@@ -94,8 +99,10 @@ export const adminHelpMessage = `*Comandos inline*:
 \\- \`gemini:\` mensagem \\- Faz uma pergunta usando o modelo __Gemini Flash__
 \\- \`geminiPro:\` mensagem \\- Faz uma pergunta usando o modelo __Gemini Pro__
 \\- \`o4mini:\` mensagem \\- Faz uma pergunta usando o modelo __o4mini__ pelo __Github Copilot__
-\\- \`pgpt:\` mensagem \\- Faz uma pergunta usando o modelo __PPLX GPT 4\\.5__ pela __Perplexity__
-\\- \`pgrok:\` mensagem \\- Faz uma pergunta usando o modelo __PPLX Grok 3__ pela __Perplexity__
+\\- \`pgpt:\` mensagem \\- Faz uma pergunta usando o modelo __PPLX GPT 5__ pela __Perplexity__
+\\- \`pgrok:\` mensagem \\- Faz uma pergunta usando o modelo __PPLX Grok 4__ pela __Perplexity__
+\\- \`po3:\` mensagem \\- Faz uma pergunta usando o modelo __PPLX o3__ pela __Perplexity__
+\\- \`pclaude:\` mensagem \\- Faz uma pergunta usando o modelo __PPLX Sonnet 4__ pela __Perplexity__
 \\- \`fala:\` mensagem \\- Faz uma pergunta usando __Elevenlabs__ para TTS
 
 *Seleção de modelos de linguagem*:`;

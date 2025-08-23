@@ -374,7 +374,7 @@ function formatQuota(q: Quota | undefined): string {
 		return `Usadas ${used} de ${entitlement} (${percent.toFixed(0)}% restante)`;
 	}
 	if (typeof q.percent_remaining === 'number') {
-		return `${q.percent_remaining.toFixed(0)}% restante`;
+		return `${q.percent_remaining.toFixed(2)}% restante`;
 	}
 	return 'n/a';
 }

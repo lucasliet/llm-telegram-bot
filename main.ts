@@ -82,7 +82,7 @@ function registerBotCommands() {
 		(ctx) => TelegramService.callAdminModel(ctx, TelegramService.callPhindModel),
 	);
 	BOT.hears(
-		/^(pgpt|pgrok):/gi,
+		/^(pgpt|pgrok|po3|pclaude):/gi,
 		(ctx) => TelegramService.callAdminModel(ctx, TelegramService.callOpenWebUIModel),
 	);
 
