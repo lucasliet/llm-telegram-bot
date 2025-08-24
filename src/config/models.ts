@@ -9,7 +9,7 @@ export const perplexityModels = {
 };
 
 export const openAIModels = {
-	gptModel: 'gpt-4.1',
+	gptModel: 'gpt-5-mini',
 	imageModel: 'dall-e-3',
 	sttModel: 'whisper-1',
 };
@@ -60,7 +60,7 @@ export const duckduckgoModels = {
 export const copilotModels = {
 	gemini: 'gemini-2.5-pro',
 	o4mini: 'o4-mini',
-	gpt41: 'gpt-4.1',
+	gpt5mini: 'gpt-5-mini',
 	gpt5: 'gpt-5',
 	claude: 'claude-sonnet-4',
 	sonnetThinking: 'claude-3.7-sonnet-thought',

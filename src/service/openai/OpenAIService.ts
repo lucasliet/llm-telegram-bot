@@ -114,7 +114,7 @@ export default class OpenAiService {
 			max_tokens: maxTokens,
 			stream: true,
 			// parallel_tool_calls: true,
-			...(model === 'gpt-4.1' ? {} : { reasoning_effort: 'high' }),
+			reasoning_effort: 'high',
 		});
 		const initialReader = initialResponse.toReadableStream().getReader() as ReadableStreamDefaultReader<Uint8Array>;
 
@@ -172,7 +172,7 @@ export default class OpenAiService {
 }
 
 export function responseMap(responseBody: string): string {
-	return JSON.parse(responseBody).choices[0]?.delta?.content || '...';
+	return JSON.parse(responseBody).choices[0]?.delta?.content || '';
 }
 
 /**
@@ -295,15 +295,24 @@ async function handleFunctionCallFollowUp(
 		const result = await fn(args);
 		messages.push({
 			role: 'assistant',
-			name: fnName,
 			content: '',
-			function_call: { name: fnName, arguments: tool_call.function.arguments },
-		});
+			tool_calls: [
+				{
+					id: tool_call.id ?? null,
+					function: {
+						name: fnName,
+						arguments: tool_call.function.arguments,
+					},
+				},
+			],
+		} as unknown as OpenAi.Chat.ChatCompletionMessageParam);
 		messages.push({
-			role: 'function',
+			tool_call_id: tool_call.id ?? null,
+			role: 'tool',
+			type: 'function_tool_output',
 			name: fnName,
 			content: JSON.stringify(result),
-		});
+		} as unknown as OpenAi.Chat.ChatCompletionMessageParam);
 	}
 
 	const followupReader = await generateText(messages, ...generateTextArgs);
@@ -321,7 +330,7 @@ function generateFollowupResponse(
 	maxTokens: number,
 ): Promise<ReadableStreamDefaultReader<Uint8Array>> {
 	return openai.chat.completions.create({
-		model: model === 'o3-mini' || model === 'o4-mini' ? 'gpt-4.1' : model,
+		model: model === 'o3-mini' || model === 'o4-mini' ? 'gpt-5-mini' : model,
 		messages,
 		stream: true,
 		max_tokens: maxTokens,
