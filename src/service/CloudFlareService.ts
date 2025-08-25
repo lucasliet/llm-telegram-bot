@@ -1,6 +1,8 @@
 import OpenAi from 'npm:openai';
 import { addContentToChatHistory, getChatHistory } from '@/repository/ChatRepository.ts';
 import { convertGeminiHistoryToGPT, getSystemPrompt, StreamReplyResponse } from '@/util/ChatConfigUtil.ts';
+import ResponsesToolAdapter from '@/utils/ResponsesToolAdapter.ts';
+import ToolService from '@/service/ToolService.ts';
 import { cloudflareModels } from '@/config/models.ts';
 import { downloadTelegramFile } from './TelegramService.ts';
 
@@ -110,6 +112,7 @@ export default {
 			{ role: 'user', content: requestPrompt },
 		];
 
+		const tools = ResponsesToolAdapter.mapChatToolsToResponsesTools(ToolService.schemas);
 
 		const apiResponse = await fetch(
 			`https://api.cloudflare.com/client/v4/accounts/${CLOUDFLARE_ACCOUNT_ID}/ai/v1/responses`,
@@ -117,6 +120,7 @@ export default {
 				...REQUEST_OPTIONS,
 				body: JSON.stringify({
 					model,
+					tools,					
 					reasoning: { effort: 'high' },
 					input: messages,
 				}),
@@ -128,7 +132,9 @@ export default {
 			throw new Error(`Failed to generate text: ${apiResponse.statusText} ${errorBody}`);
 		}
 
-		const reader = apiResponse.body!.getReader();
+		const initialReader = apiResponse.body!.getReader();
+
+		const reader = ResponsesToolAdapter.executeResponsesToolCalls(generateFollowup, initialReader, messages, model);
 
 		const onComplete = (completedAnswer: string) =>
 			addContentToChatHistory(
@@ -257,7 +263,6 @@ function escapeMessageQuotes(message: string): string {
  * @returns Extracted text content
  */
 function responseMap(responseBody: string): string {
-	console.log(responseBody)
 	type ResponseContent = { text?: string; type?: string;[key: string]: unknown };
 	type OutputItem = { id?: string; type?: string; content?: ResponseContent[] };
 
@@ -279,8 +284,33 @@ function responseMap(responseBody: string): string {
 	if (reasoning) console.log('reasoning', reasoning)
 
 	try {
-		return message || '';
+		return message || '...';
 	} catch {
 		return '';
 	}
+}
+
+
+/**
+ * Generates a follow-up response from the Cloudflare AI API.
+ * @param messages - The array of messages to send to the model.
+ * @param model - The model to use for the follow-up response.
+ * @returns A promise that resolves to a ReadableStreamDefaultReader for the follow-up response.
+ */
+async function generateFollowup(messages: any[], model: string): Promise<ReadableStreamDefaultReader<Uint8Array>> {
+	const followResp = await fetch(
+		`https://api.cloudflare.com/client/v4/accounts/${CLOUDFLARE_ACCOUNT_ID}/ai/v1/responses`,
+		{
+			...REQUEST_OPTIONS,
+			body: JSON.stringify({
+				model,
+				input: messages,
+			}),
+		},
+	);
+	if (!followResp.ok) {
+		const errorBody = await followResp.text().catch(() => '');
+		throw new Error(`Failed to generate followup: ${followResp.statusText} ${errorBody}`);
+	}
+	return followResp.body!.getReader();
 }
