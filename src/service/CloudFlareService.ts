@@ -1,3 +1,4 @@
+import OpenAi from 'npm:openai';
 import { addContentToChatHistory, getChatHistory } from '@/repository/ChatRepository.ts';
 import { convertGeminiHistoryToGPT, getSystemPrompt, StreamReplyResponse } from '@/util/ChatConfigUtil.ts';
 import { cloudflareModels } from '@/config/models.ts';
@@ -12,8 +13,6 @@ const {
 	imageModel,
 	textModel,
 	visionTextModel,
-	sqlModel,
-	codeModel,
 	sttModel,
 } = cloudflareModels;
 
@@ -64,7 +63,8 @@ export default {
 		);
 
 		if (!apiResponse.ok) {
-			throw new Error(`Failed to generate text: ${apiResponse.statusText}`);
+			const errorBody = await apiResponse.text().catch(() => '');
+			throw new Error(`Failed to generate text: ${apiResponse.statusText} ${errorBody}`);
 		}
 		const { result: { description } } = await apiResponse.json();
 
@@ -97,31 +97,35 @@ export default {
 
 		const requestPrompt = quote ? `quote: "${quote}"\n\n${prompt}` : prompt;
 
+		const messages: OpenAi.Chat.ChatCompletionMessageParam[] = [
+			{
+				role: 'system',
+				content: getSystemPrompt(
+					'Cloudflare',
+					model,
+					CLOUDFLARE_MAX_TOKENS,
+				),
+			},
+			...convertGeminiHistoryToGPT(geminiHistory),
+			{ role: 'user', content: requestPrompt },
+		];
+
+
 		const apiResponse = await fetch(
-			`https://api.cloudflare.com/client/v4/accounts/${CLOUDFLARE_ACCOUNT_ID}/ai/run/${model}`,
+			`https://api.cloudflare.com/client/v4/accounts/${CLOUDFLARE_ACCOUNT_ID}/ai/v1/responses`,
 			{
 				...REQUEST_OPTIONS,
 				body: JSON.stringify({
-					messages: [
-						{
-							role: 'system',
-							content: getSystemPrompt(
-								'Llama',
-								textModel,
-								CLOUDFLARE_MAX_TOKENS,
-							),
-						},
-						...convertGeminiHistoryToGPT(geminiHistory),
-						{ role: 'user', content: requestPrompt },
-					],
-					max_tokens: CLOUDFLARE_MAX_TOKENS,
-					stream: true,
+					model,
+					reasoning: { effort: 'high' },
+					input: messages,
 				}),
 			},
 		);
 
 		if (!apiResponse.ok) {
-			throw new Error(`Failed to generate text: ${apiResponse.statusText}`);
+			const errorBody = await apiResponse.text().catch(() => '');
+			throw new Error(`Failed to generate text: ${apiResponse.statusText} ${errorBody}`);
 		}
 
 		const reader = apiResponse.body!.getReader();
@@ -167,36 +171,6 @@ export default {
 		const { result: { image } } = await response.json();
 
 		return Uint8Array.from(atob(image), (m) => m.codePointAt(0)!);
-	},
-
-	/**
-	 * Generate SQL code using a dedicated SQL model
-	 * @param userKey - User identifier for chat history
-	 * @param quote - Optional quote to include in context
-	 * @param prompt - Text prompt describing the SQL query
-	 * @returns Stream reply response with reader and completion handler
-	 */
-	async generateSQL(
-		userKey: string,
-		quote: string = '',
-		prompt: string,
-	): Promise<StreamReplyResponse> {
-		return await this.generateText(userKey, quote, prompt, sqlModel);
-	},
-
-	/**
-	 * Generate code using a dedicated coding model
-	 * @param userKey - User identifier for chat history
-	 * @param quote - Optional quote to include in context
-	 * @param prompt - Text prompt describing the code
-	 * @returns Stream reply response with reader and completion handler
-	 */
-	async generateCode(
-		userKey: string,
-		quote: string = '',
-		prompt: string,
-	): Promise<StreamReplyResponse> {
-		return await this.generateText(userKey, quote, prompt, codeModel);
 	},
 
 	/**
@@ -283,12 +257,30 @@ function escapeMessageQuotes(message: string): string {
  * @returns Extracted text content
  */
 function responseMap(responseBody: string): string {
-	if (responseBody.startsWith('data: ')) {
-		try {
-			return JSON.parse(responseBody.split('data: ')[1])?.response || '';
-		} catch {
-			return '';
-		}
+	console.log(responseBody)
+	type ResponseContent = { text?: string; type?: string;[key: string]: unknown };
+	type OutputItem = { id?: string; type?: string; content?: ResponseContent[] };
+
+	const output: OutputItem[] | undefined = JSON.parse(responseBody)?.output;
+
+	const message = output
+		?.filter((chat: OutputItem) => chat.type === 'message')
+		.flatMap((chat: OutputItem) => chat.content ?? [])
+		.map((c) => c.text ?? '')
+		.filter(Boolean)
+		.join('\n') ?? '';
+	const reasoning = output
+		?.filter((chat: OutputItem) => chat.type === 'reasoning')
+		.flatMap((chat: OutputItem) => chat.content ?? [])
+		.map((c) => c.text ?? '')
+		.filter(Boolean)
+		.join('\n') ?? '';
+
+	if (reasoning) console.log('reasoning', reasoning)
+
+	try {
+		return message || '';
+	} catch {
+		return '';
 	}
-	return '';
 }
