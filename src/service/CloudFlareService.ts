@@ -5,6 +5,7 @@ import ResponsesToolAdapter from '@/utils/ResponsesToolAdapter.ts';
 import ToolService from '@/service/ToolService.ts';
 import { cloudflareModels } from '@/config/models.ts';
 import { downloadTelegramFile } from './TelegramService.ts';
+import ToolUsageAdapter from '../adapter/ToolUsageAdapter.ts';
 
 const CLOUDFLARE_ACCOUNT_ID: string = Deno.env.get(
 	'CLOUDFLARE_ACCOUNT_ID',
@@ -134,7 +135,13 @@ export default {
 
 		const initialReader = apiResponse.body!.getReader();
 
-		const reader = ResponsesToolAdapter.executeResponsesToolCalls(generateFollowup, initialReader, messages, model);
+		const reader = ToolUsageAdapter.processModelResponse(
+					generateFollowup,
+					initialReader,
+					messages,
+					undefined,
+					model
+		);
 
 		const onComplete = (completedAnswer: string) =>
 			addContentToChatHistory(
@@ -145,7 +152,7 @@ export default {
 				userKey,
 			);
 
-		return { reader, onComplete, responseMap };
+		return { reader, onComplete };
 	},
 
 	/**
@@ -298,13 +305,14 @@ function responseMap(responseBody: string): string {
  * @returns A promise that resolves to a ReadableStreamDefaultReader for the follow-up response.
  */
 async function generateFollowup(messages: any[], model: string): Promise<ReadableStreamDefaultReader<Uint8Array>> {
+	const modifiedMessages = ToolUsageAdapter.modifyMessagesWithToolInfo(messages);
 	const followResp = await fetch(
 		`https://api.cloudflare.com/client/v4/accounts/${CLOUDFLARE_ACCOUNT_ID}/ai/v1/responses`,
 		{
 			...REQUEST_OPTIONS,
 			body: JSON.stringify({
 				model,
-				input: messages,
+				input: modifiedMessages,
 			}),
 		},
 	);
@@ -312,5 +320,6 @@ async function generateFollowup(messages: any[], model: string): Promise<Readabl
 		const errorBody = await followResp.text().catch(() => '');
 		throw new Error(`Failed to generate followup: ${followResp.statusText} ${errorBody}`);
 	}
-	return followResp.body!.getReader();
+	const reader = followResp.body!.getReader();
+	return ToolUsageAdapter.mapResponse(reader, true, responseMap);
 }
