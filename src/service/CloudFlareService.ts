@@ -1,5 +1,7 @@
 import { addContentToChatHistory, getChatHistory } from '@/repository/ChatRepository.ts';
 import { convertGeminiHistoryToGPT, getSystemPrompt, StreamReplyResponse } from '@/util/ChatConfigUtil.ts';
+import ResponsesToolAdapter from '@/utils/ResponsesToolAdapter.ts';
+import ToolService from '@/service/ToolService.ts';
 import { cloudflareModels } from '@/config/models.ts';
 import { downloadTelegramFile } from './TelegramService.ts';
 
@@ -96,28 +98,34 @@ export default {
 
 		const requestPrompt = quote ? `quote: "${quote}"\n\n${prompt}` : prompt;
 
+		const inputMessages = [
+			{
+				role: 'system',
+				content: getSystemPrompt(
+					'Llama',
+					textModel,
+					CLOUDFLARE_MAX_TOKENS,
+				),
+			},
+			...convertGeminiHistoryToGPT(geminiHistory),
+			{ role: 'user', content: requestPrompt },
+		];
+
+		const tools = ResponsesToolAdapter.mapChatToolsToResponsesTools(ToolService.schemas);
+		console.log('tools', tools)
+
 		const apiResponse = await fetch(
 			`https://api.cloudflare.com/client/v4/accounts/${CLOUDFLARE_ACCOUNT_ID}/ai/v1/responses`,
 			{
 				...REQUEST_OPTIONS,
 				body: JSON.stringify({
 					model,
+					tools,
 					reasoning: {
 						effort: 'high',
-						summary: 'auto'
+						summary: 'auto',
 					},
-					input: [
-						{
-							role: 'system',
-							content: getSystemPrompt(
-								'Llama',
-								textModel,
-								CLOUDFLARE_MAX_TOKENS,
-							),
-						},
-						...convertGeminiHistoryToGPT(geminiHistory),
-						{ role: 'user', content: requestPrompt },
-					],
+					input: inputMessages,
 				}),
 			},
 		);
@@ -127,7 +135,30 @@ export default {
 			throw new Error(`Failed to generate text: ${apiResponse.statusText} ${errorBody}`);
 		}
 
-		const reader = apiResponse.body!.getReader();
+		const initialReader = apiResponse.body!.getReader();
+
+		const generateFollowup = async (messages: any[]) => {
+			console.log('generateFollowup', messages)
+			const followResp = await fetch(
+				`https://api.cloudflare.com/client/v4/accounts/${CLOUDFLARE_ACCOUNT_ID}/ai/v1/responses`,
+				{
+					...REQUEST_OPTIONS,
+					body: JSON.stringify({
+						model,
+						reasoning: { effort: 'high', summary: 'auto' },
+						tools,
+						input: messages,
+					}),
+				},
+			);
+			if (!followResp.ok) {
+				const errorBody = await followResp.text().catch(() => '');
+				throw new Error(`Failed to generate followup: ${followResp.statusText} ${errorBody}`);
+			}
+			return followResp.body!.getReader();
+		};
+
+		const reader = ResponsesToolAdapter.executeResponsesToolCalls(generateFollowup, initialReader, inputMessages as any[]);
 
 		const onComplete = (completedAnswer: string) =>
 			addContentToChatHistory(
@@ -256,7 +287,6 @@ function escapeMessageQuotes(message: string): string {
  * @returns Extracted text content
  */
 function responseMap(responseBody: string): string {
-	console.log(responseBody)
 	type ResponseContent = { text?: string; type?: string;[key: string]: unknown };
 	type OutputItem = { id?: string; type?: string; content?: ResponseContent[] };
 
@@ -278,7 +308,7 @@ function responseMap(responseBody: string): string {
 	if (reasoning) console.log('reasoning', reasoning)
 
 	try {
-		return message || '';
+		return message || '...';
 	} catch {
 		return '';
 	}
