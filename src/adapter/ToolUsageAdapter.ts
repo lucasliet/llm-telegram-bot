@@ -331,18 +331,30 @@ export class ToolUsageAdapter {
 		let toolCalls: Array<{ index: number; id?: string; type?: string; function?: { name?: string; arguments?: string } }> = [];
 		let processed = false;
 
-		if (textChunk.includes(`"${TOOL_CALL_ADAPTER_KEY}"`)) {
+		if (textChunk.includes(`"${TOOL_CALL_ADAPTER_KEY}"`) || textChunk.includes('function_call')) {
 			try {
 				const data = JSON.parse(textChunk);
-				if (data[TOOL_CALL_ADAPTER_KEY]) {
+				if (
+					data[TOOL_CALL_ADAPTER_KEY] ||
+					(Array.isArray(data.output) && data.output.some((item: any) => item?.type === 'function_call'))
+				) {
 					processed = true;
-					const extractedToolCalls: ToolCall[] = data[TOOL_CALL_ADAPTER_KEY];
+					const extractedToolCalls: ToolCall[] =
+						data[TOOL_CALL_ADAPTER_KEY] ||
+						(Array.isArray(data.output) ? data.output.filter((item: any) => item?.type === 'function_call') : []);
 
-					toolCalls = extractedToolCalls.map((call, index) => ({
+					toolCalls = extractedToolCalls.map((call: any, index) => ({
 						index: index,
 						id: call.id,
 						type: call.type,
-						function: call.function,
+						function:
+							call.function ||
+							{
+								name: call.name,
+								arguments: typeof call.arguments === 'string'
+									? call.arguments
+									: JSON.stringify(call.arguments ?? {}),
+							},
 					}));
 
 					for (const toolCall of toolCalls) {
