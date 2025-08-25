@@ -121,7 +121,7 @@ export default {
 				...REQUEST_OPTIONS,
 				body: JSON.stringify({
 					model,
-					tools,					
+					tools,
 					reasoning: { effort: 'high' },
 					input: messages,
 				}),
@@ -136,11 +136,11 @@ export default {
 		const initialReader = apiResponse.body!.getReader();
 
 		const reader = ToolUsageAdapter.processModelResponse(
-					generateFollowup,
-					initialReader,
-					messages,
-					undefined,
-					model
+			generateFollowup,
+			initialReader,
+			messages,
+			responseMap,
+			model
 		);
 
 		const onComplete = (completedAnswer: string) =>
@@ -273,25 +273,26 @@ function responseMap(responseBody: string): string {
 	type ResponseContent = { text?: string; type?: string;[key: string]: unknown };
 	type OutputItem = { id?: string; type?: string; content?: ResponseContent[] };
 
-	const output: OutputItem[] | undefined = JSON.parse(responseBody)?.output;
-
-	const message = output
-		?.filter((chat: OutputItem) => chat.type === 'message')
-		.flatMap((chat: OutputItem) => chat.content ?? [])
-		.map((c) => c.text ?? '')
-		.filter(Boolean)
-		.join('\n') ?? '';
-	const reasoning = output
-		?.filter((chat: OutputItem) => chat.type === 'reasoning')
-		.flatMap((chat: OutputItem) => chat.content ?? [])
-		.map((c) => c.text ?? '')
-		.filter(Boolean)
-		.join('\n') ?? '';
-
-	if (reasoning) console.log('reasoning', reasoning)
-
+	let output: OutputItem[] | undefined;
 	try {
-		return message || '...';
+		output = JSON.parse(responseBody)?.output;
+
+		const message = output
+			?.filter((chat: OutputItem) => chat.type === 'message')
+			.flatMap((chat: OutputItem) => chat.content ?? [])
+			.map((c) => c.text ?? '')
+			.filter(Boolean)
+			.join('\n') ?? '';
+		const reasoning = output
+			?.filter((chat: OutputItem) => chat.type === 'reasoning')
+			.flatMap((chat: OutputItem) => chat.content ?? [])
+			.map((c) => c.text ?? '')
+			.filter(Boolean)
+			.join('\n') ?? '';
+
+		if (reasoning) console.log('Reasoning: ', reasoning)
+
+		return message || responseBody
 	} catch {
 		return '';
 	}

@@ -39,24 +39,6 @@ export async function handleCloudflare(
 			);
 
 		ctx.streamReply(reader, onComplete, responseMap);
-	} else if (cloudflareCommand === 'sql') {
-		const { reader, onComplete, responseMap } = await CloudFlareService
-			.generateSQL(
-				userKey,
-				quote,
-				message!.replace('sql:', ''),
-			);
-
-		ctx.streamReply(reader, onComplete, responseMap);
-	} else if (cloudflareCommand === 'code') {
-		const { reader, onComplete, responseMap } = await CloudFlareService
-			.generateCode(
-				userKey,
-				quote,
-				message!.replace('code:', ''),
-			);
-
-		ctx.streamReply(reader, onComplete, responseMap);
 	} else if (cloudflareCommand === 'cloudflareimage' || cloudflareCommand === 'image') {
 		ctx.replyWithPhoto(
 			new InputFile(
