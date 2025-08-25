@@ -204,6 +204,7 @@ export default {
 			'/gpt5': () => handleGithubCopilot(ctx, `gpt5: ${message}`),
 			'/perplexity': () => handlePerplexity(ctx, `perplexity: ${message}`),
 			'/perplexityReasoning': () => handlePerplexity(ctx, `perplexityReasoning: ${message}`),
+			'/oss' : () => handleCloudflare(ctx, `oss: ${message}`),
 			'/llama': () => handleOpenRouter(ctx, `llama: ${message!}`),
 			// '/r1': () => handleBlackbox(ctx, `r1: ${message}`),
 			// '/r1online': () => handleBlackbox(ctx, `r1online: ${message}`),
@@ -218,6 +219,8 @@ export default {
 			'/phind': () => handlePhind(ctx, `phind: ${message}`),
 			'/pplxgpt': () => handleOpenWebUI(ctx, `pgpt: ${message}`),
 			'/pplxgrok': () => handleOpenWebUI(ctx, `pgrok: ${message}`),
+			'/pplxclaude': () => handleOpenWebUI(ctx, `pclaude: ${message}`),
+			'/pplxo3': () => handleOpenWebUI(ctx, `po3: ${message}`),
 		};
 
 		const handler = modelHandlers[currentModel];

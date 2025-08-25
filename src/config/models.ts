@@ -78,6 +78,7 @@ export type ModelCommand =
 	| '/geminiPro'
 	| '/gemini'
 	| '/llama'
+	| '/oss'
 	| '/gpt'
 	| '/gpt5'
 	| '/perplexity'
@@ -104,6 +105,7 @@ export const modelCommands: ModelCommand[] = [
 	'/geminiPro',
 	'/gemini',
 	'/llama',
+	'/oss',
 	'/gpt',
 	'/gpt5',
 	'/perplexity',
@@ -126,6 +128,7 @@ export const modelCommands: ModelCommand[] = [
 
 export const WHITELISTED_MODELS: ModelCommand[] = [
 	'/llama',
+	'/oss',
 	'/gpt',
 	// '/r1online',
 	// '/r1',

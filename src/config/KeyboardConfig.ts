@@ -42,8 +42,8 @@ const adminCommandButtons = [
 		['PPLX Grok 4', '/pplxgrok'],
 	],
 	[
-		['PPLX o3', '/pplxo3'],
 		['PPLX Sonnet 4', '/pplxclaude'],
+		['GPT OSS 120b', '/oss'],
 	],
 	[['Limpar Histórico', '/clear']],
 ];
@@ -55,7 +55,7 @@ const userCommandButtons = [
 	[['Modelo Atual', '/currentmodel']],
 	[
 		['Phind', '/phind'],
-		// ['GPT o3 Mini', '/o3mini'],
+		['GPT OSS 120b', '/oss'],
 	],
 	[
 		// ['Deepseek R1', '/r1'],
@@ -86,7 +86,8 @@ export const userKeyboard = InlineKeyboard.from(
 export const adminHelpMessage = `*Comandos inline*:
 \\- \`cloudflareImage:\` mensagem \\- Gera imagens com __Stable Diffusion__
 \\- \`gptImage:\` mensagem \\- Gera imagens com __DALL\\-e__
-\\- \`gpt:\` mensagem \\- Gera texto com __GPT 4\\.1__
+\\- \`oss:\` mensagem \\- Faz uma pergunta usando o modelo de codigo aberto__GPT OSS 120b__
+\\- \`gpt:\` mensagem \\- Gera texto com __GPT 5 mini__
 \\- \`gpt5:\` mensagem \\- Gera texto com __GPT 5__
 \\- \`llama:\` mensagem \\- Gera texto com o __Llama 4 Maverick__
 \\- \`sql:\` mensagem \\- Gera sql com modelo __SQL Coder__
@@ -112,7 +113,8 @@ export const adminHelpMessage = `*Comandos inline*:
  */
 export const userHelpMessage = `*Comandos inline*:
 \\- \`phind:\` mensagem \\- Faz uma pergunta usando o modelo __Phind__ com acesso web
+\\- \`oss:\` mensagem \\- Faz uma pergunta usando o modelo de codigo aberto__GPT OSS 120b__
+\\- \`gpt:\` mensagem \\- Gera texto com __GPT 5 mini__
 \\- \`llama:\` mensagem \\- Gera texto com o __Llama 4 Maverick__
-\\- \`gemini:\` mensagem \\- Faz uma pergunta usando o modelo __Gemini Flash__
 
 *Seleção de modelos de linguagem*:`;
