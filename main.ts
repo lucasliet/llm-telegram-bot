@@ -87,7 +87,7 @@ function registerBotCommands() {
 	);
 
 	BOT.hears(
-		/^(polli|polliReasoning):/gi,
+		/^(polli|polliReasoning|polliImage):/gi,
 		(ctx) => TelegramService.callAdminModel(ctx, TelegramService.callPollinationsModel),
 	);
 

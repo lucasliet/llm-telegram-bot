@@ -30,8 +30,8 @@ const adminCommandButtons = [
 		['Gemini 2.5 Pro', '/geminiPro'],
 	],
 	[
-		// ['Qwen', '/qwen'],
-		// ['Mixtral', '/mixtral'],
+		['Pollinations', '/polli'],
+		['Pollinations Reasoning', '/polliReasoning'],
 	],
 	[
 		['Sonar', '/perplexity'],
@@ -56,6 +56,10 @@ const userCommandButtons = [
 	[
 		['Phind', '/phind'],
 		['GPT OSS 120b', '/oss'],
+	],
+	[
+		['Pollinations', '/polli'],
+		['Pollinations Reasoning', '/polliReasoning'],
 	],
 	[
 		// ['Deepseek R1', '/r1'],
@@ -86,6 +90,7 @@ export const userKeyboard = InlineKeyboard.from(
 export const adminHelpMessage = `*Comandos inline*:
 \\- \`cloudflareImage:\` mensagem \\- Gera imagens com __Stable Diffusion__
 \\- \`gptImage:\` mensagem \\- Gera imagens com __DALL\\-e__
+\\- \`polliImage:\` mensagem \\- Gera imagens com __Pollinations__
 \\- \`oss:\` mensagem \\- Faz uma pergunta usando o modelo de codigo aberto__GPT OSS 120b__
 \\- \`gpt:\` mensagem \\- Gera texto com __GPT 5 mini__
 \\- \`gpt5:\` mensagem \\- Gera texto com __GPT 5__
@@ -104,6 +109,8 @@ export const adminHelpMessage = `*Comandos inline*:
 \\- \`pgrok:\` mensagem \\- Faz uma pergunta usando o modelo __PPLX Grok 4__ pela __Perplexity__
 \\- \`po3:\` mensagem \\- Faz uma pergunta usando o modelo __PPLX o3__ pela __Perplexity__
 \\- \`pclaude:\` mensagem \\- Faz uma pergunta usando o modelo __PPLX Sonnet 4__ pela __Perplexity__
+\\- \`polli:\` mensagem \\- Faz uma pergunta usando o modelo __Pollinations__
+\\- \`polliReasoning:\` mensagem \\- Faz uma pergunta usando o modelo __Pollinations Reasoning__
 \\- \`fala:\` mensagem \\- Faz uma pergunta usando __Elevenlabs__ para TTS
 
 *Seleção de modelos de linguagem*:`;
@@ -116,5 +123,8 @@ export const userHelpMessage = `*Comandos inline*:
 \\- \`oss:\` mensagem \\- Faz uma pergunta usando o modelo de codigo aberto__GPT OSS 120b__
 \\- \`gpt:\` mensagem \\- Gera texto com __GPT 5 mini__
 \\- \`llama:\` mensagem \\- Gera texto com o __Llama 4 Maverick__
+\\- \`polliImage:\` mensagem \\- Gera imagens com __Pollinations__
+\\- \`polli:\` mensagem \\- Faz uma pergunta usando o modelo __Pollinations__
+\\- \`polliReasoning:\` mensagem \\- Faz uma pergunta usando o modelo __Pollinations Reasoning__
 
 *Seleção de modelos de linguagem*:`;

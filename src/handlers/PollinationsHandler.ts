@@ -4,8 +4,8 @@ import PollinationsService from '@/service/PollinationsService.ts';
 import { pollinationsModels } from '@/config/models.ts';
 
 const modelMap = {
-	'pollinations': pollinationsModels.openai,
-	'pollinationsReasoning': pollinationsModels.reasoning,
+	'polli': pollinationsModels.openai,
+	'pollireasoning': pollinationsModels.reasoning,
 	none: undefined,
 };
 
@@ -29,6 +29,15 @@ export async function handlePollinations(
 	}
 
 	const command = message?.split(':')[0]?.toLowerCase() || 'none';
+
+	if (command === 'polliimage') {
+		const imageUrl = await PollinationsService.generateImage(
+			message!.replace(`${command}:`, ''),
+		);
+		await ctx.replyWithPhoto(imageUrl);
+		return;
+	}
+
 	const model = modelMap[command as keyof typeof modelMap];
 
 	const { reader, onComplete, responseMap } = await PollinationsService.generateText(
