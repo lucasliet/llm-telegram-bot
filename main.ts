@@ -50,7 +50,7 @@ function registerBotCommands() {
 	BOT.command('clear', (ctx) => clearChatHistoryHandler(ctx));
 
 	BOT.hears(
-		/^(oss|sql|code|cloudflareImage):/gi,
+		/^(oss|cloudflareImage):/gi,
 		(ctx) => TelegramService.callAdminModel(ctx, TelegramService.callCloudflareModel),
 	);
 	BOT.hears(
@@ -84,6 +84,11 @@ function registerBotCommands() {
 	BOT.hears(
 		/^(pgpt|pgrok|po3|pclaude):/gi,
 		(ctx) => TelegramService.callAdminModel(ctx, TelegramService.callOpenWebUIModel),
+	);
+
+	BOT.hears(
+		/^(polli|polliReasoning):/gi,
+		(ctx) => TelegramService.callAdminModel(ctx, TelegramService.callPollinationsModel),
 	);
 
 	BOT.hears(

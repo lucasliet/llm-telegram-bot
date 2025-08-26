@@ -62,7 +62,12 @@ export const copilotModels = {
 	gpt5: 'gpt-5',
 	claude: 'claude-sonnet-4',
 	sonnetThinking: 'claude-3.7-sonnet-thought',
-}
+};
+
+export const pollinationsModels = {
+	openai: 'openai',
+	reasoning: 'openai-reasoning',
+};
 
 export const openWebUiModels = {
 	gpt5: 'pplx.gpt-5-search',
@@ -96,7 +101,9 @@ export type ModelCommand =
 	| '/pplxgpt'
 	| '/pplxgrok'
 	| '/pplxo3'
-	| '/pplxclaude';
+	| '/pplxclaude'
+	| '/polli'
+	| '/polliReasoning';
 
 /**
  * Available model commands
@@ -124,6 +131,8 @@ export const modelCommands: ModelCommand[] = [
 	'/pplxgrok',
 	'/pplxo3',
 	'/pplxclaude',
+	'/polli',
+	'/polliReasoning',
 ];
 
 export const WHITELISTED_MODELS: ModelCommand[] = [
@@ -138,4 +147,6 @@ export const WHITELISTED_MODELS: ModelCommand[] = [
 	// '/o3mini',
 	// '/grok',
 	'/phind',
+	'/polli',
+	'/polliReasoning',
 ];

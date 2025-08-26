@@ -17,6 +17,7 @@ import {
 	handlePhind,
 	handlePuter,
 	handleOpenWebUI,
+	handlePollinations,
 } from '@/handlers/index.ts';
 
 import { FileUtils } from '@/util/FileUtils.ts';
@@ -118,28 +119,34 @@ export default {
 			const completions = quotas.completions as Quota | undefined;
 			const premium = quotas.premium_interactions as Quota | undefined;
 
-			const formatted = `🤖 \`GitHub Copilot - Status de Uso\`
+			const formatted = `🤖 
+GitHub Copilot - Status de Uso
 
-📋 \`Informações Gerais:\`
+📋 
+Informações Gerais:
 • *Plano*: ${(data as any).copilot_plan ?? 'n/a'}
 • *Tipo de acesso*: ${(data as any).access_type_sku?.replaceAll('_', '\\_') ?? 'n/a'}
 • *Chat habilitado*: ${(data as any).chat_enabled ? 'Sim' : 'Não'}
 • *Data de atribuição*: ${formatDate((data as any).assigned_date)}
 • *Próxima renovação de cota*: ${formatDate((data as any).quota_reset_date)}
 
-📊 \`Cotas de Uso:\`
+📊 
+Cotas de Uso:
 
-🗨️ \`Chat:\`
+🗨️ 
+Chat:
 • *Status*: ${formatQuota(chat)}
 • *Overage permitido*: ${chat?.overage_permitted ? 'Sim' : 'Não'}
 • *Contador de overage*: ${chat?.overage_count ?? 0}
 
-💡 \`Completions (Autocompletar):\`
+💡 
+Completions (Autocompletar):
 • *Status*: ${formatQuota(completions)}
 • *Overage permitido*: ${completions?.overage_permitted ? 'Sim' : 'Não'}
 • *Contador de overage*: ${completions?.overage_count ?? 0}
 
-⭐ \`Interações Premium:\`
+⭐ 
+Interações Premium:
 • *Status*: ${formatQuota(premium)}
 • *Overage permitido*: ${premium?.overage_permitted ? 'Sim' : 'Não'}
 • *Contador de overage*: ${premium?.overage_count ?? 0}`;
@@ -221,6 +228,8 @@ export default {
 			'/pplxgrok': () => handleOpenWebUI(ctx, `pgrok: ${message}`),
 			'/pplxclaude': () => handleOpenWebUI(ctx, `pclaude: ${message}`),
 			'/pplxo3': () => handleOpenWebUI(ctx, `po3: ${message}`),
+			'/polli': () => handlePollinations(ctx, `polli: ${message}`),
+			'/polliReasoning': () => handlePollinations(ctx, `polliReasoning: ${message}`),
 		};
 
 		const handler = modelHandlers[currentModel];
@@ -275,6 +284,9 @@ export default {
 	},
 	callGeminiModel(ctx: Context, commandMessage?: string): Promise<void> {
 		return handleGemini(ctx, commandMessage);
+	},
+	callPollinationsModel(ctx: Context, commandMessage?: string): Promise<void> {
+		return handlePollinations(ctx, commandMessage);
 	},
 };
 
