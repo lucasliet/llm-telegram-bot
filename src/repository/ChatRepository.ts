@@ -132,3 +132,59 @@ export async function setVqdHeader(vqdHeader: string): Promise<void> {
 export async function getVqdHeader(): Promise<string | null> {
 	return (await kv.get<string>(['vqd_header'])).value || null;
 }
+
+/**
+ * Retrieve the full memory object for a user
+ */
+export async function getMemory(
+        userKey: string,
+): Promise<Record<string, unknown>> {
+        const stored = (await kv.get<string>([userKey, 'memory'])).value;
+        return stored ? decompressObject<Record<string, unknown>>(stored) : {};
+}
+
+/**
+ * Merge new data into the user's memory object
+ */
+export async function setMemory(
+        userKey: string,
+        data: Record<string, unknown>,
+): Promise<Record<string, unknown>> {
+        const current = await getMemory(userKey);
+        const updated = { ...current, ...data };
+        await writeMemory(userKey, updated);
+        return updated;
+}
+
+/**
+ * Adjust a numeric field in the user's memory object
+ */
+export async function adjustMemoryValue(
+        userKey: string,
+        field: string,
+        amount: number,
+): Promise<number> {
+        const data = await getMemory(userKey);
+        const current = Number(data[field]) || 0;
+        const updatedValue = current + amount;
+        data[field] = updatedValue;
+        await writeMemory(userKey, data);
+        return updatedValue;
+}
+
+/**
+ * Clear all memory for a user
+ */
+export async function clearMemory(userKey: string): Promise<void> {
+	await kv.delete([userKey, 'memory']);
+}
+
+/**
+ * Write memory object for a user
+ */
+async function writeMemory(
+        userKey: string,
+	data: Record<string, unknown>,
+): Promise<void> {
+	await kv.set([userKey, 'memory'], compressObject(data));
+}

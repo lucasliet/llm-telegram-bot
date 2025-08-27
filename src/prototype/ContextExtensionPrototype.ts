@@ -1,6 +1,7 @@
 import { Context } from 'grammy';
 import { Audio, Message, ParseMode, PhotoSize, Voice } from 'grammy-types';
 import { transcribeAudio } from '@/service/TelegramService.ts';
+import { setUserKey } from '@/utils/ExecutionContext.ts';
 
 const MARKDOWN_ERROR_MESSAGE = 'Error on markdown parse_mode, message:';
 
@@ -158,7 +159,7 @@ Context.prototype.streamReply = async function (
 	let sanitizedResult = result.removeThinkingChatCompletion()
 		.convertBlackBoxWebSearchSourcesToMarkdown();
 
-	if(sanitizedResult.length > 4093) {
+	if (sanitizedResult.length > 4093) {
 		const remainingChunk = sanitizedResult.substring(4093);
 		sanitizedResult = sanitizedResult.substring(0, 4093) + '...';
 		this.replyInChunks(remainingChunk);
@@ -181,6 +182,7 @@ Context.prototype.streamReply = async function (
 Context.prototype.extractContextKeys = async function (this: Context) {
 	const userId = this.from?.id!;
 	const userKey = `user:${userId}`;
+	setUserKey(userKey);
 	const audio = this.message?.voice || this.message?.audio;
 	const contextMessage = await getTextMessage(userId, userKey, this, audio);
 	const photos = this.message?.photo;
