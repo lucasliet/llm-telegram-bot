@@ -1,3 +1,26 @@
+# Project Overview
+
+## Project Structure
+- `main.ts` - entry point that initializes the bot and HTTP server
+- `src/` - source files
+  - `adapter/` - adapters for integrating external tools and tool responses
+  - `config/` - keyboard layouts and model listings
+  - `handlers/` - handlers for each command and model
+  - `prototype/` - runtime prototype extensions
+  - `repository/` - data persistence using Deno KV
+  - `service/` - services that interact with LLM providers and Telegram
+  - `util/` - utilities for chat configuration and file handling
+- `tests/` - automated tests mirroring the source structure
+- `devrun.sh` - helper script to run locally
+- `run_tests.sh` - script that executes the full test suite
+- `deno.json` - project configuration for Deno
+
+## About the Project
+Telegram bot powered by multiple large language model providers. It answers user messages, supports model switching, and runs on Deno Deploy with Deno KV for persistence.
+
+## How It Works
+`main.ts` creates an Oak application and a grammy bot. Commands register model actions and utilities. `TelegramService` orchestrates model selection, message handling, and webhook setup. Repositories store conversation history, allowing the bot to operate via webhook or long polling.
+
 # Code Conventions
 
 ## Do not add comments on code
@@ -7,8 +30,7 @@ When writing code, do not add // comments. Just write the code.
 Maintain consistent indentation and spacing throughout the code.
 
 ## TSDocs on functions
-When writing functions, always include TSDoc comments to describe the function's purpose, parameters, and return value.
-since its typescript, there is no need to add types in the function signature. unless the code is javascript.
+When writing functions, always include TSDoc comments to describe the function's purpose, parameters, and return value. since its typescript, there is no need to add types in the function signature. unless the code is javascript.
 
 ## Clean code
 Write clean, readable code. Avoid unnecessary complexity and ensure that the code is easy to understand. Follow best practices for clean code and the programming language being used.

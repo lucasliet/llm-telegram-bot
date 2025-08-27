@@ -289,7 +289,9 @@ async function handleFunctionCallFollowUp(
   }
 }
 
-export default {
+const ResponsesToolAdapter = {
   mapChatToolsToResponsesTools,
   executeResponsesToolCalls,
 };
+
+export default ResponsesToolAdapter;
