@@ -1,7 +1,7 @@
 import OpenAi from 'npm:openai';
 import { addContentToChatHistory, getChatHistory } from '@/repository/ChatRepository.ts';
 import { convertGeminiHistoryToGPT, getSystemPrompt, StreamReplyResponse } from '@/util/ChatConfigUtil.ts';
-import ResponsesToolAdapter from '@/utils/ResponsesToolAdapter.ts';
+import ResponsesToolAdapter from '@/adapter/ResponsesToolAdapter.ts';
 import ToolService from '@/service/ToolService.ts';
 import { cloudflareModels } from '@/config/models.ts';
 import { downloadTelegramFile } from './TelegramService.ts';
