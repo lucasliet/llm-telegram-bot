@@ -90,10 +90,14 @@ function registerBotCommands() {
 		(ctx) => TelegramService.callAdminModel(ctx, TelegramService.callOpenWebUIModel),
 	);
 
-	BOT.hears(
-		/^(polli|polliReasoning|polliImage):/gi,
-		(ctx) => TelegramService.callAdminModel(ctx, TelegramService.callPollinationsModel),
-	);
+        BOT.hears(
+                /^(polli|polliReasoning|polliImage):/gi,
+                (ctx) => TelegramService.callAdminModel(ctx, TelegramService.callPollinationsModel),
+        );
+        BOT.hears(
+                /^(artaImage):/gi,
+                (ctx) => TelegramService.callAdminModel(ctx, TelegramService.callArtaModel),
+        );
 
 	BOT.hears(
 		new RegExp(`^(${modelCommands.join('|')})$`),

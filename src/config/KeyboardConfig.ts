@@ -93,6 +93,7 @@ export const adminHelpMessage = `*Comandos inline*:
 \\- \`cloudflareImage:\` mensagem \\- Gera imagens com __Stable Diffusion__
 \\- \`gptImage:\` mensagem \\- Gera imagens com __DALL\\-e__
 \\- \`polliImage:\` mensagem \\- Gera imagens com __Pollinations__
+\\- \`artaImage:\` mensagem \\- Gera imagens com __Arta__
 \\- \`oss:\` mensagem \\- Faz uma pergunta usando o modelo de codigo aberto__GPT OSS 120b__
 \\- \`gpt:\` mensagem \\- Gera texto com __GPT 5 mini__
 \\- \`gpt5:\` mensagem \\- Gera texto com __GPT 5__
@@ -128,6 +129,7 @@ export const userHelpMessage = `*Comandos inline*:
 \\- \`gpt:\` mensagem \\- Gera texto com __GPT 5 mini__
 \\- \`llama:\` mensagem \\- Gera texto com o __Llama 4 Maverick__
 \\- \`polliImage:\` mensagem \\- Gera imagens com __Pollinations__
+\\- \`artaImage:\` mensagem \\- Gera imagens com __Arta__
 \\- \`polli:\` mensagem \\- Faz uma pergunta usando o modelo __Pollinations__
 \\- \`polliReasoning:\` mensagem \\- Faz uma pergunta usando o modelo __Pollinations Reasoning__
 

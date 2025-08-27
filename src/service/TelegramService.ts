@@ -11,14 +11,15 @@ import {
 	handleDuckDuckGo,
 	handleGemini,
 	handleGithubCopilot,
-	handleIsou,
-	handleOpenAI,
-	handleOpenRouter,
-	handleOpenWebUI,
-	handlePerplexity,
-	handlePhind,
-	handlePollinations,
-	handlePuter,
+        handleIsou,
+        handleOpenAI,
+        handleOpenRouter,
+        handleOpenWebUI,
+        handlePerplexity,
+        handlePhind,
+        handlePollinations,
+        handleArta,
+        handlePuter,
 } from '@/handlers/index.ts';
 
 import { FileUtils } from '@/util/FileUtils.ts';
@@ -286,12 +287,15 @@ Interações Premium:
 	callOpenWebUIModel(ctx: Context, commandMessage?: string): Promise<void> {
 		return handleOpenWebUI(ctx, commandMessage);
 	},
-	callGeminiModel(ctx: Context, commandMessage?: string): Promise<void> {
-		return handleGemini(ctx, commandMessage);
-	},
-	callPollinationsModel(ctx: Context, commandMessage?: string): Promise<void> {
-		return handlePollinations(ctx, commandMessage);
-	},
+        callGeminiModel(ctx: Context, commandMessage?: string): Promise<void> {
+                return handleGemini(ctx, commandMessage);
+        },
+        callPollinationsModel(ctx: Context, commandMessage?: string): Promise<void> {
+                return handlePollinations(ctx, commandMessage);
+        },
+        callArtaModel(ctx: Context, commandMessage?: string): Promise<void> {
+                return handleArta(ctx, commandMessage);
+        },
 };
 
 export const downloadTelegramFile = FileUtils.downloadTelegramFile;
