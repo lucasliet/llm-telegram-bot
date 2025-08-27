@@ -8,6 +8,7 @@ const adminCommandButtons = [
 	[
 		['Llama 4 Maverick', '/llama'],
 		['Phind', '/phind'],
+		['Isou', '/isou'],
 	],
 	[
 		['Copilot GPT 5 Mini', '/gpt'],
@@ -56,6 +57,7 @@ const userCommandButtons = [
 	[
 		['Phind', '/phind'],
 		['GPT OSS 120b', '/oss'],
+		['Isou', '/isou'],
 	],
 	[
 		['Pollinations', '/polli'],
@@ -71,7 +73,7 @@ const userCommandButtons = [
 	],
 	[
 		['Llama 4 Maverick', '/llama'],
-		['Copilot GPT 5 Mini', '/gpt']
+		['Copilot GPT 5 Mini', '/gpt'],
 	],
 	[['Limpar Histórico', '/clear']],
 ];
@@ -91,6 +93,7 @@ export const adminHelpMessage = `*Comandos inline*:
 \\- \`cloudflareImage:\` mensagem \\- Gera imagens com __Stable Diffusion__
 \\- \`gptImage:\` mensagem \\- Gera imagens com __DALL\\-e__
 \\- \`polliImage:\` mensagem \\- Gera imagens com __Pollinations__
+\\- \`artaImage:\` mensagem \\- Gera imagens com __Arta__
 \\- \`oss:\` mensagem \\- Faz uma pergunta usando o modelo de codigo aberto__GPT OSS 120b__
 \\- \`gpt:\` mensagem \\- Gera texto com __GPT 5 mini__
 \\- \`gpt5:\` mensagem \\- Gera texto com __GPT 5__
@@ -98,6 +101,7 @@ export const adminHelpMessage = `*Comandos inline*:
 \\- \`sql:\` mensagem \\- Gera sql com modelo __SQL Coder__
 \\- \`code:\` mensagem \\- Gera código com modelo __Deepseek Coder__
 \\- \`phind:\` mensagem \\- Faz uma pergunta usando o modelo __Phind__ com acesso web
+\\- \`isou:\` mensagem \\- Faz uma pergunta usando o modelo __Isou__ com acesso web
 \\- \`perplexity:\` mensagem \\- Faz uma pergunta usando o modelo perplexity\\.ai
 \\- \`search:\` mensagem \\- Faz uma pergunta usando o modelo perplexity\\.ai
 \\- \`reasonSearch:\` mensagem \\- Faz uma pergunta usando o modelo perplexity\\.ai com o uso de __Deepseek\\-R1__
@@ -120,10 +124,12 @@ export const adminHelpMessage = `*Comandos inline*:
  */
 export const userHelpMessage = `*Comandos inline*:
 \\- \`phind:\` mensagem \\- Faz uma pergunta usando o modelo __Phind__ com acesso web
+\\- \`isou:\` mensagem \\- Faz uma pergunta usando o modelo __Isou__ com acesso web
 \\- \`oss:\` mensagem \\- Faz uma pergunta usando o modelo de codigo aberto__GPT OSS 120b__
 \\- \`gpt:\` mensagem \\- Gera texto com __GPT 5 mini__
 \\- \`llama:\` mensagem \\- Gera texto com o __Llama 4 Maverick__
 \\- \`polliImage:\` mensagem \\- Gera imagens com __Pollinations__
+\\- \`artaImage:\` mensagem \\- Gera imagens com __Arta__
 \\- \`polli:\` mensagem \\- Faz uma pergunta usando o modelo __Pollinations__
 \\- \`polliReasoning:\` mensagem \\- Faz uma pergunta usando o modelo __Pollinations Reasoning__
 

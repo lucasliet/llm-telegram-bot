@@ -10,3 +10,5 @@ export { handleGithubCopilot } from './GithubCopilotHandler.ts';
 export { handlePhind } from './PhindHandler.ts';
 export { handleOpenWebUI } from './OpenWebUIHandler.ts';
 export { handlePollinations } from './PollinationsHandler.ts';
+export { handleIsou } from './IsouHandler.ts';
+export { handleArta } from './ArtaHandler.ts';

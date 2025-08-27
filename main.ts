@@ -82,14 +82,22 @@ function registerBotCommands() {
 		(ctx) => TelegramService.callAdminModel(ctx, TelegramService.callPhindModel),
 	);
 	BOT.hears(
+		/^(isou):/gi,
+		(ctx) => TelegramService.callAdminModel(ctx, TelegramService.callIsouModel),
+	);
+	BOT.hears(
 		/^(pgpt|pgrok|po3|pclaude):/gi,
 		(ctx) => TelegramService.callAdminModel(ctx, TelegramService.callOpenWebUIModel),
 	);
 
-	BOT.hears(
-		/^(polli|polliReasoning|polliImage):/gi,
-		(ctx) => TelegramService.callAdminModel(ctx, TelegramService.callPollinationsModel),
-	);
+        BOT.hears(
+                /^(polli|polliReasoning|polliImage):/gi,
+                (ctx) => TelegramService.callAdminModel(ctx, TelegramService.callPollinationsModel),
+        );
+        BOT.hears(
+                /^(artaImage):/gi,
+                (ctx) => TelegramService.callAdminModel(ctx, TelegramService.callArtaModel),
+        );
 
 	BOT.hears(
 		new RegExp(`^(${modelCommands.join('|')})$`),

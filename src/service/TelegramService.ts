@@ -11,13 +11,15 @@ import {
 	handleDuckDuckGo,
 	handleGemini,
 	handleGithubCopilot,
-	handleOpenAI,
-	handleOpenRouter,
-	handlePerplexity,
-	handlePhind,
-	handlePuter,
-	handleOpenWebUI,
-	handlePollinations,
+        handleIsou,
+        handleOpenAI,
+        handleOpenRouter,
+        handleOpenWebUI,
+        handlePerplexity,
+        handlePhind,
+        handlePollinations,
+        handleArta,
+        handlePuter,
 } from '@/handlers/index.ts';
 
 import { FileUtils } from '@/util/FileUtils.ts';
@@ -103,7 +105,6 @@ export default {
 			});
 	},
 
-
 	/**
 	 * Retrieves and sends GitHub Copilot usage information to the user if the user is an admin.
 	 * @param ctx - The Telegram context.
@@ -151,10 +152,9 @@ Interações Premium:
 • *Overage permitido*: ${premium?.overage_permitted ? 'Sim' : 'Não'}
 • *Contador de overage*: ${premium?.overage_count ?? 0}`;
 
-			ctx.reply(formatted, {parse_mode: 'Markdown'})
+			ctx.reply(formatted, { parse_mode: 'Markdown' });
 		}
 	},
-
 
 	/**
 	 * Returns admin IDs if the requesting user is an admin
@@ -211,7 +211,7 @@ Interações Premium:
 			'/gpt5': () => handleGithubCopilot(ctx, `gpt5: ${message}`),
 			'/perplexity': () => handlePerplexity(ctx, `perplexity: ${message}`),
 			'/perplexityReasoning': () => handlePerplexity(ctx, `perplexityReasoning: ${message}`),
-			'/oss' : () => handleCloudflare(ctx, `oss: ${message}`),
+			'/oss': () => handleCloudflare(ctx, `oss: ${message}`),
 			'/llama': () => handleOpenRouter(ctx, `llama: ${message!}`),
 			// '/r1': () => handleBlackbox(ctx, `r1: ${message}`),
 			// '/r1online': () => handleBlackbox(ctx, `r1online: ${message}`),
@@ -224,6 +224,7 @@ Interações Premium:
 			'/o4mini': () => handleGithubCopilot(ctx, `o4mini: ${message}`),
 			// '/grok': () => handleBlackbox(ctx, `grok: ${message}`),
 			'/phind': () => handlePhind(ctx, `phind: ${message}`),
+			'/isou': () => handleIsou(ctx, `isou: ${message}`),
 			'/pplxgpt': () => handleOpenWebUI(ctx, `pgpt: ${message}`),
 			'/pplxgrok': () => handleOpenWebUI(ctx, `pgrok: ${message}`),
 			'/pplxclaude': () => handleOpenWebUI(ctx, `pclaude: ${message}`),
@@ -279,15 +280,22 @@ Interações Premium:
 		return handlePhind(ctx, commandMessage);
 	},
 
+	callIsouModel(ctx: Context, commandMessage?: string): Promise<void> {
+		return handleIsou(ctx, commandMessage);
+	},
+
 	callOpenWebUIModel(ctx: Context, commandMessage?: string): Promise<void> {
 		return handleOpenWebUI(ctx, commandMessage);
 	},
-	callGeminiModel(ctx: Context, commandMessage?: string): Promise<void> {
-		return handleGemini(ctx, commandMessage);
-	},
-	callPollinationsModel(ctx: Context, commandMessage?: string): Promise<void> {
-		return handlePollinations(ctx, commandMessage);
-	},
+        callGeminiModel(ctx: Context, commandMessage?: string): Promise<void> {
+                return handleGemini(ctx, commandMessage);
+        },
+        callPollinationsModel(ctx: Context, commandMessage?: string): Promise<void> {
+                return handlePollinations(ctx, commandMessage);
+        },
+        callArtaModel(ctx: Context, commandMessage?: string): Promise<void> {
+                return handleArta(ctx, commandMessage);
+        },
 };
 
 export const downloadTelegramFile = FileUtils.downloadTelegramFile;
@@ -315,7 +323,7 @@ export async function textToSpeech(
  * Retrieves Copilot usage information if the requesting user is an admin.
  * @param ctx - Telegram context.
  * @returns A promise that resolves to the Copilot usage data or an empty object if not authorized.
-	 */
+ */
 export async function getUsage() {
 	const url = 'https://api.github.com/copilot_internal/user';
 	const headers: Record<string, string> = {
@@ -331,7 +339,11 @@ export async function getUsage() {
 	const text = await res.text();
 	if (!res.ok) {
 		let body: any;
-		try { body = JSON.parse(text); } catch { body = text; }
+		try {
+			body = JSON.parse(text);
+		} catch {
+			body = text;
+		}
 		throw new Error(`Copilot API error ${res.status}: ${JSON.stringify(body)}`);
 	}
 
