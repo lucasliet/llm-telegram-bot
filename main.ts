@@ -82,6 +82,10 @@ function registerBotCommands() {
 		(ctx) => TelegramService.callAdminModel(ctx, TelegramService.callPhindModel),
 	);
 	BOT.hears(
+		/^(isou):/gi,
+		(ctx) => TelegramService.callAdminModel(ctx, TelegramService.callIsouModel),
+	);
+	BOT.hears(
 		/^(pgpt|pgrok|po3|pclaude):/gi,
 		(ctx) => TelegramService.callAdminModel(ctx, TelegramService.callOpenWebUIModel),
 	);

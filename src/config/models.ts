@@ -74,7 +74,7 @@ export const openWebUiModels = {
 	grok: 'pplx.grok-4-search',
 	o3: 'pplx.o3-search',
 	sonnetThinking: 'pplx.claude-4.0-sonnet-think-search',
-}
+};
 
 /**
  * Type definitions
@@ -103,7 +103,8 @@ export type ModelCommand =
 	| '/pplxo3'
 	| '/pplxclaude'
 	| '/polli'
-	| '/polliReasoning';
+	| '/polliReasoning'
+	| '/isou';
 
 /**
  * Available model commands
@@ -133,6 +134,7 @@ export const modelCommands: ModelCommand[] = [
 	'/pplxclaude',
 	'/polli',
 	'/polliReasoning',
+	'/isou',
 ];
 
 export const WHITELISTED_MODELS: ModelCommand[] = [
@@ -149,4 +151,5 @@ export const WHITELISTED_MODELS: ModelCommand[] = [
 	'/phind',
 	'/polli',
 	'/polliReasoning',
+	'/isou',
 ];
