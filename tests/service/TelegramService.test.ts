@@ -2,7 +2,8 @@ import { assertEquals } from 'asserts';
 import { spy } from 'mock';
 import { assertSpyCalls, createMockContext, MockContext, mockDenoEnv } from '../test_helpers.ts';
 
-import { ModelCommand, modelCommands, WHITELISTED_MODELS } from '../../src/config/models.ts';
+import type { ModelCommand } from '../../src/config/models.ts';
+import { modelCommands, WHITELISTED_MODELS } from '../../src/config/models.ts';
 
 Deno.test('TelegramService', async (t) => {
 	mockDenoEnv({
@@ -129,12 +130,29 @@ Deno.test('TelegramService', async (t) => {
 
 	await t.step('setCurrentModel should enforce whitelist for non-admin users', async () => {
 		const nonAdmin = 99999;
+		assertEquals(
+			WHITELISTED_MODELS.every((m) => modelCommands.includes(m)),
+			true,
+			'WHITELISTED_MODELS deve ser subconjunto de modelCommands',
+		);
+		assertEquals(
+			new Set(WHITELISTED_MODELS).size,
+			WHITELISTED_MODELS.length,
+			'WHITELISTED_MODELS não deve conter duplicatas',
+		);
 		for (const model of WHITELISTED_MODELS) {
 			mockKv.set = spy(() => Promise.resolve({ ok: true }));
 			const ctx = createMockContext({ userId: nonAdmin, message: model });
 			await originalSetCurrentModel(ctx as any);
 			assertSpyCalls(mockKv.set, 1);
 			assertSpyCalls(ctx.reply, 1);
+			const expectedKey = [`user:${nonAdmin}`, 'current_model'];
+			assertEquals(mockKv.set.calls[0].args[0], expectedKey);
+			assertEquals(mockKv.set.calls[0].args[1], model);
+			assertEquals(
+				ctx.reply.calls[0].args[0],
+				`Novo modelo de inteligência escolhido: ${model}`,
+			);
 		}
 		const disallowed = modelCommands.filter((m) => !WHITELISTED_MODELS.includes(m));
 		for (const model of disallowed) {
