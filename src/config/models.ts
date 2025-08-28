@@ -27,6 +27,10 @@ export const cloudflareModels = {
 	sttModel: '@cf/openai/whisper-large-v3-turbo',
 };
 
+export const codexModels = {
+	textModel: 'gpt-5',
+};
+
 export const blackboxModels = {
 	reasoningModel: 'deepseek-reasoner|DeepSeek-R1',
 	reasoningModelOnline: 'deepseek-reasoner|DeepSeek-R1',
@@ -86,6 +90,7 @@ export type ModelCommand =
 	| '/oss'
 	| '/gpt'
 	| '/gpt5'
+	| '/codex'
 	| '/perplexity'
 	| '/perplexityReasoning'
 	// | '/r1'
@@ -116,6 +121,7 @@ export const modelCommands: ModelCommand[] = [
 	'/oss',
 	'/gpt',
 	'/gpt5',
+	'/codex',
 	'/perplexity',
 	'/perplexityReasoning',
 	// '/r1',
@@ -141,6 +147,7 @@ export const WHITELISTED_MODELS: ModelCommand[] = [
 	'/llama',
 	'/oss',
 	'/gpt',
+	'/codex',
 	// '/r1online',
 	// '/r1',
 	// '/qwen',

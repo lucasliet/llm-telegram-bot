@@ -20,6 +20,7 @@ import {
         handlePollinations,
         handleArta,
         handlePuter,
+        handleCodex,
 } from '@/handlers/index.ts';
 
 import { FileUtils } from '@/util/FileUtils.ts';
@@ -209,6 +210,7 @@ Interações Premium:
 		const modelHandlers: Record<ModelCommand, () => Promise<void>> = {
 			'/gpt': () => handleGithubCopilot(ctx, `gpt: ${message}`),
 			'/gpt5': () => handleGithubCopilot(ctx, `gpt5: ${message}`),
+			'/codex': () => handleCodex(ctx, `codex: ${message}`),
 			'/perplexity': () => handlePerplexity(ctx, `perplexity: ${message}`),
 			'/perplexityReasoning': () => handlePerplexity(ctx, `perplexityReasoning: ${message}`),
 			'/oss': () => handleCloudflare(ctx, `oss: ${message}`),
@@ -249,7 +251,8 @@ Interações Premium:
 	},
 
 	callOpenAIModel(ctx: Context, commandMessage?: string): Promise<void> {
-		return handleOpenAI(ctx, commandMessage);
+		const fn = (globalThis as any).handleOpenAI || handleOpenAI;
+		return fn(ctx, commandMessage);
 	},
 
 	callCloudflareModel(ctx: Context, commandMessage?: string): Promise<void> {
@@ -274,6 +277,10 @@ Interações Premium:
 
 	callGithubCopilotModel(ctx: Context, commandMessage?: string): Promise<void> {
 		return handleGithubCopilot(ctx, commandMessage);
+	},
+
+	callCodexModel(ctx: Context, commandMessage?: string): Promise<void> {
+		return handleCodex(ctx, commandMessage);
 	},
 
 	callPhindModel(ctx: Context, commandMessage?: string): Promise<void> {

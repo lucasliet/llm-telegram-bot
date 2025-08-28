@@ -53,6 +53,11 @@ function registerBotCommands() {
 		/^(oss|cloudflareImage):/gi,
 		(ctx) => TelegramService.callAdminModel(ctx, TelegramService.callCloudflareModel),
 	);
+
+	BOT.hears(
+		/^(codex):/gi,
+		(ctx) => TelegramService.callAdminModel(ctx, TelegramService.callCodexModel),
+	);
 	BOT.hears(
 		/^(perplexity|reasonSearch|search):/gi,
 		(ctx) => TelegramService.callAdminModel(ctx, TelegramService.callPerplexityModel),

@@ -4,24 +4,28 @@ import { InlineKeyboard } from 'grammy';
  * Helper command buttons for inline keyboard - Admin version (all models)
  */
 const adminCommandButtons = [
-	[['Modelo Atual', '/currentmodel']],
-	[
-		['Llama 4 Maverick', '/llama'],
-		['Phind', '/phind'],
-		['Isou', '/isou'],
-	],
-	[
-		['Copilot GPT 5 Mini', '/gpt'],
-		['Copilot GPT o4 Mini', '/o4mini'],
-	],
-	[
-		['Copilot GPT 5', '/gpt5'],
-		['Copilot Sonnet 4', '/claude'],
-	],
-	[
-		// ['Grok 3', '/grok'],
-		// ['GPT o3 Mini', '/o3mini'],
-	],
+    [['Modelo Atual', '/currentmodel']],
+    [
+        ['Llama 4 Maverick', '/llama'],
+        ['Phind', '/phind'],
+        ['Isou', '/isou'],
+    ],
+    [
+        ['Copilot GPT 5 Mini', '/gpt'],
+        ['Copilot GPT o4 Mini', '/o4mini'],
+    ],
+    [
+        ['Copilot GPT 5', '/gpt5'],
+        ['Copilot Sonnet 4', '/claude'],
+    ],
+    [
+        ['Codex', '/codex'],
+        ['GPT OSS 120b', '/oss'],
+    ],
+    [
+        // ['Grok 3', '/grok'],
+        // ['GPT o3 Mini', '/o3mini'],
+    ],
 	[
 		// ['Deepseek R1', '/r1'],
 		// ['Gemini 2.5 Pro', '/geminiPro'],
@@ -42,11 +46,10 @@ const adminCommandButtons = [
 		['PPLX GPT 5', '/pplxgpt'],
 		['PPLX Grok 4', '/pplxgrok'],
 	],
-	[
-		['PPLX Sonnet 4', '/pplxclaude'],
-		['GPT OSS 120b', '/oss'],
-	],
-	[['Limpar Histórico', '/clear']],
+    [
+        ['PPLX Sonnet 4', '/pplxclaude'],
+    ],
+    [['Limpar Histórico', '/clear']],
 ];
 
 /**
@@ -95,6 +98,7 @@ export const adminHelpMessage = `*Comandos inline*:
 \\- \`polliImage:\` mensagem \\- Gera imagens com __Pollinations__
 \\- \`artaImage:\` mensagem \\- Gera imagens com __Arta__
 \\- \`oss:\` mensagem \\- Faz uma pergunta usando o modelo de codigo aberto__GPT OSS 120b__
+\\- \`codex:\` mensagem \\- Faz uma pergunta usando o provedor __Codex__
 \\- \`gpt:\` mensagem \\- Gera texto com __GPT 5 mini__
 \\- \`gpt5:\` mensagem \\- Gera texto com __GPT 5__
 \\- \`llama:\` mensagem \\- Gera texto com o __Llama 4 Maverick__

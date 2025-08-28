@@ -1,5 +1,4 @@
 import OpenAi from 'npm:openai';
-import ToolService from '@/service/ToolService.ts';
 
 const TEXT_DECODER = new TextDecoder();
 const TEXT_ENCODER = new TextEncoder();
@@ -18,27 +17,30 @@ export type ToolCall = {
 export function mapChatToolsToResponsesTools(
   tools?: OpenAi.Chat.Completions.ChatCompletionTool[],
 ): OpenAi.Responses.Tool[] {
-  if (!tools || tools.length === 0) return [];
+  if (!tools || tools.length === 0) {
+    return [];
+  }
 
-  return tools.map((t) => {
+  return tools.map((t): OpenAi.Responses.Tool => {
     if (t.type === 'function' && t.function) {
+      const params = t.function.parameters || {};
+      const props = params.properties || {};
+      const required = Object.keys(props);
       return {
         type: 'function',
         name: t.function.name,
         description: t.function.description ?? '',
-        parameters: t.function.parameters,
+        parameters: {
+          type: 'object',
+          additionalProperties: false,
+          ...params,
+          properties: props,
+          required,
+        },
         strict: (t as any).strict ?? true,
       } as OpenAi.Responses.Tool;
     }
-
-    // fallback minimal mapping (preserve type and strict if available)
-    return {
-      type: (t as any).type ?? 'function',
-      name: (t as any).name ?? 'unknown_tool',
-      description: (t as any).description ?? '',
-      parameters: (t as any).parameters ?? undefined,
-      strict: (t as any).strict ?? false,
-    } as OpenAi.Responses.Tool;
+    throw new Error('Unsupported tool type');
   });
 }
 
