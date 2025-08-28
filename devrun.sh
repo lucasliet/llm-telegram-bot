@@ -38,11 +38,9 @@ if command -v jq >/dev/null 2>&1 && [ -f "$HOME/.codex/auth.json" ]; then
   CODEX_ACCOUNT=$(jq -r '.tokens.account_id' "$HOME/.codex/auth.json")
   if [ -n "$CODEX_ACCESS" ] && [ "$CODEX_ACCESS" != "null" ]; then
     export CODEX_ACCESS_TOKEN="$CODEX_ACCESS"
-    export ACCESS_TOKEN=${ACCESS_TOKEN:-$CODEX_ACCESS}
   fi
   if [ -n "$CODEX_ACCOUNT" ] && [ "$CODEX_ACCOUNT" != "null" ]; then
     export CODEX_ACCOUNT_ID="$CODEX_ACCOUNT"
-    export ACCOUNT_ID=${ACCOUNT_ID:-$CODEX_ACCOUNT}
   fi
 fi
 

@@ -1,6 +1,6 @@
 import OpenAi from 'npm:openai';
-import { XMLParser } from "npm:fast-xml-parser";
-import { parse } from "npm:node-html-parser";
+import { XMLParser } from 'npm:fast-xml-parser';
+import { parse } from 'npm:node-html-parser';
 /**
  * Represents a search result from SearxNG.
  */
@@ -13,8 +13,8 @@ export interface SearxResult {
 }
 
 /**
-	* Represents a segment of a YouTube transcript.
-	*/
+ * Represents a segment of a YouTube transcript.
+ */
 interface YouTubeTranscriptSegment {
 	text: string;
 	startInMs: number;
@@ -70,8 +70,7 @@ export default class ToolService {
 					'Pragma': 'no-cache',
 				};
 
-				const buildUrl = (baseUrl: string) =>
-					`${baseUrl}/search?${new URLSearchParams({ q: query, format: 'json', language: 'pt-BR' }).toString()}`;
+				const buildUrl = (baseUrl: string) => `${baseUrl}/search?${new URLSearchParams({ q: query, format: 'json', language: 'pt-BR' }).toString()}`;
 
 				const fetchJson = async (url: string) => {
 					const res = await fetch(url, { headers });
@@ -146,7 +145,7 @@ export default class ToolService {
 					const html = await response.text();
 					const root = parse(html);
 					try {
-						const body = root.getElementsByTagName("body")[0];
+						const body = root.getElementsByTagName('body')[0];
 						return body.children.filter((child) => child.tagName !== 'script')
 							.map((child) => child.text.trim().replace(/\s+/g, ' ')).join(' ');
 					} catch {
@@ -197,7 +196,11 @@ export default class ToolService {
 				const text = await res.text();
 				if (!res.ok) {
 					let body: any;
-					try { body = JSON.parse(text); } catch { body = text; }
+					try {
+						body = JSON.parse(text);
+					} catch {
+						body = text;
+					}
 					throw new Error(`Copilot API error ${res.status}: ${JSON.stringify(body)}`);
 				}
 
@@ -213,7 +216,8 @@ export default class ToolService {
 				type: 'function',
 				function: {
 					name: 'transcript_yt',
-					description: 'Busca a transcrição de um vídeo do YouTube a partir de sua URL., pode ser utilizado para responder perguntas sobre qualquer vídeo com "youtube" na URL',
+					description:
+						'Busca a transcrição de um vídeo do YouTube a partir de sua URL., pode ser utilizado para responder perguntas sobre qualquer vídeo com "youtube" na URL',
 					parameters: {
 						type: 'object',
 						properties: {
@@ -234,13 +238,13 @@ export default class ToolService {
 				},
 			},
 			/**
-			* Busca a transcrição de um vídeo do YouTube a partir de sua URL.
-			* pode ser utilizado para responder perguntas sobre qualquer vídeo com "youtube" na URL'
-			* @param args - Objeto contendo os parâmetros.
-			* @param args.videoUrl - A URL completa do vídeo do YouTube.
-			* @param args.preferredLanguages - (Opcional) Uma lista de códigos de idioma preferenciais (ex: ['pt-BR', 'en']).
-			* @returns Uma promessa que resolve para um array de objetos de transcrição ou null se a transcrição não for encontrada ou ocorrer um erro.
-			*/
+			 * Busca a transcrição de um vídeo do YouTube a partir de sua URL.
+			 * pode ser utilizado para responder perguntas sobre qualquer vídeo com "youtube" na URL'
+			 * @param args - Objeto contendo os parâmetros.
+			 * @param args.videoUrl - A URL completa do vídeo do YouTube.
+			 * @param args.preferredLanguages - (Opcional) Uma lista de códigos de idioma preferenciais (ex: ['pt-BR', 'en']).
+			 * @returns Uma promessa que resolve para um array de objetos de transcrição ou null se a transcrição não for encontrada ou ocorrer um erro.
+			 */
 			fn: async (args: { videoUrl: string; preferredLanguages?: string[] }): Promise<YouTubeTranscriptSegment[] | null> => {
 				const extractVideoId = (url: string): string | null => {
 					const match = url.match(/(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/(?:watch\?v=|embed\/|v\/)|youtu\.be\/)([\w-]{11})/);
@@ -257,7 +261,7 @@ export default class ToolService {
 				};
 				const chooseTrack = (tracks: any[], langs?: string[]): { url: string; lang: string } | null => {
 					for (const lang of langs || []) {
-						const t = tracks.find(t => t.languageCode.startsWith(lang) && t.baseUrl);
+						const t = tracks.find((t) => t.languageCode.startsWith(lang) && t.baseUrl);
 						if (t) return { url: `${t.baseUrl}&fmt=srv3`, lang: t.languageCode };
 					}
 					const first = tracks[0];
@@ -267,7 +271,7 @@ export default class ToolService {
 					const parser = new XMLParser({ ignoreAttributes: false, attributeNamePrefix: '@_', trimValues: false });
 					const body = parser.parse(xml)?.timedtext?.body?.p || [];
 					const items = Array.isArray(body) ? body : [body];
-					return items.flatMap(p => {
+					return items.flatMap((p) => {
 						const start = Number(p['@_t'] || 0);
 						const duration = Number(p['@_d'] || 0);
 						const texts = p.s ? (Array.isArray(p.s) ? p.s : [p.s]).map((s: any) => typeof s === 'string' ? s : s['#text'] || '') : [p['#text'] || ''];
@@ -279,7 +283,7 @@ export default class ToolService {
 					if (!id) {
 						console.error('Invalid YouTube URL');
 						return null;
-					};
+					}
 					console.log(`Fetching video ID: ${id}`);
 					const html = await fetchText(args.videoUrl, { 'Accept-Language': 'en-US,en;q=0.9' });
 					const player = parsePlayerResponse(html);
@@ -287,20 +291,20 @@ export default class ToolService {
 					if (!tracks.length) {
 						console.error('No captions found');
 						return null;
-					};
-					console.debug('tracks url:', tracks.map(t => ({[t.languageCode]: t.baseUrl})))
+					}
+					console.debug('tracks url:', tracks.map((t) => ({ [t.languageCode]: t.baseUrl })));
 					const track = chooseTrack(tracks, args.preferredLanguages);
 					if (!track) {
 						console.error('No suitable track found');
 						return null;
-					};
+					}
 					const xml = await fetchText(track.url);
-					console.log('parsing segments from track url:', track.url, xml)
+					console.log('parsing segments from track url:', track.url, xml);
 					const segments = parseSegments(xml);
 					if (!segments.length) {
 						console.error('No segments found');
 						return null;
-					};
+					}
 					return segments;
 				} catch {
 					return null;

@@ -1,5 +1,5 @@
-import { streamText, CoreMessage } from 'npm:ai';
-import { createGoogleGenerativeAI, GoogleGenerativeAIProvider } from "npm:@ai-sdk/google";
+import { CoreMessage, streamText } from 'npm:ai';
+import { createGoogleGenerativeAI, GoogleGenerativeAIProvider } from 'npm:@ai-sdk/google';
 
 import { ExpirableContent, getChatHistory } from '@/repository/ChatRepository.ts';
 import { addContentToChatHistory } from '@/repository/ChatRepository.ts';
@@ -82,7 +82,7 @@ export default class GeminiService {
 	private static _mapOpenAiHistoryToCoreMessages(
 		openAiHistory: OpenAI.ChatCompletionMessageParam[],
 	): CoreMessage[] {
-		return openAiHistory.map(msg => {
+		return openAiHistory.map((msg) => {
 			const role: 'user' | 'assistant' = msg.role === 'assistant' ? 'assistant' : 'user';
 			return {
 				role,

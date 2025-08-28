@@ -20,10 +20,10 @@ export async function handleGemini(ctx: Context, commandMessage?: string): Promi
 	const message = commandMessage || contextMessage;
 
 	const command = message?.split(':')[0]?.toLowerCase() || 'none';
-	
+
 	const model = modelMap[command as keyof typeof modelMap];
 
-	const prompt = (message || caption)?.replace(`${command}:`, '')
+	const prompt = (message || caption)?.replace(`${command}:`, '');
 
 	const geminiService = new GeminiService(model);
 

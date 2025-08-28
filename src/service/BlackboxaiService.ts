@@ -77,7 +77,7 @@ export default {
 			undefined,
 			model,
 			modelId,
-			modelName
+			modelName,
 		);
 
 		const onComplete = (completedAnswer: string) =>
@@ -161,8 +161,8 @@ function generateFollowupResponse(
 	modelName: string,
 ): Promise<ReadableStreamDefaultReader<Uint8Array>> {
 	return fetchResponse(messages, model, modelId, modelName)
-		.then(r => r.body!.getReader())
-		.then(reader => ToolUsageAdapter.mapResponse(reader, true))
+		.then((r) => r.body!.getReader())
+		.then((reader) => ToolUsageAdapter.mapResponse(reader, true));
 }
 
 const firstNames = [

@@ -7,14 +7,14 @@ import ArtaService from '@/service/ArtaService.ts';
  * @param commandMessage - Optional command message override
  */
 export async function handleArta(
-    ctx: Context,
-    commandMessage?: string,
+	ctx: Context,
+	commandMessage?: string,
 ): Promise<void> {
-    const { contextMessage } = await ctx.extractContextKeys();
-    const message = commandMessage || contextMessage;
-    const prompt = message?.replace(/^artaImage:/i, '').trim();
-    if (!prompt) return;
+	const { contextMessage } = await ctx.extractContextKeys();
+	const message = commandMessage || contextMessage;
+	const prompt = message?.replace(/^artaImage:/i, '').trim();
+	if (!prompt) return;
 
-    const imageUrl = await ArtaService.generateImage(prompt);
-    await ctx.replyWithPhoto(imageUrl);
+	const imageUrl = await ArtaService.generateImage(prompt);
+	await ctx.replyWithPhoto(imageUrl);
 }

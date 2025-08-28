@@ -51,7 +51,7 @@ class TokenManager {
 		}
 
 		const data = await response.json();
-		
+
 		if (data.expires_at) {
 			const expiresAt = data.expires_at * 1000;
 			const now = Date.now();
@@ -65,7 +65,7 @@ class TokenManager {
 			console.log('No expiration info, token will not be cached');
 			this.cache = null;
 		}
-		
+
 		return data.token;
 	}
 
@@ -125,7 +125,7 @@ export default class GithubCopilotService extends OpenAiService {
 		userKey: string,
 		quote: string | undefined,
 		photosUrl: Promise<string>[],
-		prompt: string
+		prompt: string,
 	): Promise<StreamReplyResponse> {
 		await this.ensureAuthenticated();
 		return super.generateTextFromImage(

@@ -54,10 +54,7 @@ export default {
 
 	async generateImage(prompt: string): Promise<string> {
 		const encodedPrompt = encodeURIComponent(prompt);
-		const url =
-			`https://image.pollinations.ai/prompt/${encodedPrompt}?width=720&height=1280&seed=${ 
-				Math.floor(Math.random() * 1000000)
-			}
+		const url = `https://image.pollinations.ai/prompt/${encodedPrompt}?width=720&height=1280&seed=${Math.floor(Math.random() * 1000000)}
 &enhance=true&nologo=true&model=flux`;
 
 		return url;

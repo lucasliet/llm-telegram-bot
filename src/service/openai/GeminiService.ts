@@ -15,11 +15,7 @@ export default class GeminiService extends OpenAiService {
 		);
 	}
 
-	override generateTextFromImage(userKey: string,
-		quote: string | undefined,
-		photosUrl: Promise<string>[],
-		prompt: string
-	): Promise<StreamReplyResponse> {
+	override generateTextFromImage(userKey: string, quote: string | undefined, photosUrl: Promise<string>[], prompt: string): Promise<StreamReplyResponse> {
 		return super.generateTextFromImage(
 			userKey,
 			quote,

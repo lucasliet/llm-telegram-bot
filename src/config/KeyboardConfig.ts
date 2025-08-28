@@ -4,28 +4,28 @@ import { InlineKeyboard } from 'grammy';
  * Helper command buttons for inline keyboard - Admin version (all models)
  */
 const adminCommandButtons = [
-    [['Modelo Atual', '/currentmodel']],
-    [
-        ['Llama 4 Maverick', '/llama'],
-        ['Phind', '/phind'],
-        ['Isou', '/isou'],
-    ],
-    [
-        ['Copilot GPT 5 Mini', '/gpt'],
-        ['Copilot GPT o4 Mini', '/o4mini'],
-    ],
-    [
-        ['Copilot GPT 5', '/gpt5'],
-        ['Copilot Sonnet 4', '/claude'],
-    ],
-    [
-        ['Codex', '/codex'],
-        ['GPT OSS 120b', '/oss'],
-    ],
-    [
-        // ['Grok 3', '/grok'],
-        // ['GPT o3 Mini', '/o3mini'],
-    ],
+	[['Modelo Atual', '/currentmodel']],
+	[
+		['Llama 4 Maverick', '/llama'],
+		['Phind', '/phind'],
+		['Isou', '/isou'],
+	],
+	[
+		['Copilot GPT 5 Mini', '/gpt'],
+		['Copilot GPT o4 Mini', '/o4mini'],
+	],
+	[
+		['Copilot GPT 5', '/gpt5'],
+		['Copilot Sonnet 4', '/claude'],
+	],
+	[
+		['Codex', '/codex'],
+		['GPT OSS 120b', '/oss'],
+	],
+	[
+		// ['Grok 3', '/grok'],
+		// ['GPT o3 Mini', '/o3mini'],
+	],
 	[
 		// ['Deepseek R1', '/r1'],
 		// ['Gemini 2.5 Pro', '/geminiPro'],
@@ -46,10 +46,10 @@ const adminCommandButtons = [
 		['PPLX GPT 5', '/pplxgpt'],
 		['PPLX Grok 4', '/pplxgrok'],
 	],
-    [
-        ['PPLX Sonnet 4', '/pplxclaude'],
-    ],
-    [['Limpar Histórico', '/clear']],
+	[
+		['PPLX Sonnet 4', '/pplxclaude'],
+	],
+	[['Limpar Histórico', '/clear']],
 ];
 
 /**

@@ -65,7 +65,7 @@ export default class OpenAiService {
 				},
 			],
 			max_tokens: this.maxTokens,
-			stream: true
+			stream: true,
 		});
 
 		const reader = completion.toReadableStream().getReader() as ReadableStreamDefaultReader<Uint8Array>;
@@ -244,8 +244,9 @@ async function readInitialStreamAndExtract(
 				}
 
 				try {
-					if (!tool_calls[index].function.arguments || JSON.parse(tool_calls[index].function.arguments))
+					if (!tool_calls[index].function.arguments || JSON.parse(tool_calls[index].function.arguments)) {
 						JSON.parse(call.function.arguments);
+					}
 					tool_calls[index].function.arguments = call.function.arguments;
 				} catch {
 					tool_calls[index].function.arguments += call.function.arguments;
@@ -334,7 +335,7 @@ function generateFollowupResponse(
 		messages,
 		stream: true,
 		max_tokens: maxTokens,
-	}).then(r => r.toReadableStream().getReader() as ReadableStreamDefaultReader<Uint8Array>);
+	}).then((r) => r.toReadableStream().getReader() as ReadableStreamDefaultReader<Uint8Array>);
 }
 
 function getImageBase64String(
@@ -356,7 +357,7 @@ function getImageBase64String(
 			const ext = extension.slice(1).toLowerCase();
 			const mimeType = ext && ext !== 'jpg' ? `image/${ext}` : 'image/jpeg';
 
-			console.log(mimeType)
+			console.log(mimeType);
 
 			return `data:${mimeType};base64,${base64String}`;
 		} catch (e) {

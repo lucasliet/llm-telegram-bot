@@ -64,7 +64,7 @@ export async function handleBlackbox(
 			userKey,
 			quote,
 			'max_token limit this answer to 500 characters, it will be converted to limited voice message: ' +
-			prompt,
+				prompt,
 			blackboxModels.gptModel,
 		);
 

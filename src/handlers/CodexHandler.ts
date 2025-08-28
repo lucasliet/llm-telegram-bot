@@ -7,28 +7,27 @@ import CodexService from '@/service/CodexService.ts';
  * @param commandMessage - Optional command override
  */
 export async function handleCodex(
-  ctx: Context,
-  commandMessage?: string,
+	ctx: Context,
+	commandMessage?: string,
 ): Promise<void> {
-  const { userKey, contextMessage, photos, caption, quote } = await ctx.extractContextKeys();
+	const { userKey, contextMessage, photos, caption, quote } = await ctx.extractContextKeys();
 
-  const message = commandMessage || contextMessage;
+	const message = commandMessage || contextMessage;
 
-  if (photos && caption) {
-    await ctx.replyWithVisionNotSupportedByModel();
-    return;
-  }
+	if (photos && caption) {
+		await ctx.replyWithVisionNotSupportedByModel();
+		return;
+	}
 
-  const command = message?.split(':')[0]?.toLowerCase() || 'codex';
+	const command = message?.split(':')[0]?.toLowerCase() || 'codex';
 
-  const text = message!.replace(`${command}:`, '');
+	const text = message!.replace(`${command}:`, '');
 
-  const { reader, onComplete } = await CodexService.generateText(
-    userKey,
-    quote,
-    text,
-  );
+	const { reader, onComplete, responseMap } = await CodexService.generateText(
+		userKey,
+		quote,
+		text,
+	);
 
-  ctx.streamReply(reader, onComplete);
+	ctx.streamReply(reader, onComplete, responseMap);
 }
-

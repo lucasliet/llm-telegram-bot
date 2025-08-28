@@ -158,7 +158,7 @@ Context.prototype.streamReply = async function (
 	let sanitizedResult = result.removeThinkingChatCompletion()
 		.convertBlackBoxWebSearchSourcesToMarkdown();
 
-	if(sanitizedResult.length > 4093) {
+	if (sanitizedResult.length > 4093) {
 		const remainingChunk = sanitizedResult.substring(4093);
 		sanitizedResult = sanitizedResult.substring(0, 4093) + '...';
 		this.replyInChunks(remainingChunk);

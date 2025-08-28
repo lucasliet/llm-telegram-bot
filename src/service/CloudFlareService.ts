@@ -1,7 +1,6 @@
 import OpenAi from 'npm:openai';
 import { addContentToChatHistory, getChatHistory } from '@/repository/ChatRepository.ts';
-import { convertGeminiHistoryToGPT, getSystemPrompt, StreamReplyResponse } from '@/util/ChatConfigUtil.ts';
-import ResponsesToolAdapter from '@/adapter/ResponsesToolAdapter.ts';
+import { convertGeminiHistoryToGPT, getSystemPrompt, mapChatToolsToResponsesTools, StreamReplyResponse } from '@/util/ChatConfigUtil.ts';
 import ToolService from '@/service/ToolService.ts';
 import { cloudflareModels } from '@/config/models.ts';
 import { downloadTelegramFile } from './TelegramService.ts';
@@ -113,7 +112,7 @@ export default {
 			{ role: 'user', content: requestPrompt },
 		];
 
-		const tools = ResponsesToolAdapter.mapChatToolsToResponsesTools(ToolService.schemas);
+		const tools = mapChatToolsToResponsesTools(ToolService.schemas);
 
 		const apiResponse = await fetch(
 			`https://api.cloudflare.com/client/v4/accounts/${CLOUDFLARE_ACCOUNT_ID}/ai/v1/responses`,
@@ -140,7 +139,7 @@ export default {
 			initialReader,
 			messages,
 			responseMap,
-			model
+			model,
 		);
 
 		const onComplete = (completedAnswer: string) =>
@@ -270,7 +269,7 @@ function escapeMessageQuotes(message: string): string {
  * @returns Extracted text content
  */
 function responseMap(responseBody: string): string {
-	type ResponseContent = { text?: string; type?: string;[key: string]: unknown };
+	type ResponseContent = { text?: string; type?: string; [key: string]: unknown };
 	type OutputItem = { id?: string; type?: string; content?: ResponseContent[] };
 
 	let output: OutputItem[] | undefined;
@@ -290,14 +289,13 @@ function responseMap(responseBody: string): string {
 			.filter(Boolean)
 			.join('\n') ?? '';
 
-		if (reasoning) console.log('Reasoning: ', reasoning)
+		if (reasoning) console.log('Reasoning: ', reasoning);
 
-		return message || responseBody
+		return message || responseBody;
 	} catch {
 		return '';
 	}
 }
-
 
 /**
  * Generates a follow-up response from the Cloudflare AI API.

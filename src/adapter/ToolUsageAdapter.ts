@@ -146,9 +146,9 @@ export class ToolUsageAdapter {
 	): OpenAi.Chat.Completions.ChatCompletionAssistantMessageParam {
 		const toolCallId = message.tool_call_id;
 		const toolResult = message.content;
-		const formattedContent =
-			`This was the result of the tool call with ID ${toolCallId}, I will use it to formulate my next response: \`\`\`json\n${JSON.stringify(toolResult)
-			}\n\`\`\``;
+		const formattedContent = `This was the result of the tool call with ID ${toolCallId}, I will use it to formulate my next response: \`\`\`json\n${
+			JSON.stringify(toolResult)
+		}\n\`\`\``;
 		return {
 			role: 'assistant',
 			content: formattedContent,
@@ -222,9 +222,7 @@ export class ToolUsageAdapter {
 		messages: OpenAi.Chat.Completions.ChatCompletionMessageParam[],
 		toolOptions?: ToolOptions,
 	): OpenAi.Chat.Completions.ChatCompletionMessageParam[] {
-		const modifiedMessages = messages.map((message) =>
-			message.role === 'tool' ? this._convertToolRoleMessage(message) : message
-		);
+		const modifiedMessages = messages.map((message) => message.role === 'tool' ? this._convertToolRoleMessage(message) : message);
 
 		const lastUserMessageIndex = modifiedMessages.findLastIndex(
 			(message) => message.role === 'user',
@@ -236,9 +234,7 @@ export class ToolUsageAdapter {
 				const lastUserMessage = modifiedMessages[lastUserMessageIndex];
 				const originalContent = typeof lastUserMessage.content === 'string'
 					? lastUserMessage.content
-					: (Array.isArray(lastUserMessage.content)
-						? lastUserMessage.content.map(part => part.type === 'text' ? part.text : '').join('')
-						: '');
+					: (Array.isArray(lastUserMessage.content) ? lastUserMessage.content.map((part) => part.type === 'text' ? part.text : '').join('') : '');
 
 				modifiedMessages[lastUserMessageIndex] = {
 					...lastUserMessage,
@@ -288,9 +284,7 @@ export class ToolUsageAdapter {
 
 						if (!mappedText && !(formatAsOpenAIChunk && mappedText === '')) continue;
 
-						const outputChunk = formatAsOpenAIChunk
-							? ToolUsageAdapter._createOpenAIStreamChunk(mappedText)
-							: mappedText;
+						const outputChunk = formatAsOpenAIChunk ? ToolUsageAdapter._createOpenAIStreamChunk(mappedText) : mappedText;
 
 						controller.enqueue(TEXT_ENCODER.encode(outputChunk));
 					}
@@ -339,21 +333,17 @@ export class ToolUsageAdapter {
 					(Array.isArray(data.output) && data.output.some((item: any) => item?.type === 'function_call'))
 				) {
 					processed = true;
-					const extractedToolCalls: ToolCall[] =
-						data[TOOL_CALL_ADAPTER_KEY] ||
+					const extractedToolCalls: ToolCall[] = data[TOOL_CALL_ADAPTER_KEY] ||
 						(Array.isArray(data.output) ? data.output.filter((item: any) => item?.type === 'function_call') : []);
 
 					toolCalls = extractedToolCalls.map((call: any, index) => ({
 						index: index,
 						id: call.id,
 						type: call.type,
-						function:
-							call.function ||
+						function: call.function ||
 							{
 								name: call.name,
-								arguments: typeof call.arguments === 'string'
-									? call.arguments
-									: JSON.stringify(call.arguments ?? {}),
+								arguments: typeof call.arguments === 'string' ? call.arguments : JSON.stringify(call.arguments ?? {}),
 							},
 					}));
 

@@ -6,21 +6,21 @@ import { getCurrentModel, setCurrentModel } from '@/repository/ChatRepository.ts
 import { ModelCommand, modelCommands, WHITELISTED_MODELS } from '@/config/models.ts';
 
 import {
+	handleArta,
 	handleBlackbox,
 	handleCloudflare,
+	handleCodex,
 	handleDuckDuckGo,
 	handleGemini,
 	handleGithubCopilot,
-        handleIsou,
-        handleOpenAI,
-        handleOpenRouter,
-        handleOpenWebUI,
-        handlePerplexity,
-        handlePhind,
-        handlePollinations,
-        handleArta,
-        handlePuter,
-        handleCodex,
+	handleIsou,
+	handleOpenAI,
+	handleOpenRouter,
+	handleOpenWebUI,
+	handlePerplexity,
+	handlePhind,
+	handlePollinations,
+	handlePuter,
 } from '@/handlers/index.ts';
 
 import { FileUtils } from '@/util/FileUtils.ts';
@@ -294,15 +294,15 @@ Interações Premium:
 	callOpenWebUIModel(ctx: Context, commandMessage?: string): Promise<void> {
 		return handleOpenWebUI(ctx, commandMessage);
 	},
-        callGeminiModel(ctx: Context, commandMessage?: string): Promise<void> {
-                return handleGemini(ctx, commandMessage);
-        },
-        callPollinationsModel(ctx: Context, commandMessage?: string): Promise<void> {
-                return handlePollinations(ctx, commandMessage);
-        },
-        callArtaModel(ctx: Context, commandMessage?: string): Promise<void> {
-                return handleArta(ctx, commandMessage);
-        },
+	callGeminiModel(ctx: Context, commandMessage?: string): Promise<void> {
+		return handleGemini(ctx, commandMessage);
+	},
+	callPollinationsModel(ctx: Context, commandMessage?: string): Promise<void> {
+		return handlePollinations(ctx, commandMessage);
+	},
+	callArtaModel(ctx: Context, commandMessage?: string): Promise<void> {
+		return handleArta(ctx, commandMessage);
+	},
 };
 
 export const downloadTelegramFile = FileUtils.downloadTelegramFile;
