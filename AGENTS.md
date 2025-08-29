@@ -1,53 +1,69 @@
-# Project Overview
+# Repository Guidelines
 
-## Project Structure
-- `main.ts` - entry point that initializes the bot and HTTP server
-- `src/` - source files
-  - `adapter/` - adapters for integrating external tools and tool responses
-  - `config/` - keyboard layouts and model listings
-  - `handlers/` - handlers for each command and model
-  - `prototype/` - runtime prototype extensions
-  - `repository/` - data persistence using Deno KV
-  - `service/` - services that interact with LLM providers and Telegram
-  - `util/` - utilities for chat configuration and file handling
-- `tests/` - automated tests mirroring the source structure
-- `devrun.sh` - helper script to run locally
-- `run_tests.sh` - script that executes the full test suite
-- `deno.json` - project configuration for Deno
+## Project Structure & Module Organization
+- `main.ts`: Oak app + grammy bot bootstrap.
+- `src/`: production code
+  - `handlers/`: command and model handlers (suffix `Handler`)
+  - `service/`: integrations and orchestration (suffix `Service`)
+  - `repository/`: persistence via Deno KV (suffix `Repository`)
+  - `adapter/`, `config/`, `prototype/`, `util/`: support modules
+- `tests/`: mirrors `src/` with `*.test.ts`
+- `resources/`: prompts and internal docs
+- `deno.json`: tasks, formatting, linting
+- `devrun.sh`, `run_tests.sh`: local dev and test helpers
 
-## About the Project
-Telegram bot powered by multiple large language model providers. It answers user messages, supports model switching, and runs on Deno Deploy with Deno KV for persistence.
+## Build, Test, and Development Commands
+- `deno task dev`: runs `devrun.sh` (loads `.env`, starts with `denon`, sets Telegram webhook).
+- `deno task test`: runs `run_tests.sh` (full suite + coverage).
+- `deno test -A --unstable-kv --unstable-cron tests/service/TelegramService.test.ts`: run a specific test.
+- `deno fmt`, `deno lint`: format and lint the codebase.
 
-## How It Works
-`main.ts` creates an Oak application and a grammy bot. Commands register model actions and utilities. `TelegramService` orchestrates model selection, message handling, and webhook setup. Repositories store conversation history, allowing the bot to operate via webhook or long polling.
+## Coding Style & Naming Conventions
+- Language: TypeScript (`strict` mode). Use TSDoc for all functions; avoid inline `//` comments.
+- Formatting: tabs, semicolons, single quotes, line width 160 (see `deno.json`).
+- Naming: files in `src/` use PascalCase and clear suffixes: `*Service.ts`, `*Handler.ts`, `*Repository.ts`.
+- Keep functions small, purposeful, and secure; avoid deprecated APIs; handle errors explicitly.
 
-# Code Conventions
+## Testing Guidelines
+- Framework: Deno tests in `tests/`, mirroring `src/` structure; filenames end with `.test.ts`.
+- Run all: `deno task test`. Coverage is generated automatically.
+- Targeted runs: use `deno test` with `-A --unstable-kv --unstable-cron` for KV- and cron-dependent tests.
 
-## Do not add comments on code
+## Commit & Pull Request Guidelines
+- Commits: prefer Conventional Commits (e.g., `feat:`, `fix:`, `docs:`, `test:`, `refactor:`). Write concise, imperative messages.
+- PRs: include clear description, rationale, test steps, and any env/config changes. Link related issues.
+
+## Security & Configuration Tips
+- Never commit secrets. Store provider keys and tokens in `.env` (e.g., `BOT_TOKEN`, `SERVER_URL`, `ADMIN_USER_IDS`, provider API keys).
+- Validate inputs and sanitize outputs when interacting with external providers.
+
+## Code Conventions
+
+### Do not add comments on code
 When writing code, do not add // comments. Just write the code.
 
-## Ensure proper formatting
+### Ensure proper formatting
 Maintain consistent indentation and spacing throughout the code.
 
-## TSDocs on functions
+### TSDocs on functions
 When writing functions, always include TSDoc comments to describe the function's purpose, parameters, and return value. since its typescript, there is no need to add types in the function signature. unless the code is javascript.
 
-## Clean code
+### Clean code
 Write clean, readable code. Avoid unnecessary complexity and ensure that the code is easy to understand. Follow best practices for clean code and the programming language being used.
 
-## Avoid using deprecated APIs
+### Avoid using deprecated APIs
 Avoid using deprecated APIs or methods. If a newer alternative is available, use that instead.
 
-## Security best practices
+### Security best practices
 Always keep security implications of the code in mind. Implement security best practices to protect against vulnerabilities and attacks.
 
-## Ensure proper error handling
+### Ensure proper error handling
 Implement proper error handling to manage exceptions and provide meaningful feedback to users.
 
-## Avoid hardcoding sensitive information
+### Avoid hardcoding sensitive information
 Do not hardcode sensitive information such as API keys, passwords, or tokens in the code. Use environment variables or secure storage solutions instead.
 
-## More Rules
+### More Rules
 - Code should be easy to read and understand.
 - Keep the code as simple as possible. Avoid unnecessary complexity.
 - Use meaningful names for variables, functions, etc. Names should reveal intent.
