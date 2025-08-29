@@ -1,4 +1,4 @@
-import { assertEquals } from 'asserts';
+import { assertEquals } from '../deps.ts';
 import { MockKvStore } from '../test_helpers.ts';
 
 const mockKv = new MockKvStore();
@@ -19,6 +19,7 @@ Deno.test('ChatRepository', async (t) => {
 		getVqdHeader,
 	} = await import('../../src/repository/ChatRepository.ts');
 
+	/** Resets the mock KV store */
 	const resetKv = () => {
 		for (const key of (mockKv as any).store.keys()) {
 			(mockKv as any).store.delete(key);
