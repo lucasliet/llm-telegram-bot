@@ -1,0 +1,8 @@
+{
+  "imports": {
+    "@/": "../src/",
+    "npm:openai": "./stubs/openai.ts",
+    "@/service/BlackboxaiService.ts": "./stubs/BlackboxaiService.ts",
+    "@/repository/ChatRepository.ts": "./stubs/ChatRepository.ts"
+  }
+}

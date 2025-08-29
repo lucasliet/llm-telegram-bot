@@ -1,13 +1,7 @@
-import { Context } from 'grammy';
-import { Spy, spy } from 'mock';
-import { assertEquals } from 'asserts';
+import { assertEquals, spy, Spy } from './deps.ts';
 
 export function assertSpyCalls(spy: Spy, expectedCalls: number): void {
-	assertEquals(
-		spy.calls.length,
-		expectedCalls,
-		`Expected spy to be called ${expectedCalls} time(s) but was called ${spy.calls.length} time(s)`,
-	);
+        assertEquals(spy.calls.length, expectedCalls);
 }
 
 export interface MockContext {
