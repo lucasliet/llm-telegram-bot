@@ -5,3 +5,4 @@ temp_*
 /coverage/**
 *.log
 .aider*
+.serena

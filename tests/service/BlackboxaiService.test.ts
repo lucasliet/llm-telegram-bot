@@ -1,7 +1,7 @@
 import { assertEquals, assertRejects } from 'https://deno.land/std@0.214.0/assert/mod.ts';
 import { afterEach, beforeEach, describe, it } from 'https://deno.land/std@0.214.0/testing/bdd.ts';
 import { assertSpyCalls, Spy, spy } from 'https://deno.land/std@0.214.0/testing/mock.ts';
-import BlackboxaiService from '../../src/service/BlackboxaiService.ts';
+let BlackboxaiService: any;
 
 describe('BlackboxaiService', () => {
 	let mockFetch: Spy;
@@ -34,6 +34,17 @@ describe('BlackboxaiService', () => {
 
 	describe('generateText', () => {
 		it('should generate text successfully', async () => {
+			const originalOpenKv = Deno.openKv;
+			Deno.openKv = () =>
+				Promise.resolve(
+					{
+						get: () => Promise.resolve({ value: undefined }),
+						set: () => Promise.resolve({ ok: true }),
+						delete: () => Promise.resolve({ ok: true }),
+						close: () => Promise.resolve(),
+					} as any,
+				);
+			BlackboxaiService = (await import('../../src/service/BlackboxaiService.ts')).default;
 			const response = await BlackboxaiService.generateText(
 				'test-user-key',
 				'test quote',
@@ -51,9 +62,21 @@ describe('BlackboxaiService', () => {
 
 			const body = JSON.parse(options.body);
 			assertEquals(body.messages[body.messages.length - 1].content, 'quote: "test quote"\n\nHello');
+			Deno.openKv = originalOpenKv;
 		});
 
 		it('should handle API errors', async () => {
+			const originalOpenKv = Deno.openKv;
+			Deno.openKv = () =>
+				Promise.resolve(
+					{
+						get: () => Promise.resolve({ value: undefined }),
+						set: () => Promise.resolve({ ok: true }),
+						delete: () => Promise.resolve({ ok: true }),
+						close: () => Promise.resolve(),
+					} as any,
+				);
+			BlackboxaiService = (await import('../../src/service/BlackboxaiService.ts')).default;
 			globalThis.fetch = spy(() =>
 				Promise.resolve({
 					ok: false,
@@ -66,11 +89,23 @@ describe('BlackboxaiService', () => {
 				Error,
 				'Failed to generate text: Unauthorized',
 			);
+			Deno.openKv = originalOpenKv;
 		});
 	});
 
 	describe('generateImage', () => {
 		it('should generate image successfully', async () => {
+			const originalOpenKv = Deno.openKv;
+			Deno.openKv = () =>
+				Promise.resolve(
+					{
+						get: () => Promise.resolve({ value: undefined }),
+						set: () => Promise.resolve({ ok: true }),
+						delete: () => Promise.resolve({ ok: true }),
+						close: () => Promise.resolve(),
+					} as any,
+				);
+			BlackboxaiService = (await import('../../src/service/BlackboxaiService.ts')).default;
 			const imageUrl = await BlackboxaiService.generateImage('A test prompt');
 
 			assertEquals(imageUrl, 'https://example.com/image.png');
@@ -82,9 +117,21 @@ describe('BlackboxaiService', () => {
 
 			const body = JSON.parse(options.body);
 			assertEquals(body.messages[0].content, 'A test prompt');
+			Deno.openKv = originalOpenKv;
 		});
 
 		it('should handle API errors', async () => {
+			const originalOpenKv = Deno.openKv;
+			Deno.openKv = () =>
+				Promise.resolve(
+					{
+						get: () => Promise.resolve({ value: undefined }),
+						set: () => Promise.resolve({ ok: true }),
+						delete: () => Promise.resolve({ ok: true }),
+						close: () => Promise.resolve(),
+					} as any,
+				);
+			BlackboxaiService = (await import('../../src/service/BlackboxaiService.ts')).default;
 			globalThis.fetch = spy(() =>
 				Promise.resolve({
 					ok: false,
@@ -97,6 +144,7 @@ describe('BlackboxaiService', () => {
 				Error,
 				'Failed to generate image: Bad Request',
 			);
+			Deno.openKv = originalOpenKv;
 		});
 	});
 });

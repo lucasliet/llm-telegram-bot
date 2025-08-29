@@ -1,5 +1,5 @@
 import { Context } from 'grammy-context';
-import CodexService from '@/service/openai/responses/CodexService.ts';
+import CodexService from '@/service/CodexService.ts';
 
 /**
  * Handles requests for Codex models
@@ -23,9 +23,7 @@ export async function handleCodex(
 
 	const text = message!.replace(`${command}:`, '');
 
-	const service = new CodexService();
-
-	const { reader, onComplete, responseMap } = await service.generateText(
+	const { reader, onComplete, responseMap } = await CodexService.generateText(
 		userKey,
 		quote,
 		text,
