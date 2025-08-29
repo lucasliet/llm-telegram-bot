@@ -59,15 +59,15 @@ export default {
     const stream = client.responses.stream({
 			model,
 			instructions: await getCodexInstructions(),
-			input: messages,
+			input: messages as OpenAi.Responses.ResponseInput,
 			tools: [],
 			tool_choice: 'auto',
 			parallel_tool_calls: false,
 			reasoning: { effort: 'minimal', summary: 'auto' },
+      verbosity: { text: 'low' },
 			store: false,
 			include: ['reasoning.encrypted_content'],
 		});
-
 
     const reader = toReader(stream);
 
