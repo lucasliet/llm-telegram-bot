@@ -15,48 +15,48 @@ const sessionId = crypto.randomUUID().toLowerCase();
  * Service for interacting with Codex Responses API via SSE
  */
 export default {
-  /**
-   * Generate text using Codex API with SSE streaming
-   * @param userKey - User identifier for chat history
-   * @param quote - Optional quoted message to include in the prompt
-   * @param prompt - Text prompt to send to the model
-   * @param model - Model to use, defaults to gpt-5
-   * @returns StreamReplyResponse with reader and completion handler
-   */
-  async generateText(
-    userKey: string,
-    quote: string = '',
-    prompt: string,
-    model: string = textModel,
-  ): Promise<StreamReplyResponse> {
-    if (!CODEX_ACCESS_TOKEN || !CODEX_ACCOUNT_ID) {
-      throw new Error('Codex credentials are missing. Set CODEX_ACCESS_TOKEN and CODEX_ACCOUNT_ID.');
-    }
+	/**
+	 * Generate text using Codex API with SSE streaming
+	 * @param userKey - User identifier for chat history
+	 * @param quote - Optional quoted message to include in the prompt
+	 * @param prompt - Text prompt to send to the model
+	 * @param model - Model to use, defaults to gpt-5
+	 * @returns StreamReplyResponse with reader and completion handler
+	 */
+	async generateText(
+		userKey: string,
+		quote: string = '',
+		prompt: string,
+		model: string = textModel,
+	): Promise<StreamReplyResponse> {
+		if (!CODEX_ACCESS_TOKEN || !CODEX_ACCOUNT_ID) {
+			throw new Error('Codex credentials are missing. Set CODEX_ACCESS_TOKEN and CODEX_ACCOUNT_ID.');
+		}
 
-    const history = await getChatHistory(userKey);
-    const requestPrompt = quote ? `quote: "${quote}"\n\n${prompt}` : prompt;
+		const history = await getChatHistory(userKey);
+		const requestPrompt = quote ? `quote: "${quote}"\n\n${prompt}` : prompt;
 
-    const system = getSystemPrompt('Codex', model, CODEX_MAX_TOKENS);
+		const system = getSystemPrompt('Codex', model, CODEX_MAX_TOKENS);
 
-    const messages: OpenAi.Chat.ChatCompletionMessageParam[] = [
-      { role: 'system', content: system },
-      ...convertGeminiHistoryToGPT(history),
-      { role: 'user', content: requestPrompt },
-    ];
+		const messages: OpenAi.Chat.ChatCompletionMessageParam[] = [
+			{ role: 'system', content: system },
+			...convertGeminiHistoryToGPT(history),
+			{ role: 'user', content: requestPrompt },
+		];
 
-    const client = new OpenAi({
-      apiKey: CODEX_ACCESS_TOKEN,
-      baseURL: 'https://chatgpt.com/backend-api/codex',
-      defaultHeaders: {
-        'chatgpt-account-id': CODEX_ACCOUNT_ID,
-        'OpenAI-Beta': 'responses=experimental',
-        'originator': 'codex_cli_rs',
-        'User-Agent': 'codex_cli_rs',
-        'session_id': sessionId,
-      },
-    });
+		const client = new OpenAi({
+			apiKey: CODEX_ACCESS_TOKEN,
+			baseURL: 'https://chatgpt.com/backend-api/codex',
+			defaultHeaders: {
+				'chatgpt-account-id': CODEX_ACCOUNT_ID,
+				'OpenAI-Beta': 'responses=experimental',
+				'originator': 'codex_cli_rs',
+				'User-Agent': 'codex_cli_rs',
+				'session_id': sessionId,
+			},
+		});
 
-    const stream = client.responses.stream({
+		const stream = client.responses.stream({
 			model,
 			instructions: await getCodexInstructions(),
 			input: messages as OpenAi.Responses.ResponseInput,
@@ -64,24 +64,24 @@ export default {
 			tool_choice: 'auto',
 			parallel_tool_calls: false,
 			reasoning: { effort: 'minimal', summary: 'auto' },
-      verbosity: { text: 'low' },
+			verbosity: { text: 'low' },
 			store: false,
 			include: ['reasoning.encrypted_content'],
 		});
 
-    const reader = toReader(stream);
+		const reader = toReader(stream);
 
-    const onComplete = (completedAnswer: string) =>
-      addContentToChatHistory(
-        history,
-        quote,
-        requestPrompt,
-        completedAnswer,
-        userKey,
-      );
+		const onComplete = (completedAnswer: string) =>
+			addContentToChatHistory(
+				history,
+				quote,
+				requestPrompt,
+				completedAnswer,
+				userKey,
+			);
 
-    return { reader, onComplete, responseMap };
-  },
+		return { reader, onComplete, responseMap };
+	},
 };
 
 /**
@@ -90,15 +90,15 @@ export default {
  * @returns Delta text content from the chunk
  */
 function responseMap(responseBody: string): string {
-  try {
-    const obj = JSON.parse(responseBody);
-    if (obj?.choices?.[0]?.delta?.content) return obj.choices[0].delta.content;
-    if (obj?.type === 'response.output_text.delta' && typeof obj?.delta === 'string') return obj.delta;
-    if (typeof obj?.output_text === 'string') return obj.output_text;
-    return '';
-  } catch {
-    return '';
-  }
+	try {
+		const obj = JSON.parse(responseBody);
+		if (obj?.choices?.[0]?.delta?.content) return obj.choices[0].delta.content;
+		if (obj?.type === 'response.output_text.delta' && typeof obj?.delta === 'string') return obj.delta;
+		if (typeof obj?.output_text === 'string') return obj.output_text;
+		return '';
+	} catch {
+		return '';
+	}
 }
 
 /**
@@ -108,21 +108,21 @@ function responseMap(responseBody: string): string {
  * @returns A reader that yields Uint8Array chunks representing JSON lines.
  */
 function toReader(stream: any) {
-  if (stream && typeof stream.toReadableStream === 'function') {
-    return stream.toReadableStream().getReader();
-  }
-  return new ReadableStream<Uint8Array>({
-    async start(controller) {
-      try {
-        for await (const event of stream) {
-          const encoded = new TextEncoder().encode(JSON.stringify(event));
-          controller.enqueue(encoded);
-        }
-      } finally {
-        controller.close();
-      }
-    },
-  }).getReader();
+	if (stream && typeof stream.toReadableStream === 'function') {
+		return stream.toReadableStream().getReader();
+	}
+	return new ReadableStream<Uint8Array>({
+		async start(controller) {
+			try {
+				for await (const event of stream) {
+					const encoded = new TextEncoder().encode(JSON.stringify(event));
+					controller.enqueue(encoded);
+				}
+			} finally {
+				controller.close();
+			}
+		},
+	}).getReader();
 }
 
 let cachedCodexInstructions: string | null = null;
@@ -132,19 +132,19 @@ let cachedCodexInstructions: string | null = null;
  * @returns Concatenated instructions content
  */
 async function getCodexInstructions(): Promise<string> {
-  if (cachedCodexInstructions !== null) return cachedCodexInstructions;
-  try {
-    const base = new URL('.', import.meta.url);
-    const promptUrl = new URL('../../resources/prompt.md', base);
-    const toolUrl = new URL('../../resources/apply_patch_tool_instructions.md', base);
-    const [prompt, tool] = await Promise.all([
-      Deno.readTextFile(promptUrl.pathname),
-      Deno.readTextFile(toolUrl.pathname),
-    ]);
-    cachedCodexInstructions = `${prompt}\n${tool}`;
-    return cachedCodexInstructions;
-  } catch {
-    cachedCodexInstructions = '';
-    return cachedCodexInstructions;
-  }
+	if (cachedCodexInstructions !== null) return cachedCodexInstructions;
+	try {
+		const base = new URL('.', import.meta.url);
+		const promptUrl = new URL('../../resources/prompt.md', base);
+		const toolUrl = new URL('../../resources/apply_patch_tool_instructions.md', base);
+		const [prompt, tool] = await Promise.all([
+			Deno.readTextFile(promptUrl.pathname),
+			Deno.readTextFile(toolUrl.pathname),
+		]);
+		cachedCodexInstructions = `${prompt}\n${tool}`;
+		return cachedCodexInstructions;
+	} catch {
+		cachedCodexInstructions = '';
+		return cachedCodexInstructions;
+	}
 }
