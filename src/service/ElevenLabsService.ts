@@ -58,8 +58,8 @@ export default {
 	 */
 	async textToSpeech(
 		text: string,
-		voiceId: string = 'SAz9YHcvj6GT2YYXdXww',
-		modelId: string = 'eleven_multilingual_v2',
+		voiceId: string = '7eUAxNOneHxqfyRS77mW',
+		modelId: string = 'eleven_v3',
 	): Promise<Uint8Array> {
 		const MAX_TEXT_LENGTH = 500;
 		let processedText = text;
