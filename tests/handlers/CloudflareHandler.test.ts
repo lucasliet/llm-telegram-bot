@@ -18,7 +18,7 @@ Deno.test('CloudflareHandler routes to text generation', async () => {
 	const mod = await import('../../src/handlers/CloudflareHandler.ts');
 	const svc = await import('../../src/service/CloudFlareService.ts');
 	(svc.default as any).generateText = spy(() =>
-		Promise.resolve({ reader: new ReadableStream().getReader(), onComplete: () => Promise.resolve(), responseMap: (s: string) => s }),
+		Promise.resolve({ reader: new ReadableStream().getReader(), onComplete: () => Promise.resolve(), responseMap: (s: string) => s })
 	);
 	await mod.handleCloudflare(ctx);
 	assertEquals(ctx.streamReply.calls.length, 1);
@@ -29,7 +29,9 @@ Deno.test('CloudflareHandler routes to image generation', async () => {
 	const restore = setupKvStub();
 	const ctx: any = {
 		replyWithPhoto: spy(() => Promise.resolve()),
-		extractContextKeys: spy(() => Promise.resolve({ userKey: 'user:1', contextMessage: 'cloudflareimage: a tree', photos: undefined, caption: undefined, quote: undefined })),
+		extractContextKeys: spy(() =>
+			Promise.resolve({ userKey: 'user:1', contextMessage: 'cloudflareimage: a tree', photos: undefined, caption: undefined, quote: undefined })
+		),
 		message: { message_id: 11 },
 	};
 	await import('../../src/service/TelegramService.ts');

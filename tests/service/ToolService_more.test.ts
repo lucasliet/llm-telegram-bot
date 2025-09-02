@@ -11,10 +11,14 @@ Deno.test('ToolService transcript_yt returns null for invalid URL', async () => 
 Deno.test('ToolService transcript_yt honors preferredLanguages', async () => {
 	const svc = await import('../../src/service/ToolService.ts');
 	const html = 'ytInitialPlayerResponse = ' + JSON.stringify({
-		captions: { playerCaptionsTracklistRenderer: { captionTracks: [
-			{ languageCode: 'en', baseUrl: 'https://c-en' },
-			{ languageCode: 'pt-BR', baseUrl: 'https://c-pt' },
-		] } },
+		captions: {
+			playerCaptionsTracklistRenderer: {
+				captionTracks: [
+					{ languageCode: 'en', baseUrl: 'https://c-en' },
+					{ languageCode: 'pt-BR', baseUrl: 'https://c-pt' },
+				],
+			},
+		},
 	}) + ';';
 	const xml = '<timedtext><body><p t="0" d="1000">Oi</p></body></timedtext>';
 	const original = globalThis.fetch;
@@ -46,4 +50,3 @@ Deno.test('ToolService copilot_usage returns JSON on success', async () => {
 		globalThis.fetch = originalFetch;
 	}
 });
-

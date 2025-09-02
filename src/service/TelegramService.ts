@@ -11,6 +11,7 @@ import {
 	handleCloudflare,
 	handleCodex,
 	handleDuckDuckGo,
+	handleFala,
 	handleGemini,
 	handleGithubCopilot,
 	handleIsou,
@@ -21,7 +22,6 @@ import {
 	handlePhind,
 	handlePollinations,
 	handlePuter,
-	handleFala,
 } from '@/handlers/index.ts';
 
 import { FileUtils } from '@/util/FileUtils.ts';

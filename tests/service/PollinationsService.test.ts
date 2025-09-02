@@ -7,7 +7,12 @@ Deno.test('PollinationsService.generateText returns reader and onComplete', asyn
 	const svc = await import('../../src/service/PollinationsService.ts');
 	const originalFetch = globalThis.fetch;
 	try {
-		const stream = new ReadableStream({ start(c){ c.enqueue(new TextEncoder().encode('data: {"choices":[{"delta":{"content":"Hi"}}]}\n\n')); c.close(); } });
+		const stream = new ReadableStream({
+			start(c) {
+				c.enqueue(new TextEncoder().encode('data: {"choices":[{"delta":{"content":"Hi"}}]}\n\n'));
+				c.close();
+			},
+		});
 		globalThis.fetch = spy(() => Promise.resolve(new Response(stream, { status: 200 }))) as any;
 		const { reader, onComplete, responseMap } = await (svc.default as any).generateText('user:1', '', 'hello', 'polli');
 		const { done } = await reader.read();
