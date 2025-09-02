@@ -4,13 +4,14 @@ import { setupKvStub } from '../stubs/kv.ts';
 Deno.test('Instantiate OpenAI-related service classes constructors', async () => {
 	setupKvStub();
 	const env = Deno.env.get;
-	Deno.env.get = (k: string) => ({
-		GEMINI_API_KEY: 'g',
-		OPENWEBUI_API_KEY: 'o',
-		OPENROUTER_API_KEY: 'r',
-		PERPLEXITY_API_KEY: 'p',
-		COPILOT_TOKEN: 'c',
-	}[k] || env(k)) as any;
+	Deno.env.get = (k: string) =>
+		({
+			GEMINI_API_KEY: 'g',
+			OPENWEBUI_API_KEY: 'o',
+			OPENROUTER_API_KEY: 'r',
+			PERPLEXITY_API_KEY: 'p',
+			COPILOT_TOKEN: 'c',
+		}[k] || env(k)) as any;
 	try {
 		const Gemini = (await import('../../src/service/openai/GeminiService.ts')).default;
 		const OpenWebUI = (await import('../../src/service/openai/OpenWebUIService.ts')).default;

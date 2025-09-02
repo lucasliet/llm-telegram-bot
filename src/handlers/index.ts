@@ -13,3 +13,4 @@ export { handlePollinations } from './PollinationsHandler.ts';
 export { handleIsou } from './IsouHandler.ts';
 export { handleArta } from './ArtaHandler.ts';
 export { handleCodex } from './CodexHandler.ts';
+export { handleFala } from './ElevenlabsHandler.ts';

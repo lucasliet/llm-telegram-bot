@@ -83,38 +83,7 @@ export const openWebUiModels = {
 /**
  * Type definitions
  */
-export type ModelCommand =
-	| '/geminiPro'
-	| '/gemini'
-	| '/llama'
-	| '/oss'
-	| '/gpt'
-	| '/gpt5'
-	| '/codex'
-	| '/perplexity'
-	| '/perplexityReasoning'
-	// | '/r1'
-	// | '/r1online'
-	// | '/qwen'
-	// | '/mixtral'
-	| '/claude'
-	// | '/geminiPro'
-	// | '/o3mini'
-	| '/o4mini'
-	// | '/grok'
-	| '/phind'
-	| '/pplxgpt'
-	| '/pplxgrok'
-	| '/pplxo3'
-	| '/pplxclaude'
-	| '/polli'
-	| '/polliReasoning'
-	| '/isou';
-
-/**
- * Available model commands
- */
-export const modelCommands: ModelCommand[] = [
+export const MODEL_COMMANDS = [
 	'/geminiPro',
 	'/gemini',
 	'/llama',
@@ -141,13 +110,18 @@ export const modelCommands: ModelCommand[] = [
 	'/polli',
 	'/polliReasoning',
 	'/isou',
-];
+] as const;
+
+/**
+ * Available model commands
+ */
+export type ModelCommand = typeof MODEL_COMMANDS[number];
+export const modelCommands = [...MODEL_COMMANDS] as ModelCommand[];
 
 export const WHITELISTED_MODELS: ModelCommand[] = [
 	'/llama',
 	'/oss',
 	'/gpt',
-	'/codex',
 	// '/r1online',
 	// '/r1',
 	// '/qwen',

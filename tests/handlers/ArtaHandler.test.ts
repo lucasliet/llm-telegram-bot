@@ -5,7 +5,9 @@ function createCtx() {
 	return {
 		reply: spy(() => Promise.resolve()),
 		replyWithPhoto: spy(() => Promise.resolve()),
-		extractContextKeys: spy(() => Promise.resolve({ userKey: 'user:1', contextMessage: 'artaImage: draw a cat', photos: undefined, caption: undefined, quote: undefined })),
+		extractContextKeys: spy(() =>
+			Promise.resolve({ userKey: 'user:1', contextMessage: 'artaImage: draw a cat', photos: undefined, caption: undefined, quote: undefined })
+		),
 	};
 }
 

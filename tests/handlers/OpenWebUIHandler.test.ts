@@ -14,7 +14,7 @@ Deno.test('OpenWebUIHandler streams text path', async () => {
 	const mod = await import('../../src/handlers/OpenWebUIHandler.ts');
 	const svc = await import('../../src/service/openai/OpenWebUIService.ts');
 	(svc.default as any).prototype.generateText = spy(() =>
-		Promise.resolve({ reader: new ReadableStream().getReader(), onComplete: () => Promise.resolve(), responseMap: (s: string) => s }),
+		Promise.resolve({ reader: new ReadableStream().getReader(), onComplete: () => Promise.resolve(), responseMap: (s: string) => s })
 	);
 	await mod.handleOpenWebUI(ctx);
 	assertEquals(ctx.streamReply.calls.length, 1);

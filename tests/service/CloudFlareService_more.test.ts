@@ -66,4 +66,3 @@ Deno.test('CloudFlareService.generateTextFromImage returns description', async (
 		globalThis.fetch = originalFetch;
 	}
 });
-

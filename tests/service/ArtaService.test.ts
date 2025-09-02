@@ -18,4 +18,3 @@ Deno.test('ArtaService.generateImage completes after status DONE', async () => {
 		globalThis.fetch = originalFetch;
 	}
 });
-
