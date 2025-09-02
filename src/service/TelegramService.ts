@@ -21,9 +21,11 @@ import {
 	handlePhind,
 	handlePollinations,
 	handlePuter,
+	handleFala,
 } from '@/handlers/index.ts';
 
 import { FileUtils } from '@/util/FileUtils.ts';
+import { PhindService } from './PhindService.ts';
 
 const TOKEN = Deno.env.get('BOT_TOKEN') as string;
 const ADMIN_USER_IDS: number[] = (Deno.env.get('ADMIN_USER_IDS') as string)
@@ -251,8 +253,7 @@ Interações Premium:
 	},
 
 	callOpenAIModel(ctx: Context, commandMessage?: string): Promise<void> {
-		const fn = (globalThis as any).handleOpenAI || handleOpenAI;
-		return fn(ctx, commandMessage);
+		return handleOpenAI(ctx, commandMessage);
 	},
 
 	callCloudflareModel(ctx: Context, commandMessage?: string): Promise<void> {
@@ -302,6 +303,9 @@ Interações Premium:
 	},
 	callArtaModel(ctx: Context, commandMessage?: string): Promise<void> {
 		return handleArta(ctx, commandMessage);
+	},
+	callFala(ctx: Context, commandMessage?: string): Promise<void> {
+		return handleFala(ctx, new PhindService(), commandMessage);
 	},
 };
 

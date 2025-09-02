@@ -53,7 +53,10 @@ function registerBotCommands() {
 		/^(oss|cloudflareImage):/gi,
 		(ctx) => TelegramService.callAdminModel(ctx, TelegramService.callCloudflareModel),
 	);
-
+	BOT.hears(
+		/^(fala):/gi,
+		(ctx) => TelegramService.callAdminModel(ctx, TelegramService.callFala),
+	);
 	BOT.hears(
 		/^(codex):/gi,
 		(ctx) => TelegramService.callAdminModel(ctx, TelegramService.callCodexModel),
@@ -71,7 +74,7 @@ function registerBotCommands() {
 		(ctx) => TelegramService.callAdminModel(ctx, TelegramService.callGithubCopilotModel),
 	);
 	BOT.hears(
-		/^(black|gptonline|llama|r1online|r1|v3|mixtral|qwen|o1|o3Mini|o3High|gpt45|grok|image|fala):/gi,
+		/^(black|gptonline|llama|r1online|r1|v3|mixtral|qwen|o1|o3Mini|o3High|gpt45|grok|image):/gi,
 		(ctx) => TelegramService.callAdminModel(ctx, TelegramService.callBlackboxModel),
 	);
 	BOT.hears(
@@ -95,14 +98,14 @@ function registerBotCommands() {
 		(ctx) => TelegramService.callAdminModel(ctx, TelegramService.callOpenWebUIModel),
 	);
 
-        BOT.hears(
-                /^(polli|polliReasoning|polliImage):/gi,
-                (ctx) => TelegramService.callAdminModel(ctx, TelegramService.callPollinationsModel),
-        );
-        BOT.hears(
-                /^(artaImage):/gi,
-                (ctx) => TelegramService.callAdminModel(ctx, TelegramService.callArtaModel),
-        );
+	BOT.hears(
+		/^(polli|polliReasoning|polliImage):/gi,
+		(ctx) => TelegramService.callAdminModel(ctx, TelegramService.callPollinationsModel),
+	);
+	BOT.hears(
+		/^(artaImage):/gi,
+		(ctx) => TelegramService.callAdminModel(ctx, TelegramService.callArtaModel),
+	);
 
 	BOT.hears(
 		new RegExp(`^(${modelCommands.join('|')})$`),

@@ -1,7 +1,6 @@
 import { Context } from 'grammy-context';
 import BlackboxaiService from '@/service/BlackboxaiService.ts';
 import { blackboxModels } from '@/config/models.ts';
-import { textToSpeech } from '@/service/TelegramService.ts';
 import ToolService from '../service/ToolService.ts';
 
 const modelMap = {
@@ -56,21 +55,6 @@ export async function handleBlackbox(
 		ctx.replyWithPhoto(imageUrl, {
 			reply_to_message_id: ctx.message?.message_id,
 		});
-		return;
-	}
-
-	if (command === 'fala') {
-		const { reader, onComplete } = await BlackboxaiService.generateText(
-			userKey,
-			quote,
-			'max_token limit this answer to 500 characters, it will be converted to limited voice message: ' +
-				prompt,
-			blackboxModels.gptModel,
-		);
-
-		const fullText = (await reader.text()).removeThinkingChatCompletion();
-		if (onComplete) await onComplete(fullText);
-		textToSpeech(ctx, fullText);
 		return;
 	}
 
