@@ -58,8 +58,8 @@ export default {
 	 */
 	async textToSpeech(
 		text: string,
-		voiceId: string = 'SAz9YHcvj6GT2YYXdXww',
-		modelId: string = 'eleven_multilingual_v2',
+		voiceId: string = '7eUAxNOneHxqfyRS77mW',
+		modelId: string = 'eleven_v3',
 	): Promise<Uint8Array> {
 		const MAX_TEXT_LENGTH = 500;
 		let processedText = text;
@@ -75,7 +75,7 @@ export default {
 		});
 
 		try {
-			const response = await fetch(`https://api.elevenlabs.io/v1/text-to-speech/${voiceId}?allow_unauthenticated=1`, {
+			const response = await fetch(`https://api.elevenlabs.io/v1/text-to-speech/${voiceId}/stream/with-timestamps?allow_unauthenticated=1`, {
 				method: 'POST',
 				headers: {
 					'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:136.0) Gecko/20100101 Firefox/136.0',
