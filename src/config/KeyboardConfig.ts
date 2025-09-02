@@ -6,7 +6,6 @@ import { InlineKeyboard } from 'grammy';
 const adminCommandButtons = [
 	[['Modelo Atual', '/currentmodel']],
 	[
-		['Llama 4 Maverick', '/llama'],
 		['Phind', '/phind'],
 		['Isou', '/isou'],
 	],
@@ -19,7 +18,7 @@ const adminCommandButtons = [
 		['Copilot Sonnet 4', '/claude'],
 	],
 	[
-		['Codex', '/codex'],
+		['Llama 4 Maverick', '/llama'],
 		['GPT OSS 120b', '/oss'],
 	],
 	[
@@ -59,7 +58,9 @@ const userCommandButtons = [
 	[['Modelo Atual', '/currentmodel']],
 	[
 		['Phind', '/phind'],
-		['GPT OSS 120b', '/oss'],
+	],
+	[
+		['Copilot GPT 5 Mini', '/gpt'],
 		['Isou', '/isou'],
 	],
 	[
@@ -76,7 +77,7 @@ const userCommandButtons = [
 	],
 	[
 		['Llama 4 Maverick', '/llama'],
-		['Copilot GPT 5 Mini', '/gpt'],
+		['GPT OSS 120b', '/oss'],
 	],
 	[['Limpar Histórico', '/clear']],
 ];
