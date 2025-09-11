@@ -54,10 +54,10 @@ Deno.test('ToolService copilot_usage throws without token', async () => {
 	const original = Deno.env.get;
 	try {
 		Deno.env.get = (_k: string) => undefined as any;
-		const fn = (ToolService as any).tools.get('copilot_usage').fn as () => Promise<any>;
+		const fn = (ToolService as any).tools.get('copilot_usage').fn as (args: Record<string, never>) => Promise<any>;
 		let threw = false;
 		try {
-			await fn({} as any);
+			await fn({} as never);
 		} catch {
 			threw = true;
 		}
@@ -67,15 +67,19 @@ Deno.test('ToolService copilot_usage throws without token', async () => {
 	}
 });
 
+
 Deno.test('ToolService transcript_yt parses captions and returns segments', async () => {
-	const html = 'ytInitialPlayerResponse = ' + JSON.stringify({
-		captions: { playerCaptionsTracklistRenderer: { captionTracks: [{ languageCode: 'en', baseUrl: 'https://c' }] } },
-	}) + ';';
-	const xml = '<timedtext><body><p t="0" d="1000">Hello</p></body></timedtext>';
+	const watchHtml = '{"INNERTUBE_API_KEY":"k"}';
+	const innertube = {
+		playabilityStatus: { status: 'OK' },
+		captions: { playerCaptionsTracklistRenderer: { captionTracks: [{ languageCode: 'en', baseUrl: 'https://c' }], translationLanguages: [{ languageCode: 'pt' }] } },
+	};
+	const xml = '<transcript><text start="0" dur="1.0">Hello</text></transcript>';
 	const original = globalThis.fetch;
 	try {
 		globalThis.fetch = mockFetchSequence([
-			new Response(html, { status: 200 }),
+			new Response(watchHtml, { status: 200 }),
+			new Response(JSON.stringify(innertube), { status: 200 }),
 			new Response(xml, { status: 200 }),
 		]) as any;
 		const fn = (ToolService as any).tools.get('transcript_yt').fn as (args: { videoUrl: string; preferredLanguages?: string[] }) => Promise<any>;
@@ -83,5 +87,56 @@ Deno.test('ToolService transcript_yt parses captions and returns segments', asyn
 		assertEquals(Array.isArray(segments) && segments.length > 0, true);
 	} finally {
 		globalThis.fetch = original;
+	}
+});
+
+Deno.test('ToolService transcript_yt returns null for invalid URL', async () => {
+	const fn = (ToolService as any).tools.get('transcript_yt').fn as (args: { videoUrl: string; preferredLanguages?: string[] }) => Promise<any>;
+	const res = await fn({ videoUrl: 'https://example.com' });
+	assertEquals(res, null);
+});
+
+Deno.test('ToolService transcript_yt honors preferredLanguages', async () => {
+	const watchHtml = '{"INNERTUBE_API_KEY":"k"}';
+	const innertube = {
+		playabilityStatus: { status: 'OK' },
+		captions: {
+			playerCaptionsTracklistRenderer: {
+				captionTracks: [
+					{ languageCode: 'en', baseUrl: 'https://c-en' },
+					{ languageCode: 'pt-BR', baseUrl: 'https://c-pt' },
+				],
+				translationLanguages: [{ languageCode: 'pt' }, { languageCode: 'en' }],
+			},
+		},
+	};
+	const xml = '<transcript><text start="0" dur="1.0">Oi</text></transcript>';
+	const original = globalThis.fetch;
+	try {
+		globalThis.fetch = mockFetchSequence([
+			new Response(watchHtml, { status: 200 }),
+			new Response(JSON.stringify(innertube), { status: 200 }),
+			new Response(xml, { status: 200 }),
+		]) as any;
+		const fn = (ToolService as any).tools.get('transcript_yt').fn as (args: { videoUrl: string; preferredLanguages?: string[] }) => Promise<any>;
+		const res = await fn({ videoUrl: 'https://youtu.be/aaaaaaaaaaa', preferredLanguages: ['pt'] });
+		assertEquals(Array.isArray(res) && res.length > 0, true);
+	} finally {
+		globalThis.fetch = original;
+	}
+});
+
+Deno.test('ToolService copilot_usage returns JSON on success', async () => {
+	const fn = (ToolService as any).tools.get('copilot_usage').fn as (args: Record<string, never>) => Promise<any>;
+	const originalGet = Deno.env.get;
+	const originalFetch = globalThis.fetch;
+	try {
+		Deno.env.get = (k: string) => (k === 'COPILOT_TOKEN' ? 'tok' : originalGet(k)) as any;
+		globalThis.fetch = mockFetchSequence([new Response(JSON.stringify({ ok: true }), { status: 200 })]) as any;
+		const out = await fn({} as never);
+		assertEquals(out.ok, true);
+	} finally {
+		Deno.env.get = originalGet;
+		globalThis.fetch = originalFetch;
 	}
 });
