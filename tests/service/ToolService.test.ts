@@ -96,6 +96,28 @@ Deno.test('ToolService transcript_yt returns null for invalid URL', async () => 
 	assertEquals(res, null);
 });
 
+Deno.test('ToolService transcript_yt accepts live URL format', async () => {
+	const watchHtml = '{"INNERTUBE_API_KEY":"k"}';
+	const innertube = {
+		playabilityStatus: { status: 'OK' },
+		captions: { playerCaptionsTracklistRenderer: { captionTracks: [{ languageCode: 'en', baseUrl: 'https://c' }], translationLanguages: [{ languageCode: 'pt' }] } },
+	};
+	const xml = '<transcript><text start="0" dur="1.0">Hello</text></transcript>';
+	const original = globalThis.fetch;
+	try {
+		globalThis.fetch = mockFetchSequence([
+			new Response(watchHtml, { status: 200 }),
+			new Response(JSON.stringify(innertube), { status: 200 }),
+			new Response(xml, { status: 200 }),
+		]) as any;
+		const fn = (ToolService as any).tools.get('transcript_yt').fn as (args: { videoUrl: string; preferredLanguages?: string[] }) => Promise<any>;
+		const segments = await fn({ videoUrl: 'https://www.youtube.com/live/aaaaaaaaaaa' });
+		assertEquals(Array.isArray(segments) && segments.length > 0, true);
+	} finally {
+		globalThis.fetch = original;
+	}
+});
+
 Deno.test('ToolService transcript_yt honors preferredLanguages', async () => {
 	const watchHtml = '{"INNERTUBE_API_KEY":"k"}';
 	const innertube = {

@@ -252,7 +252,7 @@ export default class ToolService {
 				 * @returns ID do vídeo ou null se não encontrado.
 				 */
 				const extractVideoId = (url: string): string | null => {
-					const match = url.match(/(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/(?:watch\?v=|embed\/|v\/)|youtu\.be\/)([\w-]{11})/);
+					const match = url.match(/(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/(?:watch\?v=|embed\/|v\/|live\/)|youtu\.be\/)([\w-]{11})/);
 					return match ? match[1] : null;
 				};
 				/**
