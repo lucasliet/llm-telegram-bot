@@ -13,7 +13,7 @@ export default class PerplexityService extends OpenAiService {
 				baseURL: 'https://api.perplexity.ai',
 			}),
 			command === '/perplexityreasoning' ? reasoningModel : textModel,
-			true,
+			false,
 			1000,
 		);
 	}
