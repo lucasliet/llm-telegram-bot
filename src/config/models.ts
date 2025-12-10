@@ -1,11 +1,11 @@
 export const geminiModels = {
 	geminiPro: 'gemini-2.5-pro',
-	geminiFlash: 'gemini-2.5-flash',
+	geminiFlash: 'gemini-2.5-flash-lite',
 };
 
 export const perplexityModels = {
 	textModel: 'sonar',
-	reasoningModel: 'sonar-reasoning',
+	reasoningModel: 'sonar-reasoning-pro',
 };
 
 export const openAIModels = {
@@ -63,8 +63,8 @@ export const copilotModels = {
 	gemini: 'gemini-2.5-pro',
 	o4mini: 'o4-mini',
 	gpt5mini: 'gpt-5-mini',
-	gpt5: 'gpt-5',
-	claude: 'claude-sonnet-4',
+	gpt5: 'gpt-5.1',
+	claude: 'claude-sonnet-4.5',
 	sonnetThinking: 'claude-3.7-sonnet-thought',
 };
 
