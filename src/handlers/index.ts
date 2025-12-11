@@ -1,6 +1,7 @@
 export { handleBlackbox } from './BlackboxHandler.ts';
 export { handleCloudflare } from './CloudflareHandler.ts';
 export { handleGemini } from './GeminiHandler.ts';
+export { handleVertex } from './VertexHandler.ts';
 export { handleOpenAI } from './OpenAIHandler.ts';
 export { handleOpenRouter } from './OpenRouterHandler.ts';
 export { handlePerplexity } from './PerplexityHandler.ts';

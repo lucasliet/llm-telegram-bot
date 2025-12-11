@@ -44,6 +44,12 @@ if command -v jq >/dev/null 2>&1 && [ -f "$HOME/.codex/auth.json" ]; then
   fi
 fi
 
+# Load Vertex AI credentials from gcloud application_default_credentials.json
+GCLOUD_CREDS="$HOME/.config/gcloud/application_default_credentials.json"
+if [ -f "$GCLOUD_CREDS" ]; then
+  export VERTEX_CREDENTIALS_BASE64=$(cat "$GCLOUD_CREDS" | base64)
+fi
+
 denon run --allow-env --allow-net --allow-read --allow-write --allow-import --unstable-kv --unstable-cron main.ts;
 
 curl -X POST "https://api.telegram.org/bot$BOT_TOKEN/setWebhook" \

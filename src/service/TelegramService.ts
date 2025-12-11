@@ -14,6 +14,7 @@ import {
 	handleFala,
 	handleGemini,
 	handleGithubCopilot,
+	handleVertex,
 	handleIsou,
 	handleOpenAI,
 	handleOpenRouter,
@@ -222,8 +223,8 @@ Interações Premium:
 			// '/mixtral': () => handleBlackbox(ctx, `mixtral: ${message}`),
 			// '/qwen': () => handleBlackbox(ctx, `qwen: ${message}`),
 			'/claude': () => handleGithubCopilot(ctx, `claude: ${message}`),
-			'/geminiPro': () => handleGemini(ctx, `geminiPro: ${message}`),
-			'/gemini': () => handleGemini(ctx, `gemini: ${message}`),
+			'/geminiPro': () => handleVertex(ctx, `geminiPro: ${message}`),
+			'/gemini': () => handleVertex(ctx, `gemini: ${message}`),
 			// '/o3mini': () => handleDuckDuckGo(ctx, `duck: ${message}`),
 			'/o4mini': () => handleGithubCopilot(ctx, `o4mini: ${message}`),
 			// '/grok': () => handleBlackbox(ctx, `grok: ${message}`),
@@ -300,6 +301,9 @@ Interações Premium:
 	},
 	callPollinationsModel(ctx: Context, commandMessage?: string): Promise<void> {
 		return handlePollinations(ctx, commandMessage);
+	},
+	callVertexModel(ctx: Context, commandMessage?: string): Promise<void> {
+		return handleVertex(ctx, commandMessage);
 	},
 	callArtaModel(ctx: Context, commandMessage?: string): Promise<void> {
 		return handleArta(ctx, commandMessage);

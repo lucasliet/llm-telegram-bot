@@ -79,7 +79,7 @@ function registerBotCommands() {
 	);
 	BOT.hears(
 		/^(geminiPro|gemini):/gi,
-		(ctx) => TelegramService.callAdminModel(ctx, TelegramService.callGeminiModel),
+		(ctx) => TelegramService.callAdminModel(ctx, TelegramService.callVertexModel),
 	);
 	BOT.hears(
 		/^(duck|duckgo):/gi,

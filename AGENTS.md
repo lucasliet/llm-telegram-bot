@@ -9,7 +9,7 @@
   - `adapter/`, `config/`, `prototype/`, `util/`: support modules
 - `tests/`: mirrors `src/` with `*.test.ts`
 - `resources/`: prompts and internal docs
-- `deno.json`: tasks, formatting, linting
+- `deno.json`: tasks, formatting, linting, and **centralized imports** (all external dependencies must be declared here)
 - `devrun.sh`, `run_tests.sh`: local dev and test helpers
 
 ## Build, Test, and Development Commands
@@ -21,6 +21,7 @@
 ## Coding Style & Naming Conventions
 - Language: TypeScript (`strict` mode). Use TSDoc for all functions; avoid inline `//` comments.
 - Formatting: tabs, semicolons, single quotes, line width 160 (see `deno.json`).
+- Imports: prefer `@/` alias (maps to `src/`) over relative paths like `../../`. Example: `import { foo } from '@/util/bar.ts'`.
 - Naming: files in `src/` use PascalCase and clear suffixes: `*Service.ts`, `*Handler.ts`, `*Repository.ts`.
 - Keep functions small, purposeful, and secure; avoid deprecated APIs; handle errors explicitly.
 
@@ -46,10 +47,12 @@ When writing code, do not add // comments. Just write the code.
 Maintain consistent indentation and spacing throughout the code.
 
 ### TSDocs on functions
-When writing functions, always include TSDoc comments to describe the function's purpose, parameters, and return value. since its typescript, there is no need to add types in the function signature. unless the code is javascript.
+When writing functions, always include TSDoc comments to describe the function's purpose, parameters, and return value. since its typescript, there is no need
+to add types in the function signature. unless the code is javascript.
 
 ### Clean code
-Write clean, readable code. Avoid unnecessary complexity and ensure that the code is easy to understand. Follow best practices for clean code and the programming language being used.
+Write clean, readable code. Avoid unnecessary complexity and ensure that the code is easy to understand. Follow best practices for clean code and the
+programming language being used.
 
 ### Avoid using deprecated APIs
 Avoid using deprecated APIs or methods. If a newer alternative is available, use that instead.
