@@ -138,6 +138,29 @@ function registerBotCommands() {
  */
 function configureMiddleware() {
 	APP.use(async (ctx, next) => {
+		const start = Date.now();
+		await next();
+		const ms = Date.now() - start;
+		console.log(`${ctx.request.method} ${ctx.request.url} - ${ms}ms`);
+	});
+
+	APP.use(async (ctx, next) => {
+		if (ctx.request.url.pathname === '/robots.txt') {
+			try {
+				const robotsTxt = await Deno.readTextFile('./static/robots.txt');
+				ctx.response.headers.set('Content-Type', 'text/plain');
+				ctx.response.body = robotsTxt;
+			} catch {
+				ctx.response.status = 200;
+				ctx.response.headers.set('Content-Type', 'text/plain');
+				ctx.response.body = 'User-agent: *\nDisallow: /';
+			}
+			return;
+		}
+		await next();
+	});
+
+	APP.use(async (ctx, next) => {
 		try {
 			if (ctx.request.url.pathname !== '/webhook') {
 				ctx.response.status = 200;
