@@ -10,6 +10,7 @@
 		"lineWidth": 160
 	},
 	"imports": {
+		"@std/encoding": "jsr:@std/encoding@^1.0.10",
 		"asserts": "https://deno.land/std@0.210.0/assert/mod.ts",
 		"mock": "https://deno.land/std@0.210.0/testing/mock.ts",
 		"grammy": "https://deno.land/x/grammy@v1.17.2/mod.ts",

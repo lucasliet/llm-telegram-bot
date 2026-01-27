@@ -61,14 +61,14 @@ export const FileUtils = {
 			return await ElevenLabsService.transcribeAudio(audioFile);
 		} catch (error) {
 			console.error('Erro ao transcrever áudio do ElevenLabs:', error);
-			if (isGptModelCommand || ADMIN_USER_IDS.includes(userId)) {
-				return await new OpenAiService().transcribeAudio(
-					audioFile,
-					audioUrl,
-				);
-			} else {
+			// if (isGptModelCommand || ADMIN_USER_IDS.includes(userId)) {
+			// 	return await new OpenAiService().transcribeAudio(
+			// 		audioFile,
+			// 		audioUrl,
+			// 	);
+			// } else {
 				return await CloudFlareService.transcribeAudio(audioFile);
-			}
+			// }
 		}
 	},
 

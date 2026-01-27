@@ -5,6 +5,7 @@ import ToolService from '@/service/ToolService.ts';
 import { cloudflareModels } from '@/config/models.ts';
 import { downloadTelegramFile } from './TelegramService.ts';
 import ToolUsageAdapter from '../adapter/ToolUsageAdapter.ts';
+import { encodeBase64 } from 'base64';
 
 const CLOUDFLARE_ACCOUNT_ID: string = Deno.env.get(
 	'CLOUDFLARE_ACCOUNT_ID',
@@ -191,19 +192,24 @@ export default {
 	 * @returns Transcribed text
 	 */
 	async transcribeAudio(audioFile: Promise<Uint8Array>): Promise<string> {
+		const audioData = await audioFile;
+		const base64Audio = encodeBase64(audioData);
+
 		const response = await fetch(
 			`https://api.cloudflare.com/client/v4/accounts/${CLOUDFLARE_ACCOUNT_ID}/ai/run/${sttModel}`,
 			{
 				method: 'POST',
 				headers: {
 					'Authorization': `Bearer ${CLOUDFLARE_API_KEY}`,
+					'Content-Type': 'application/json',
 				},
-				body: await audioFile,
+				body: JSON.stringify({ audio: base64Audio }),
 			},
 		);
 
 		if (!response.ok) {
-			throw new Error(`Failed to transcribe text: ${response.statusText}`);
+			const errorText = await response.text();
+			throw new Error(`Failed to transcribe audio: ${response.status} ${response.statusText} - ${errorText}`);
 		}
 
 		const { result: { text } } = await response.json();
