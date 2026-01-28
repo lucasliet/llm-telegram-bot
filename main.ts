@@ -50,16 +50,12 @@ function registerBotCommands() {
 	BOT.command('clear', (ctx) => clearChatHistoryHandler(ctx));
 
 	BOT.hears(
-		/^(oss|cloudflareImage):/gi,
+		/^(oss|cloudflareImage|image):/gi,
 		(ctx) => TelegramService.callAdminModel(ctx, TelegramService.callCloudflareModel),
 	);
 	BOT.hears(
 		/^(fala):/gi,
 		(ctx) => TelegramService.callAdminModel(ctx, TelegramService.callFala),
-	);
-	BOT.hears(
-		/^(codex):/gi,
-		(ctx) => TelegramService.callAdminModel(ctx, TelegramService.callCodexModel),
 	);
 	BOT.hears(
 		/^(perplexity|reasonSearch|search):/gi,
@@ -70,28 +66,12 @@ function registerBotCommands() {
 		(ctx) => TelegramService.callAdminModel(ctx, TelegramService.callOpenAIModel),
 	);
 	BOT.hears(
-		/^(gpt|gpt5|o4mini|claude|geminiPro):/gi,
+		/^(gpt|gpt5|claude|geminiPro):/gi,
 		(ctx) => TelegramService.callAdminModel(ctx, TelegramService.callGithubCopilotModel),
-	);
-	BOT.hears(
-		/^(black|gptonline|llama|r1online|r1|v3|mixtral|qwen|o1|o3Mini|o3High|gpt45|grok|image):/gi,
-		(ctx) => TelegramService.callAdminModel(ctx, TelegramService.callBlackboxModel),
 	);
 	BOT.hears(
 		/^(geminiPro|gemini):/gi,
 		(ctx) => TelegramService.callAdminModel(ctx, TelegramService.callVertexModel),
-	);
-	BOT.hears(
-		/^(duck|duckgo):/gi,
-		(ctx) => TelegramService.callAdminModel(ctx, TelegramService.callDuckDuckGoModel),
-	);
-	BOT.hears(
-		/^(phind):/gi,
-		(ctx) => TelegramService.callAdminModel(ctx, TelegramService.callPhindModel),
-	);
-	BOT.hears(
-		/^(isou):/gi,
-		(ctx) => TelegramService.callAdminModel(ctx, TelegramService.callIsouModel),
 	);
 	BOT.hears(
 		/^(pgpt|pgrok|po3|pclaude):/gi,

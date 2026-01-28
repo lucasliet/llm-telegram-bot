@@ -37,7 +37,7 @@ export default class GeminiService {
 	 * @param userKey - The user's unique key for chat history management.
 	 * @returns A promise that resolves to a StreamReplyResponse object.
 	 */
-	private async _streamResponse(
+	private _streamResponse(
 		modelName: string,
 		messages: CoreMessage[],
 		geminiHistoryForUpdate: ExpirableContent[],

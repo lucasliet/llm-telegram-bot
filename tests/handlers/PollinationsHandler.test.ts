@@ -11,7 +11,7 @@ Deno.test('PollinationsHandler streams text path', async () => {
 	await import('../../src/service/TelegramService.ts');
 	const mod = await import('../../src/handlers/PollinationsHandler.ts');
 	const svc = await import('../../src/service/PollinationsService.ts');
-	(svc.default as any).generateText = spy(() =>
+	(svc.default as any).prototype.generateText = spy(() =>
 		Promise.resolve({ reader: new ReadableStream().getReader(), onComplete: () => Promise.resolve(), responseMap: (s: string) => s })
 	);
 	await mod.handlePollinations(ctx);
@@ -30,7 +30,7 @@ Deno.test('PollinationsHandler image path replies with photo', async () => {
 	await import('../../src/service/TelegramService.ts');
 	const mod = await import('../../src/handlers/PollinationsHandler.ts');
 	const svc = await import('../../src/service/PollinationsService.ts');
-	(svc.default as any).generateImage = spy(() => Promise.resolve('https://img/polli.png'));
+	(svc.default as any).prototype.generateImage = spy(() => Promise.resolve('https://img/polli.png'));
 	await mod.handlePollinations(ctx);
 	assertEquals(ctx.replyWithPhoto.calls.length, 1);
 	restore();

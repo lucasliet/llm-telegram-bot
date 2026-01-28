@@ -90,7 +90,7 @@ async function getAccessTokenFromServiceAccount(credentials: {
  * Decodes base64 credentials and generates an OAuth2 access token.
  * Supports both ADC (refresh token) and service account (private key) formats.
  */
-async function getAccessToken(): Promise<string> {
+function getAccessToken(): Promise<string> {
   const credentials = JSON.parse(new TextDecoder().decode(decodeBase64(VERTEX_CREDENTIALS_BASE64)));
 
   if (credentials.refresh_token) {

@@ -4,7 +4,6 @@ import { pollinationsModels } from '@/config/models.ts';
 
 const modelMap = {
 	'polli': pollinationsModels.openai,
-	'pollireasoning': pollinationsModels.reasoning,
 };
 
 /**
@@ -26,19 +25,19 @@ export async function handlePollinations(
 	const command = message?.split(':')[0]?.toLowerCase() || 'none';
 	const prompt = message!.replace(`${command}:`, '');
 
+	const model = modelMap[command as keyof typeof modelMap];
+	const service = new PollinationsService(model);
+
 	if (command === 'polliimage') {
-		const imageUrl = await PollinationsService.generateImage(prompt);
+		const imageUrl = await service.generateImage(prompt);
 		await ctx.replyWithPhoto(imageUrl);
 		return;
 	}
 
-	const model = modelMap[command as keyof typeof modelMap];
-
-	const { reader, onComplete, responseMap } = await PollinationsService.generateText(
+	const { reader, onComplete, responseMap } = await service.generateText(
 		userKey,
 		quote ?? '',
 		prompt,
-		model,
 	);
 
 	ctx.streamReply(reader, onComplete, responseMap);

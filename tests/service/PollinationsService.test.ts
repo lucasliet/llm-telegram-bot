@@ -14,11 +14,11 @@ Deno.test('PollinationsService.generateText returns reader and onComplete', asyn
 			},
 		});
 		globalThis.fetch = spy(() => Promise.resolve(new Response(stream, { status: 200 }))) as any;
-		const { reader, onComplete, responseMap } = await (svc.default as any).generateText('user:1', '', 'hello', 'polli');
+		const { reader, onComplete, responseMap } = await new (svc.default as any)().generateText('user:1', '', 'hello');
 		const { done } = await reader.read();
 		assertEquals(done, false);
 		if (onComplete) await onComplete('ok');
-		assertEquals(typeof responseMap('data: test'), 'string');
+		assertEquals(typeof (new (svc.default as any)().responseMap ?? responseMap)('data: test'), 'string');
 	} finally {
 		globalThis.fetch = originalFetch;
 		restore();
@@ -28,6 +28,6 @@ Deno.test('PollinationsService.generateText returns reader and onComplete', asyn
 Deno.test('PollinationsService.generateImage returns pollinations URL', async () => {
 	setupKvStub();
 	const svc = await import('../../src/service/PollinationsService.ts');
-	const url = await (svc.default as any).generateImage('a prompt');
+	const url = await new (svc.default as any)().generateImage('a prompt');
 	assertEquals(url.includes('image.pollinations.ai'), true);
 });

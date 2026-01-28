@@ -33,8 +33,6 @@ Deno.test('TelegramService', async (t) => {
 		handleOpenAI: spy(() => Promise.resolve()),
 		handlePerplexity: spy(() => Promise.resolve()),
 		handleCloudflare: spy(() => Promise.resolve()),
-		handleBlackbox: spy(() => Promise.resolve()),
-		handlePuter: spy(() => Promise.resolve()),
 		handleGemini: spy(() => Promise.resolve()),
 	};
 
@@ -42,8 +40,6 @@ Deno.test('TelegramService', async (t) => {
 		handleOpenAI: globalThis.handleOpenAI,
 		handlePerplexity: globalThis.handlePerplexity,
 		handleCloudflare: globalThis.handleCloudflare,
-		handleBlackbox: globalThis.handleBlackbox,
-		handlePuter: globalThis.handlePuter,
 		handleGemini: globalThis.handleGemini,
 	};
 
@@ -166,7 +162,7 @@ Deno.test('TelegramService', async (t) => {
 
 	await t.step(
 		'callAdminModel should route to proper model for admin users',
-		async () => {
+		() => {
 			const origCallModel = TelegramService.callModel;
 			const mockCallModel = spy();
 			TelegramService.callModel = mockCallModel;
@@ -199,7 +195,7 @@ Deno.test('TelegramService', async (t) => {
 		},
 	);
 
-	await t.step('callModel should handle successful model calls', async () => {
+	await t.step('callModel should handle successful model calls', () => {
 		const mockSetInterval = spy(() => 123);
 		const mockClearInterval = spy();
 		globalThis.setInterval = mockSetInterval;
@@ -222,7 +218,7 @@ Deno.test('TelegramService', async (t) => {
 		assertSpyCalls(mockSetInterval, 1);
 	});
 
-	await t.step('callModel should handle errors in model calls', async () => {
+	await t.step('callModel should handle errors in model calls', () => {
 		const mockSetInterval = spy(() => 123);
 		const mockClearInterval = spy();
 		globalThis.setInterval = mockSetInterval;
@@ -248,8 +244,6 @@ Deno.test('TelegramService', async (t) => {
 		assertEquals(typeof TelegramService.callOpenAIModel, 'function');
 		assertEquals(typeof TelegramService.callPerplexityModel, 'function');
 		assertEquals(typeof TelegramService.callCloudflareModel, 'function');
-		assertEquals(typeof TelegramService.callBlackboxModel, 'function');
-		assertEquals(typeof TelegramService.callPuterModel, 'function');
 
 		const ctx = createMockContext();
 		const mockHandleOpenAI = spy();
@@ -269,8 +263,6 @@ Deno.test('TelegramService', async (t) => {
 	globalThis.handleOpenAI = originalHandlers.handleOpenAI;
 	globalThis.handlePerplexity = originalHandlers.handlePerplexity;
 	globalThis.handleCloudflare = originalHandlers.handleCloudflare;
-	globalThis.handleBlackbox = originalHandlers.handleBlackbox;
-	globalThis.handlePuter = originalHandlers.handlePuter;
 	globalThis.handleGemini = originalHandlers.handleGemini;
 
 	originalModule.default.setCurrentModel = originalSetCurrentModel;

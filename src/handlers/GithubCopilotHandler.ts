@@ -5,7 +5,7 @@ import { copilotModels } from '@/config/models.ts';
 const modelMap = {
 	'geminipro': copilotModels.gemini,
 	'gpt': copilotModels.gpt5mini,
-	'o4mini': copilotModels.o4mini,
+	'gpt5': copilotModels.gpt5,
 	'claude': copilotModels.claude,
 };
 

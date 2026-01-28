@@ -6,47 +6,20 @@ import { InlineKeyboard } from 'grammy';
 const adminCommandButtons = [
 	[['Modelo Atual', '/currentmodel']],
 	[
-		['Phind', '/phind'],
-		['Isou', '/isou'],
-	],
-	[
+		['Pollinations', '/polli'],
 		['Copilot GPT 5 Mini', '/gpt'],
-		['Copilot GPT o4 Mini', '/o4mini'],
-	],
-	[
-		['Copilot GPT 5', '/gpt5'],
-		['Copilot Sonnet 4', '/claude'],
 	],
 	[
 		['Llama 4 Maverick', '/llama'],
 		['GPT OSS 120b', '/oss'],
 	],
 	[
-		// ['Grok 3', '/grok'],
-		// ['GPT o3 Mini', '/o3mini'],
-	],
-	[
-		// ['Deepseek R1', '/r1'],
-		// ['Gemini 2.5 Pro', '/geminiPro'],
-	],
-	[
 		['Gemini 2.5 Flash', '/gemini'],
 		['Gemini 2.5 Pro', '/geminiPro'],
 	],
 	[
-		['Pollinations', '/polli'],
-		['Pollinations Reasoning', '/polliReasoning'],
-	],
-	[
 		['Sonar', '/perplexity'],
 		['Sonar Reasoning', '/perplexityReasoning'],
-	],
-	[
-		['PPLX GPT 5', '/pplxgpt'],
-		['PPLX Grok 4', '/pplxgrok'],
-	],
-	[
-		['PPLX Sonnet 4', '/pplxclaude'],
 	],
 	[['Limpar Histórico', '/clear']],
 ];
@@ -57,23 +30,8 @@ const adminCommandButtons = [
 const userCommandButtons = [
 	[['Modelo Atual', '/currentmodel']],
 	[
-		['Phind', '/phind'],
-	],
-	[
-		['Copilot GPT 5 Mini', '/gpt'],
-		['Isou', '/isou'],
-	],
-	[
 		['Pollinations', '/polli'],
-		['Pollinations Reasoning', '/polliReasoning'],
-	],
-	[
-		// ['Deepseek R1', '/r1'],
-		// ['Grok 3', '/grok'],
-	],
-	[
-		// ['Qwen', '/qwen'],
-		// ['Mixtral', '/mixtral'],
+		['Copilot GPT 5 Mini', '/gpt'],
 	],
 	[
 		['Llama 4 Maverick', '/llama'],
@@ -128,14 +86,9 @@ export const adminHelpMessage = `*Comandos inline*:
  * Help message for regular users (limited commands)
  */
 export const userHelpMessage = `*Comandos inline*:
-\\- \`phind:\` mensagem \\- Faz uma pergunta usando o modelo __Phind__ com acesso web
-\\- \`isou:\` mensagem \\- Faz uma pergunta usando o modelo __Isou__ com acesso web
 \\- \`oss:\` mensagem \\- Faz uma pergunta usando o modelo de codigo aberto__GPT OSS 120b__
 \\- \`gpt:\` mensagem \\- Gera texto com __GPT 5 mini__
 \\- \`llama:\` mensagem \\- Gera texto com o __Llama 4 Maverick__
-\\- \`polliImage:\` mensagem \\- Gera imagens com __Pollinations__
-\\- \`artaImage:\` mensagem \\- Gera imagens com __Arta__
 \\- \`polli:\` mensagem \\- Faz uma pergunta usando o modelo __Pollinations__
-\\- \`polliReasoning:\` mensagem \\- Faz uma pergunta usando o modelo __Pollinations Reasoning__
 
 *Seleção de modelos de linguagem*:`;

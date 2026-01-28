@@ -80,7 +80,7 @@ class TokenManager {
 }
 
 export default class GithubCopilotService extends OpenAiService {
-	public constructor(model: string = 'o4-mini') {
+	public constructor(model: string = 'gpt-5-mini') {
 		super(
 			new OpenAi({
 				apiKey: COPILOT_TOKEN,

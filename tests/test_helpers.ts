@@ -93,13 +93,13 @@ export class MockKvStore {
 		return { ok: true };
 	}
 
-	async delete(key: unknown): Promise<{ ok: true }> {
+	delete(key: unknown): { ok: true } {
 		const keyStr = this.stringifyKey(key);
 		this.store.delete(keyStr);
 		return { ok: true };
 	}
 
-	async close(): Promise<void> {
+	close(): void {
 		this.store.clear();
 	}
 

@@ -7,26 +7,20 @@ import { ModelCommand, modelCommands, WHITELISTED_MODELS } from '@/config/models
 
 import {
 	handleArta,
-	handleBlackbox,
 	handleCloudflare,
-	handleCodex,
-	handleDuckDuckGo,
 	handleFala,
 	handleGemini,
 	handleGithubCopilot,
 	handleVertex,
-	handleIsou,
 	handleOpenAI,
 	handleOpenRouter,
 	handleOpenWebUI,
 	handlePerplexity,
-	handlePhind,
 	handlePollinations,
-	handlePuter,
 } from '@/handlers/index.ts';
 
 import { FileUtils } from '@/util/FileUtils.ts';
-import { PhindService } from './PhindService.ts';
+import GithubCopilotService from './openai/GithubCopilotService.ts';
 
 const TOKEN = Deno.env.get('BOT_TOKEN') as string;
 const ADMIN_USER_IDS: number[] = (Deno.env.get('ADMIN_USER_IDS') as string)
@@ -211,31 +205,14 @@ Interações Premium:
 		const currentModel = await getCurrentModel(userKey);
 
 		const modelHandlers: Record<ModelCommand, () => Promise<void>> = {
+			'/polli': () => handlePollinations(ctx, `polli: ${message}`),
 			'/gpt': () => handleGithubCopilot(ctx, `gpt: ${message}`),
-			'/gpt5': () => handleGithubCopilot(ctx, `gpt5: ${message}`),
-			'/codex': () => handleCodex(ctx, `codex: ${message}`),
-			'/perplexity': () => handlePerplexity(ctx, `perplexity: ${message}`),
-			'/perplexityReasoning': () => handlePerplexity(ctx, `perplexityReasoning: ${message}`),
 			'/oss': () => handleCloudflare(ctx, `oss: ${message}`),
 			'/llama': () => handleOpenRouter(ctx, `llama: ${message!}`),
-			// '/r1': () => handleBlackbox(ctx, `r1: ${message}`),
-			// '/r1online': () => handleBlackbox(ctx, `r1online: ${message}`),
-			// '/mixtral': () => handleBlackbox(ctx, `mixtral: ${message}`),
-			// '/qwen': () => handleBlackbox(ctx, `qwen: ${message}`),
-			'/claude': () => handleGithubCopilot(ctx, `claude: ${message}`),
-			'/geminiPro': () => handleVertex(ctx, `geminiPro: ${message}`),
 			'/gemini': () => handleVertex(ctx, `gemini: ${message}`),
-			// '/o3mini': () => handleDuckDuckGo(ctx, `duck: ${message}`),
-			'/o4mini': () => handleGithubCopilot(ctx, `o4mini: ${message}`),
-			// '/grok': () => handleBlackbox(ctx, `grok: ${message}`),
-			'/phind': () => handlePhind(ctx, `phind: ${message}`),
-			'/isou': () => handleIsou(ctx, `isou: ${message}`),
-			'/pplxgpt': () => handleOpenWebUI(ctx, `pgpt: ${message}`),
-			'/pplxgrok': () => handleOpenWebUI(ctx, `pgrok: ${message}`),
-			'/pplxclaude': () => handleOpenWebUI(ctx, `pclaude: ${message}`),
-			'/pplxo3': () => handleOpenWebUI(ctx, `po3: ${message}`),
-			'/polli': () => handlePollinations(ctx, `polli: ${message}`),
-			'/polliReasoning': () => handlePollinations(ctx, `polliReasoning: ${message}`),
+			'/geminiPro': () => handleVertex(ctx, `geminiPro: ${message}`),
+			'/perplexity': () => handlePerplexity(ctx, `perplexity: ${message}`),
+			'/perplexityReasoning': () => handlePerplexity(ctx, `perplexityReasoning: ${message}`),
 		};
 
 		const handler = modelHandlers[currentModel];
@@ -252,47 +229,18 @@ Interações Premium:
 	callPerplexityModel(ctx: Context, commandMessage?: string): Promise<void> {
 		return handlePerplexity(ctx, commandMessage);
 	},
-
 	callOpenAIModel(ctx: Context, commandMessage?: string): Promise<void> {
 		return handleOpenAI(ctx, commandMessage);
 	},
-
 	callCloudflareModel(ctx: Context, commandMessage?: string): Promise<void> {
 		return handleCloudflare(ctx, commandMessage);
 	},
-
-	callBlackboxModel(ctx: Context, commandMessage?: string): Promise<void> {
-		return handleBlackbox(ctx, commandMessage);
-	},
-
 	callOpenRouterModel(ctx: Context, commandMessage?: string): Promise<void> {
 		return handleOpenRouter(ctx, commandMessage);
 	},
-
-	callPuterModel(ctx: Context, commandMessage?: string): Promise<void> {
-		return handlePuter(ctx, commandMessage);
-	},
-
-	callDuckDuckGoModel(ctx: Context, commandMessage?: string): Promise<void> {
-		return handleDuckDuckGo(ctx, commandMessage);
-	},
-
 	callGithubCopilotModel(ctx: Context, commandMessage?: string): Promise<void> {
 		return handleGithubCopilot(ctx, commandMessage);
 	},
-
-	callCodexModel(ctx: Context, commandMessage?: string): Promise<void> {
-		return handleCodex(ctx, commandMessage);
-	},
-
-	callPhindModel(ctx: Context, commandMessage?: string): Promise<void> {
-		return handlePhind(ctx, commandMessage);
-	},
-
-	callIsouModel(ctx: Context, commandMessage?: string): Promise<void> {
-		return handleIsou(ctx, commandMessage);
-	},
-
 	callOpenWebUIModel(ctx: Context, commandMessage?: string): Promise<void> {
 		return handleOpenWebUI(ctx, commandMessage);
 	},
@@ -309,7 +257,7 @@ Interações Premium:
 		return handleArta(ctx, commandMessage);
 	},
 	callFala(ctx: Context, commandMessage?: string): Promise<void> {
-		return handleFala(ctx, new PhindService(), commandMessage);
+		return handleFala(ctx, new GithubCopilotService(), commandMessage);
 	},
 };
 
