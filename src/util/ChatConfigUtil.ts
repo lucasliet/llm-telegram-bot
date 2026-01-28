@@ -42,6 +42,22 @@ export function convertGeminiHistoryToGPT(
 }
 
 /**
+ * Converts Gemini history format to OpenAI Responses API input format.
+ * @param history - History in Gemini format.
+ * @returns Array of ResponseInputItem for the Responses API.
+ */
+export function convertGeminiHistoryToResponsesInput(
+	history: ExpirableContent[],
+): OpenAi.Responses.ResponseInputItem[] {
+	return history.map((content) => {
+		return {
+			role: content.role === 'user' ? 'user' : 'assistant',
+			content: content.parts.map((part) => part.text).join(' '),
+		} as OpenAi.Responses.ResponseInputItem;
+	});
+}
+
+/**
  * Maps an array of OpenAI ChatCompletionTool objects to an array of OpenAI.Responses.Tool objects.
  * This function is used to adapt tool schemas for the Responses API.
  * @param tools - An optional array of OpenAI ChatCompletionTool objects.
@@ -58,7 +74,7 @@ export function mapChatToolsToResponsesTools(
 		if (t.type === 'function' && t.function) {
 			const params = t.function.parameters || {};
 			const props = params.properties || {};
-			const required = Object.keys(props);
+
 			return {
 				type: 'function',
 				name: t.function.name,
@@ -68,7 +84,7 @@ export function mapChatToolsToResponsesTools(
 					additionalProperties: false,
 					...params,
 					properties: props,
-					required,
+					required: params.required || [],
 				},
 				strict: (t as any).strict ?? true,
 			} as OpenAi.Responses.Tool;

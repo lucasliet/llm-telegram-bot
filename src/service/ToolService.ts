@@ -1,6 +1,7 @@
 import OpenAi from 'npm:openai';
 import { XMLParser } from 'npm:fast-xml-parser';
 import { parse } from 'npm:node-html-parser';
+import { mapChatToolsToResponsesTools } from '@/util/ChatConfigUtil.ts';
 /**
  * Represents a search result from SearxNG.
  */
@@ -437,4 +438,6 @@ export default class ToolService {
 	]);
 
 	static schemas: OpenAi.ChatCompletionTool[] = Array.from(ToolService.tools.values()).map((tool) => tool.schema);
+
+	static responsesSchemas: OpenAi.Responses.Tool[] = mapChatToolsToResponsesTools(ToolService.schemas);
 }
