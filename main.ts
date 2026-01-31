@@ -1,6 +1,7 @@
 import { Application } from 'oak';
 import { oakCors } from 'oak-cors';
 import { Bot, Context, webhookCallback } from 'grammy';
+import { autoChatAction, AutoChatActionFlavor } from 'grammy-auto-chat-action';
 import TelegramService from '@/service/TelegramService.ts';
 import { clearChatHistory } from '@/repository/ChatRepository.ts';
 import { modelCommands } from '@/config/models.ts';
@@ -15,7 +16,10 @@ const PORT: number = parseInt(Deno.env.get('PORT') as string) || 3333;
 const ADMIN_USER_IDS: number[] = (Deno.env.get('ADMIN_USER_IDS') as string)
 	.split('|').map((id) => parseInt(id));
 
-const BOT = new Bot(TOKEN);
+type MyContext = Context & AutoChatActionFlavor;
+
+const BOT = new Bot<MyContext>(TOKEN);
+BOT.use(autoChatAction());
 const APP = new Application();
 
 APP.use(oakCors());
@@ -162,7 +166,7 @@ function configureMiddleware() {
  * Clear chat history and notify user
  * @param ctx - Telegram context
  */
-async function clearChatHistoryHandler(ctx: Context) {
+async function clearChatHistoryHandler(ctx: MyContext) {
 	const userId = ctx.msg?.from?.id || ctx.from?.id;
 	const userKey = `user:${userId}`;
 	await clearChatHistory(userKey);
