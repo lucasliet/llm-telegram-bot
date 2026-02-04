@@ -2,7 +2,7 @@ import OpenAi from 'npm:openai';
 import OpenAiService from './OpenAIService.ts';
 import { StreamReplyResponse } from '@/util/ChatConfigUtil.ts';
 
-const COPILOT_TOKEN: string = Deno.env.get('COPILOT_TOKEN') as string;
+const COPILOT_GITHUB_TOKEN: string = Deno.env.get('COPILOT_GITHUB_TOKEN') as string;
 
 interface CopilotTokenCache {
 	token: string;
@@ -83,7 +83,7 @@ export default class GithubCopilotService extends OpenAiService {
 	public constructor(model: string = 'gpt-5-mini') {
 		super(
 			new OpenAi({
-				apiKey: COPILOT_TOKEN,
+				apiKey: COPILOT_GITHUB_TOKEN,
 				baseURL: 'https://api.githubcopilot.com',
 				defaultHeaders: {
 					'Copilot-Vision-Request': 'true',
@@ -97,7 +97,7 @@ export default class GithubCopilotService extends OpenAiService {
 	private async ensureAuthenticated(): Promise<void> {
 		try {
 			const tokenManager = TokenManager.getInstance();
-			const copilotToken = await tokenManager.getToken(COPILOT_TOKEN);
+			const copilotToken = await tokenManager.getToken(COPILOT_GITHUB_TOKEN);
 			this.openai = new OpenAi({
 				apiKey: copilotToken,
 				baseURL: 'https://api.individual.githubcopilot.com',

@@ -114,6 +114,7 @@ Context.prototype.streamReply = async function (
 	const { message_id } = await this.replyWithQuote('processando...');
 	let result = lastResult || '';
 	let lastUpdate = Date.now();
+	let lastSentMessage = '';
 
 	while (true) {
 		const { done, value } = await reader.read();
@@ -130,13 +131,16 @@ Context.prototype.streamReply = async function (
 				const remainingChunk = result.substring(4093) + chunk;
 				result = result.substring(0, 4093);
 
-				lastUpdate = await editMessageWithCompletionEvery3Seconds(
+				const updateResult = await editMessageWithCompletionEvery3Seconds(
 					this,
 					message_id,
 					result,
 					lastUpdate,
+					lastSentMessage,
 					true,
 				);
+				lastUpdate = updateResult.timestamp;
+				lastSentMessage = updateResult.lastMessage;
 				onComplete(result);
 				return this.streamReply(
 					reader,
@@ -147,12 +151,15 @@ Context.prototype.streamReply = async function (
 			}
 		}
 
-		lastUpdate = await editMessageWithCompletionEvery3Seconds(
+		const updateResult = await editMessageWithCompletionEvery3Seconds(
 			this,
 			message_id,
 			result,
 			lastUpdate,
+			lastSentMessage,
 		);
+		lastUpdate = updateResult.timestamp;
+		lastSentMessage = updateResult.lastMessage;
 	}
 
 	let sanitizedResult = result.removeThinkingChatCompletion()
@@ -226,25 +233,32 @@ async function editMessageWithCompletionEvery3Seconds(
 	messageId: number,
 	message: string,
 	lastUpdate: number,
+	lastSentMessage: string,
 	isLastMessage = false,
-): Promise<number> {
+): Promise<{ timestamp: number; lastMessage: string }> {
 	const now = Date.now();
 	const has2SecondsPassed = now - lastUpdate >= 2000;
+	const displayMessage = message + (isLastMessage ? '' : '...');
 
-	if (isLastMessage || has2SecondsPassed) {
-		const displayMessage = message + (isLastMessage ? '' : '...');
-
+	if ((isLastMessage || has2SecondsPassed) && displayMessage !== lastSentMessage) {
 		try {
 			await ctx.api.editMessageText(ctx.chat!.id, messageId, displayMessage, {
 				parse_mode: 'Markdown',
 			});
-		} catch {
+			return { timestamp: now, lastMessage: displayMessage };
+		} catch (error) {
+			if (error instanceof Error && error.message.includes('message is not modified')) {
+				return { timestamp: lastUpdate, lastMessage: lastSentMessage };
+			}
 			console.warn(MARKDOWN_ERROR_MESSAGE, displayMessage);
-			await ctx.api.editMessageText(ctx.chat!.id, messageId, displayMessage);
+			try {
+				await ctx.api.editMessageText(ctx.chat!.id, messageId, displayMessage);
+				return { timestamp: now, lastMessage: displayMessage };
+			} catch {
+				return { timestamp: lastUpdate, lastMessage: lastSentMessage };
+			}
 		}
-
-		return now;
 	}
 
-	return lastUpdate;
+	return { timestamp: lastUpdate, lastMessage: lastSentMessage };
 }
