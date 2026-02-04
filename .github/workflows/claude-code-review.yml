@@ -2,7 +2,7 @@ name: Claude Code Review
 
 on:
   pull_request:
-    types: [opened, synchronize]
+    types: [opened, synchronize, ready_for_review, reopened]
     # Optional: Only run on specific file changes
     # paths:
     #   - "src/**/*.ts"
@@ -12,46 +12,100 @@ on:
 
 jobs:
   claude-review:
-    # Optional: Filter by PR author
-    # if: |
-    #   github.event.pull_request.user.login == 'external-contributor' ||
-    #   github.event.pull_request.user.login == 'new-developer' ||
-    #   github.event.pull_request.author_association == 'FIRST_TIME_CONTRIBUTOR'
-    
     runs-on: ubuntu-latest
     permissions:
       contents: read
-      pull-requests: read
+      pull-requests: write
       issues: read
       id-token: write
-    
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
           fetch-depth: 1
 
+      - name: Minimize previous review comments
+        id: check-previous-review
+        continue-on-error: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          COMMENTS=$(gh api repos/${{ github.repository }}/issues/${{ github.event.pull_request.number }}/comments --jq '.[] | select(.user.login == "claude[bot]") | .node_id')
+          
+          echo "$COMMENTS" | while read NODE_ID; do
+            echo "Minimizando comentário: $NODE_ID"
+            gh api graphql -f query='
+              mutation {
+                minimizeComment(input: {subjectId: "'$NODE_ID'", classifier: OUTDATED}) {
+                  minimizedComment {
+                    isMinimized
+                  }
+                }
+              }
+            '
+          done
+
+      - name: Set AI Model
+        id: set-model
+        run: |
+          if [ "${{ steps.check-previous-review.outcome }}" == "success" ]; then
+            echo "AI_MODEL=claude-haiku-4-5" >> $GITHUB_OUTPUT
+            echo "Usando claude-haiku-4-5 (review de acompanhamento)"
+          else
+            echo "AI_MODEL=claude-sonnet-4-5" >> $GITHUB_OUTPUT
+            echo "Usando claude-sonnet-4-5 (primeira review ou fallback)"
+          fi
+
       - name: Run Claude Code Review
         id: claude-review
         uses: anthropics/claude-code-action@v1
         with:
+          plugin_marketplaces: 'https://github.com/anthropics/claude-code.git'
+          plugins: 'code-review@claude-code-plugins'
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
           prompt: |
             REPO: ${{ github.repository }}
             PR NUMBER: ${{ github.event.pull_request.number }}
 
-            Please review this pull request and provide feedback on:
+            IMPORTANT - Before reviewing, check the PR comments thread for previous code reviews.
+
+            If previous reviews exist:
+            1. DO NOT repeat suggestions that were already made
+            2. Check if previous suggestions were addressed in subsequent commits
+            3. For each previously suggested item:
+               - If FIXED: briefly acknowledge it was resolved (✅)
+               - If NOT FIXED: remind about the pending suggestion
+               - If PARTIALLY FIXED: note what still needs attention
+            4. focus your review only in the commits added since the last review, not the full PR
+
+            For NEW changes (commits after the last review), provide feedback on:
             - Code quality and best practices
             - Potential bugs or issues
             - Performance considerations
             - Security concerns
             - Test coverage
-            
-            Use the repository's CLAUDE.md for guidance on style and conventions. Be constructive and helpful in your feedback.
+
+            Do not nitpick, focus your review in major issues that cannot be merged.
+            address your suggestions to the class and line you are referring to.
+
+            Structure your review as:
+            ## Previous Suggestions Status (if applicable, if not, just ignore section, don't write anything)
+            [Status of each previous suggestion]
+
+            ## New Findings (if that is the first review, don't add this title)
+            [New issues found in recent commits]
+
+            ## Veredict [commit-hash]
+            [Your final verdict, and if you approve the PR or not]
+
+            Use the repository's AGENTS.md for guidance on style and conventions. Be constructive and helpful in your feedback.
+
+            answer the review in brazilian portuguese.
 
             Use `gh pr comment` with your Bash tool to leave your review as a comment on the PR.
-          
+          claude_args: |
+            --model ${{ steps.set-model.outputs.AI_MODEL }}
+            --allowedTools "Bash(gh issue view:*),Bash(gh search:*),Bash(gh issue list:*),Bash(gh pr comment:*),Bash(gh pr diff:*),Bash(gh pr view:*),Bash(gh pr list:*)"
           # See https://github.com/anthropics/claude-code-action/blob/main/docs/usage.md
-          # or https://docs.claude.com/en/docs/claude-code/sdk#command-line for available options
-          claude_args: '--allowed-tools "Bash(gh issue view:*),Bash(gh search:*),Bash(gh issue list:*),Bash(gh pr comment:*),Bash(gh pr diff:*),Bash(gh pr view:*),Bash(gh pr list:*)"'
-
+          # or https://code.claude.com/docs/en/cli-reference for available options
