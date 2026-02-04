@@ -7,7 +7,7 @@ const originalOpenKv = Deno.openKv;
 Deno.openKv = () => Promise.resolve(mockKv as unknown as Deno.Kv);
 
 const userKey = 'user:12345';
-const testModel = '/gpt';
+const testModel = '/polli';
 
 Deno.test('ChatRepository', async (t) => {
 	const {
@@ -37,22 +37,17 @@ Deno.test('ChatRepository', async (t) => {
 		},
 	);
 
-	await t.step(
-		'getChatHistory should fill missing createdAt',
-		async () => {
-			resetKv();
+	await t.step('getChatHistory should fill missing createdAt', async () => {
+		resetKv();
 
-			const incomplete = [
-				{ role: 'user', parts: [{ text: 'Hi' }] },
-			];
-			const compressed = compressObject(incomplete);
-			await mockKv.set([userKey, 'chat-history'], compressed);
+		const incomplete = [{ role: 'user', parts: [{ text: 'Hi' }] }];
+		const compressed = compressObject(incomplete);
+		await mockKv.set([userKey, 'chat-history'], compressed);
 
-			const history = await getChatHistory(userKey);
-			const created = history[0].createdAt > 0;
-			assertEquals(created, true);
-		},
-	);
+		const history = await getChatHistory(userKey);
+		const created = history[0].createdAt > 0;
+		assertEquals(created, true);
+	});
 
 	await t.step(
 		'addContentToChatHistory should add messages to history',
@@ -62,13 +57,7 @@ Deno.test('ChatRepository', async (t) => {
 			let history = await getChatHistory(userKey);
 			assertEquals(history, []);
 
-			await addContentToChatHistory(
-				history,
-				'',
-				'Hello',
-				'Hi there!',
-				userKey,
-			);
+			await addContentToChatHistory(history, '', 'Hello', 'Hi there!', userKey);
 
 			history = await getChatHistory(userKey);
 			assertEquals(history.length, 2);
@@ -107,13 +96,7 @@ Deno.test('ChatRepository', async (t) => {
 				createdAt: Date.now() - 2 * 60 * 60 * 24 * 1000,
 			};
 			let history = [old];
-			await addContentToChatHistory(
-				history,
-				'',
-				'new',
-				'reply',
-				userKey,
-			);
+			await addContentToChatHistory(history, '', 'new', 'reply', userKey);
 
 			history = await getChatHistory(userKey);
 			const hasOld = history.some((m) => m.parts[0].text === 'old');
@@ -125,13 +108,7 @@ Deno.test('ChatRepository', async (t) => {
 		resetKv();
 
 		let history = await getChatHistory(userKey);
-		await addContentToChatHistory(
-			history,
-			'',
-			'Hello',
-			'Hi there!',
-			userKey,
-		);
+		await addContentToChatHistory(history, '', 'Hello', 'Hi there!', userKey);
 
 		history = await getChatHistory(userKey);
 		assertEquals(history.length, 2);
@@ -148,7 +125,7 @@ Deno.test('ChatRepository', async (t) => {
 			resetKv();
 
 			let model = await getCurrentModel(userKey);
-			assertEquals(model, '/phind');
+			assertEquals(model, '/polli');
 
 			await setCurrentModel(userKey, testModel);
 

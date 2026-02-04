@@ -11,12 +11,12 @@ import {
 	handleFala,
 	handleGemini,
 	handleGithubCopilot,
-	handleVertex,
 	handleOpenAI,
 	handleOpenRouter,
 	handleOpenWebUI,
 	handlePerplexity,
 	handlePollinations,
+	handleVertex,
 } from '@/handlers/index.ts';
 
 import { FileUtils } from '@/util/FileUtils.ts';
@@ -24,7 +24,8 @@ import GithubCopilotService from './openai/GithubCopilotService.ts';
 
 const TOKEN = Deno.env.get('BOT_TOKEN') as string;
 const ADMIN_USER_IDS: number[] = (Deno.env.get('ADMIN_USER_IDS') as string)
-	.split('|').map((id) => parseInt(id));
+	.split('|')
+	.map((id) => parseInt(id));
 
 /**
  * Helper to keep Deno job alive during long-running requests
@@ -64,8 +65,8 @@ export default {
 		ctx: Context,
 		modelCallFunction: (ctx: Context) => Promise<void>,
 	): void {
-		const userId = ctx.from?.id!;
-		if (ADMIN_USER_IDS.includes(userId)) {
+		const userId = ctx.from?.id;
+		if (userId && ADMIN_USER_IDS.includes(userId)) {
 			this.callModel(ctx, modelCallFunction);
 		} else {
 			this.callModel(ctx, this.replyTextContent);
@@ -110,18 +111,19 @@ export default {
 	 */
 	async getUsage(ctx: Context): Promise<any> {
 		const { userId } = await ctx.extractContextKeys();
-		if (ADMIN_USER_IDS.includes(userId!)) {
-			const data = await getUsage();
+		if (!userId || !ADMIN_USER_IDS.includes(userId)) return;
 
-			const quotas = (data as any).quota_snapshots ?? {};
-			const chat = quotas.chat as Quota | undefined;
-			const completions = quotas.completions as Quota | undefined;
-			const premium = quotas.premium_interactions as Quota | undefined;
+		const data = await getUsage();
 
-			const formatted = `🤖 
+		const quotas = (data as any).quota_snapshots ?? {};
+		const chat = quotas.chat as Quota | undefined;
+		const completions = quotas.completions as Quota | undefined;
+		const premium = quotas.premium_interactions as Quota | undefined;
+
+		const formatted = `🤖
 GitHub Copilot - Status de Uso
 
-📋 
+📋
 Informações Gerais:
 • *Plano*: ${(data as any).copilot_plan ?? 'n/a'}
 • *Tipo de acesso*: ${(data as any).access_type_sku?.replaceAll('_', '\\_') ?? 'n/a'}
@@ -129,29 +131,28 @@ Informações Gerais:
 • *Data de atribuição*: ${formatDate((data as any).assigned_date)}
 • *Próxima renovação de cota*: ${formatDate((data as any).quota_reset_date)}
 
-📊 
+📊
 Cotas de Uso:
 
-🗨️ 
+🗨️
 Chat:
 • *Status*: ${formatQuota(chat)}
 • *Overage permitido*: ${chat?.overage_permitted ? 'Sim' : 'Não'}
 • *Contador de overage*: ${chat?.overage_count ?? 0}
 
-💡 
+💡
 Completions (Autocompletar):
 • *Status*: ${formatQuota(completions)}
 • *Overage permitido*: ${completions?.overage_permitted ? 'Sim' : 'Não'}
 • *Contador de overage*: ${completions?.overage_count ?? 0}
 
-⭐ 
+⭐
 Interações Premium:
 • *Status*: ${formatQuota(premium)}
 • *Overage permitido*: ${premium?.overage_permitted ? 'Sim' : 'Não'}
 • *Contador de overage*: ${premium?.overage_count ?? 0}`;
 
-			ctx.reply(formatted, { parse_mode: 'Markdown' });
-		}
+		ctx.reply(formatted, { parse_mode: 'Markdown' });
 	},
 
 	/**
@@ -161,7 +162,7 @@ Interações Premium:
 	 */
 	async getAdminIds(ctx: Context): Promise<number[]> {
 		const { userId } = await ctx.extractContextKeys();
-		if (ADMIN_USER_IDS.includes(userId!)) return ADMIN_USER_IDS;
+		if (userId && ADMIN_USER_IDS.includes(userId)) return ADMIN_USER_IDS;
 		return [];
 	},
 
@@ -181,14 +182,16 @@ Interações Premium:
 	 */
 	async setCurrentModel(ctx: Context): Promise<void> {
 		console.info(`user: ${ctx.msg?.from?.id}, message: ${ctx.message?.text}`);
-		const { userId, userKey, contextMessage: message } = await ctx
-			.extractContextKeys();
+		const {
+			userId,
+			userKey,
+			contextMessage: message,
+		} = await ctx.extractContextKeys();
 
 		const command = (message || ctx.callbackQuery?.data) as ModelCommand;
 
 		const isValidCommand = modelCommands.includes(command);
-		const isAuthorizedUser = ADMIN_USER_IDS.includes(userId!) ||
-			WHITELISTED_MODELS.includes(command);
+		const isAuthorizedUser = (userId && ADMIN_USER_IDS.includes(userId)) || WHITELISTED_MODELS.includes(command);
 
 		if (!isValidCommand || !isAuthorizedUser) return;
 
@@ -271,10 +274,7 @@ export const transcribeAudio = (
 	return FileUtils.transcribeAudio(userId, userKey, ctx, audio);
 };
 
-export async function textToSpeech(
-	ctx: Context,
-	text: string,
-): Promise<void> {
+export async function textToSpeech(ctx: Context, text: string): Promise<void> {
 	const audioFile = await FileUtils.textToSpeech(text);
 
 	ctx.replyWithVoice(audioFile, {
@@ -290,8 +290,8 @@ export async function textToSpeech(
 export async function getUsage() {
 	const url = 'https://api.github.com/copilot_internal/user';
 	const headers: Record<string, string> = {
-		'Accept': 'application/json',
-		'Authorization': `token ${Deno.env.get('COPILOT_TOKEN')}`,
+		Accept: 'application/json',
+		Authorization: `token ${Deno.env.get('COPILOT_GITHUB_TOKEN')}`,
 		'Editor-Version': 'vscode/1.98.1',
 		'Editor-Plugin-Version': 'copilot-chat/0.26.7',
 		'User-Agent': 'GitHubCopilotChat/0.26.7',

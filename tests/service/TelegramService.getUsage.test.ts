@@ -3,7 +3,11 @@ import { spy } from 'mock';
 import { mockDenoEnv } from '../test_helpers.ts';
 
 Deno.test('TelegramService.getUsage replies formatted for admin', async () => {
-	mockDenoEnv({ BOT_TOKEN: 't', ADMIN_USER_IDS: '12345|678', COPILOT_TOKEN: 'ct' });
+	mockDenoEnv({
+		BOT_TOKEN: 't',
+		ADMIN_USER_IDS: '12345|678',
+		COPILOT_GITHUB_TOKEN: 'ct',
+	});
 	const { setupKvStub } = await import('../stubs/kv.ts');
 	setupKvStub();
 	const originalFetch = globalThis.fetch;
@@ -18,9 +22,23 @@ Deno.test('TelegramService.getUsage replies formatted for admin', async () => {
 						assigned_date: new Date().toISOString(),
 						quota_reset_date: new Date().toISOString(),
 						quota_snapshots: {
-							chat: { entitlement: 100, remaining: 50, overage_permitted: false, overage_count: 0 },
-							completions: { entitlement: 100, remaining: 100, overage_permitted: false, overage_count: 0 },
-							premium_interactions: { percent_remaining: 80, overage_permitted: true, overage_count: 1 },
+							chat: {
+								entitlement: 100,
+								remaining: 50,
+								overage_permitted: false,
+								overage_count: 0,
+							},
+							completions: {
+								entitlement: 100,
+								remaining: 100,
+								overage_permitted: false,
+								overage_count: 0,
+							},
+							premium_interactions: {
+								percent_remaining: 80,
+								overage_permitted: true,
+								overage_count: 1,
+							},
 						},
 					}),
 					{ status: 200 },

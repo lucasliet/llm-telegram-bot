@@ -33,7 +33,7 @@ esse projeto utiliza o [Deno deploy](https://deno.com/deploy) e [Deno kv](https:
   - `PERPLEXITY_API_KEY` - api key da [Perplexity](https://docs.perplexity.ai/guides/getting-started) para uso do modelo pago
   - `GEMINI_API_KEY` - api key da [Google](https://aistudio.google.com/app/apikey?hl=pt-br) para uso do modelo pago
   - `OPENROUTER_API_KEY` - api key da [OpenRouter](https://openrouter.ai/settings/keys) para uso do modelo pago
-  - `COPILOT_TOKEN` - token do [Copilot](https://github.com/features/copilot) para uso do modelo pago. Para obter o token, configure a extensão do Copilot no VSCode e extraia o token do arquivo `~/.config/github-copilot/apps.json`.
+  - `COPILOT_GITHUB_TOKEN` - token do [Copilot](https://github.com/features/copilot) para uso do modelo pago. Para obter o token, configure a extensão do Copilot no VSCode e extraia o token do arquivo `~/.config/github-copilot/apps.json`.
 
 - crie um arquivo .env na raiz do projeto e configure as variaveis de ambiente nele, no formato `VARIAVEL=valor`
   ```bash
