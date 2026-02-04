@@ -254,7 +254,8 @@ async function editMessageWithCompletionEvery3Seconds(
 			try {
 				await ctx.api.editMessageText(ctx.chat!.id, messageId, displayMessage);
 				return { timestamp: now, lastMessage: displayMessage };
-			} catch {
+			} catch (fallbackError) {
+				console.error(`Failed to edit message ${messageId} in chat ${ctx.chat!.id}:`, fallbackError);
 				return { timestamp: lastUpdate, lastMessage: lastSentMessage };
 			}
 		}

@@ -26,7 +26,6 @@ export class ResponsesAPIStreamProcessor implements StreamProcessor {
 			controller.enqueue(value);
 			buffer += decoder.decode(value, { stream: true });
 
-			// Process complete lines (SSE events)
 			let newlineIndex;
 			while ((newlineIndex = buffer.indexOf('\n')) !== -1) {
 				const line = buffer.slice(0, newlineIndex).trim();
@@ -34,8 +33,15 @@ export class ResponsesAPIStreamProcessor implements StreamProcessor {
 
 				if (!line) continue;
 
+				let jsonPayload = line;
+				if (line.startsWith('data:')) {
+					jsonPayload = line.slice(5).trim();
+				}
+
+				if (!jsonPayload || jsonPayload === '[DONE]') continue;
+
 				try {
-					const event = JSON.parse(line);
+					const event = JSON.parse(jsonPayload);
 
 					// Detect start of function call
 					if (

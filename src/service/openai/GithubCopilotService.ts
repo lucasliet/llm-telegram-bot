@@ -2,7 +2,7 @@ import OpenAi from 'npm:openai';
 import OpenAiService from './OpenAIService.ts';
 import { StreamReplyResponse } from '@/util/ChatConfigUtil.ts';
 
-const COPILOT_GITHUB_TOKEN: string = Deno.env.get('COPILOT_GITHUB_TOKEN') as string;
+const COPILOT_GITHUB_TOKEN = Deno.env.get('COPILOT_GITHUB_TOKEN') as string;
 
 interface CopilotTokenCache {
 	token: string;
@@ -23,6 +23,9 @@ class TokenManager {
 	}
 
 	async getToken(githubToken: string): Promise<string> {
+		if (!githubToken) {
+			throw new Error('GitHub token is required');
+		}
 		if (this.isTokenValid()) {
 			console.log('Using cached Copilot token');
 			return this.cache!.token;
@@ -51,6 +54,11 @@ class TokenManager {
 		}
 
 		const data = await response.json();
+
+		if (!data?.token) {
+			this.cache = null;
+			throw new Error('Copilot API response does not contain a valid token');
+		}
 
 		if (data.expires_at) {
 			const expiresAt = data.expires_at * 1000;

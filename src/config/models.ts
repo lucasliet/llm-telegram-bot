@@ -66,7 +66,7 @@ export type ModelCommand = typeof MODEL_COMMANDS[number];
 export const modelCommands = [...MODEL_COMMANDS] as ModelCommand[];
 
 export const WHITELISTED_MODELS: ModelCommand[] = [
-  '/polli',
+	'/polli',
 	'/llama',
 	'/oss',
 	'/gpt',

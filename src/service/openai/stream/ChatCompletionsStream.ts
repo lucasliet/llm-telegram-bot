@@ -14,49 +14,62 @@ export class ChatCompletionsStreamProcessor implements StreamProcessor {
 		const toolCalls: Map<number, ExtractedToolCall> = new Map();
 		let hasAssistantContent = false;
 		let rawContent = '';
+		let buffer = '';
 		const decoder = new TextDecoder();
 
 		while (true) {
 			const { done, value } = await reader.read();
 			if (done) break;
 
-			// Always enqueue to user (streaming)
 			controller.enqueue(value);
+			buffer += decoder.decode(value, { stream: true });
 
-			try {
-				const text = decoder.decode(value, { stream: true });
-				const parsed = JSON.parse(text);
-				const delta = parsed?.choices?.[0]?.delta;
+			let newlineIndex;
+			while ((newlineIndex = buffer.indexOf('\n')) !== -1) {
+				const line = buffer.slice(0, newlineIndex).trim();
+				buffer = buffer.slice(newlineIndex + 1);
 
-				// Detect text content
-				if (delta?.content) {
-					hasAssistantContent = true;
-					rawContent += delta.content;
+				if (!line) continue;
+
+				let jsonPayload = line;
+				if (line.startsWith('data:')) {
+					jsonPayload = line.slice(5).trim();
 				}
 
-				// Accumulate tool calls (they come in chunks)
-				if (delta?.tool_calls) {
-					for (const call of delta.tool_calls) {
-						const index = call.index ?? 0;
+				if (!jsonPayload || jsonPayload === '[DONE]') continue;
 
-						if (!toolCalls.has(index)) {
-							toolCalls.set(index, {
-								id: call.id || '',
-								name: call.function?.name || '',
-								arguments: '',
-							});
-						}
+				try {
+					const parsed = JSON.parse(jsonPayload);
+					const delta = parsed?.choices?.[0]?.delta;
 
-						const existing = toolCalls.get(index)!;
-						if (call.id) existing.id = call.id;
-						if (call.function?.name) existing.name = call.function.name;
-						if (call.function?.arguments) {
-							existing.arguments += call.function.arguments;
+					if (delta?.content) {
+						hasAssistantContent = true;
+						rawContent += delta.content;
+					}
+
+					if (delta?.tool_calls) {
+						for (const call of delta.tool_calls) {
+							const index = call.index ?? 0;
+
+							if (!toolCalls.has(index)) {
+								toolCalls.set(index, {
+									id: call.id || '',
+									name: call.function?.name || '',
+									arguments: '',
+								});
+							}
+
+							const existing = toolCalls.get(index)!;
+							if (call.id) existing.id = call.id;
+							if (call.function?.name) existing.name = call.function.name;
+							if (call.function?.arguments) {
+								existing.arguments += call.function.arguments;
+							}
 						}
 					}
+				} catch {
+					// Invalid JSON line, continue
 				}
-			} catch {
-				// Partial chunk or non-JSON, continue
 			}
 		}
 

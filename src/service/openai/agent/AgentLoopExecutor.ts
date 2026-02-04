@@ -58,7 +58,6 @@ export class AgentLoopExecutor<TMessage, TGenerateArgs extends unknown[]> {
 		messages: TMessage[],
 		...generateArgs: TGenerateArgs
 	): ReadableStreamDefaultReader<Uint8Array> {
-		const self = this;
 		const state: AgentLoopState = {
 			iteration: 0,
 			totalTokensEstimate: 0,
@@ -66,54 +65,47 @@ export class AgentLoopExecutor<TMessage, TGenerateArgs extends unknown[]> {
 		};
 
 		return new ReadableStream<Uint8Array>({
-			async start(controller) {
+			start: async (controller) => {
 				try {
 					let currentReader = initialReader;
 					let currentToolCalls: ExtractedToolCall[] = [];
 
-					// Main agent loop
 					do {
 						state.iteration++;
 						console.log(`[AgentLoop] === Iteration ${state.iteration} started ===`);
-						self.config.onIterationStart?.(state.iteration);
+						this.config.onIterationStart?.(state.iteration);
 
-						// Check iteration limit
-						if (state.iteration > self.config.maxIterations) {
-							console.warn(`[AgentLoop] Max iterations (${self.config.maxIterations}) reached, stopping`);
-							self.emitWarning(
+						if (state.iteration > this.config.maxIterations) {
+							console.warn(`[AgentLoop] Max iterations (${this.config.maxIterations}) reached, stopping`);
+							this.emitWarning(
 								controller,
-								`⚠️ Atingi o limite de ${self.config.maxIterations} iterações.`,
+								`⚠️ Atingi o limite de ${this.config.maxIterations} iterações.`,
 							);
 							break;
 						}
 
-						// Process current stream and extract tool calls
 						console.log(`[AgentLoop] Processing stream...`);
-						const result = await self.streamProcessor.processStream(
+						const result = await this.streamProcessor.processStream(
 							currentReader,
 							controller,
 						);
 						currentToolCalls = result.toolCalls;
 						console.log(`[AgentLoop] Stream processed: ${currentToolCalls.length} tool call(s) detected`);
 
-						// If no tool calls, the agent is done
 						if (currentToolCalls.length === 0) {
 							console.log(`[AgentLoop] No tool calls, completing...`);
 							state.isComplete = true;
 							break;
 						}
 
-						// Log tool calls being executed
 						const toolNames = currentToolCalls.map((tc) => tc.name).join(', ');
 						console.log(`[AgentLoop] Executing ${currentToolCalls.length} tool(s): ${toolNames}`);
 
-						// Execute tools
-						const toolResults = await self.executeTools(currentToolCalls);
+						const toolResults = await this.executeTools(currentToolCalls);
 						console.log(`[AgentLoop] All ${toolResults.length} tools executed successfully`);
 
-						// Summarize tool results if enabled and close to token limit
 						console.log(`[AgentLoop] Checking if summarization is needed...`);
-						const summarizedResults = await self.summarizeToolResults(toolResults, messages);
+						const summarizedResults = await this.summarizeToolResults(toolResults, messages);
 						const wasSummarized = summarizedResults.some((r) => r.result && typeof r.result === 'object' && 'summary' in r.result);
 						if (wasSummarized) {
 							console.log(`[AgentLoop] Results were summarized to save tokens`);
@@ -121,25 +113,23 @@ export class AgentLoopExecutor<TMessage, TGenerateArgs extends unknown[]> {
 							console.log(`[AgentLoop] Results kept as-is (not close to token limit)`);
 						}
 
-						// Add results to message history
-						const formattedResults = self.streamProcessor
+						const formattedResults = this.streamProcessor
 							.formatToolResultsForNextCall(summarizedResults);
 						messages.push(...(formattedResults as TMessage[]));
 						console.log(`[AgentLoop] Added ${formattedResults.length} message(s) to history`);
 
-						// Generate next response
 						console.log(`[AgentLoop] Generating next response...`);
-						currentReader = await self.generateFn(messages, ...generateArgs);
+						currentReader = await this.generateFn(messages, ...generateArgs);
 
 						console.log(`[AgentLoop] === Iteration ${state.iteration} complete ===\n`);
-						self.config.onIterationComplete?.(
+						this.config.onIterationComplete?.(
 							state.iteration,
 							currentToolCalls.length > 0,
 						);
 					} while (currentToolCalls.length > 0);
 				} catch (error) {
 					state.lastError = error instanceof Error ? error : new Error(String(error));
-					self.emitError(controller, state.lastError);
+					this.emitError(controller, state.lastError);
 				} finally {
 					controller.close();
 				}

@@ -67,7 +67,7 @@ export const FileUtils = {
 			// 		audioUrl,
 			// 	);
 			// } else {
-				return await CloudFlareService.transcribeAudio(audioFile);
+			return await CloudFlareService.transcribeAudio(audioFile);
 			// }
 		}
 	},
