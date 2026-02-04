@@ -170,7 +170,7 @@ export default class OpenAiService {
 				...availableTools,
 				max_tokens: this.maxTokens,
 				stream: true,
-				reasoning_effort: 'high',
+				reasoning_effort: 'low',
 			});
 
 			return response.toReadableStream().getReader() as ReadableStreamDefaultReader<Uint8Array>;
