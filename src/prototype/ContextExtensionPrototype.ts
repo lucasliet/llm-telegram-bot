@@ -13,8 +13,6 @@ declare module 'grammy' {
 
 		replyWithVisionNotSupportedByModel(): Promise<Message.TextMessage>;
 
-		replyOnLongAnswer(): number;
-
 		replyInChunks(output: string): void;
 
 		streamReply(
@@ -57,18 +55,6 @@ Context.prototype.replyWithVisionNotSupportedByModel = function (
 	this: Context,
 ) {
 	return this.replyWithQuote('esse modelo não suporta leitura de foto');
-};
-
-/**
- * Set a timeout to reply if the answer takes too long
- */
-Context.prototype.replyOnLongAnswer = function (this: Context): number {
-	return setTimeout(() => {
-		console.info('Request is taking too long, sending processing message...');
-		this.replyWithQuote(
-			'Estou processando sua solicitação, aguarde um momento...',
-		);
-	}, 12000);
 };
 
 /**

@@ -74,7 +74,7 @@ export default {
 	},
 
 	/**
-	 * Generic model call handler with timeout and logging
+	 * Generic model call handler with typing indicator and logging
 	 * @param ctx - Telegram context
 	 * @param modelCallFunction - Function to call for the specific model
 	 */
@@ -86,16 +86,23 @@ export default {
 
 		const startTime = Date.now();
 		const keepAliveId = keepDenoJobAlive();
-		const timeoutId = ctx.replyOnLongAnswer();
+
+		// Send typing indicator immediately
+		ctx.api.sendChatAction(ctx.chat!.id, 'typing').catch(console.error);
+
+		// Keep typing indicator active every 4 seconds
+		const typingInterval = setInterval(() => {
+			ctx.api.sendChatAction(ctx.chat!.id, 'typing').catch(console.error);
+		}, 4000);
 
 		modelCallFunction(ctx)
 			.then(() => {
-				clearTimeout(timeoutId);
+				clearInterval(typingInterval);
 				clearInterval(keepAliveId);
 				console.log(`Request processed in ${Date.now() - startTime}ms`);
 			})
 			.catch((err) => {
-				clearTimeout(timeoutId);
+				clearInterval(typingInterval);
 				clearInterval(keepAliveId);
 				console.error(err);
 				ctx.reply(`Eita, algo deu errado: ${err.message}`, {
