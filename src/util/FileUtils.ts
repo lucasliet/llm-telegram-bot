@@ -1,4 +1,4 @@
-import { Context } from 'grammy-context';
+import { Context } from 'grammy';
 import { Audio, InputFile, PhotoSize, Voice } from 'grammy-types';
 import { getCurrentModel } from '@/repository/ChatRepository.ts';
 import OpenAiService from '@/service/openai/OpenAIService.ts';

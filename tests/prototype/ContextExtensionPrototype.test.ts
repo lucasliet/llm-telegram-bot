@@ -1,5 +1,5 @@
 import { assertEquals } from 'asserts';
-import { spy } from 'mock';
+import { assertSpyCalls, spy } from 'mock';
 import '../../src/prototype/StringExtensionPrototype.ts';
 import { Context } from 'grammy';
 
@@ -17,36 +17,11 @@ function createContext(overrides: Partial<any> = {}) {
 		reply: spy((text: string) => Promise.resolve({ text, message_id: 10 })),
 		replyWithQuote: undefined,
 		replyInChunks: undefined,
-		replyOnLongAnswer: undefined,
 		streamReply: undefined,
 		extractContextKeys: undefined,
 	};
 	return Object.assign(base, overrides);
 }
-
-Deno.test('replyOnLongAnswer returns timeout id', async () => {
-	const originalOpenKv = Deno.openKv;
-	Deno.openKv = () =>
-		Promise.resolve(
-			{
-				get: () => Promise.resolve({ value: [] }),
-				set: () => Promise.resolve({ ok: true }),
-				delete: () => Promise.resolve({ ok: true }),
-				close: () => Promise.resolve(),
-			} as any,
-		);
-	const ctx = createContext();
-	const original = globalThis.setTimeout;
-	try {
-		await import('../../src/prototype/ContextExtensionPrototype.ts');
-		globalThis.setTimeout = spy(() => 999 as unknown as number);
-		const id = (Context.prototype as any).replyOnLongAnswer.call(ctx);
-		assertEquals(typeof id, 'number');
-	} finally {
-		globalThis.setTimeout = original;
-		Deno.openKv = originalOpenKv;
-	}
-});
 
 Deno.test('replyInChunks splits large messages and calls replyWithQuote', async () => {
 	const originalOpenKv = Deno.openKv;
@@ -176,4 +151,19 @@ Deno.test('extractContextKeys returns expected payload', async () => {
 	const ok = keys.userId === 123 && keys.userKey === 'user:123' && keys.contextMessage === 'hello';
 	assertEquals(ok, true);
 	Deno.openKv = originalOpenKv;
+});
+
+Deno.test('startTypingIndicator sets chat action and returns interval', async () => {
+	await import('../../src/prototype/ContextExtensionPrototype.ts');
+
+	const mockSetInterval = spy(() => 123);
+	globalThis.setInterval = mockSetInterval;
+
+	const ctx = createContext();
+	const id = (Context.prototype as any).startTypingIndicator.call(ctx);
+
+	assertEquals(id, 123);
+	assertEquals(ctx.chatAction, 'typing');
+	assertSpyCalls(mockSetInterval, 1);
+	assertEquals((mockSetInterval.calls[0] as any).args[1], 4000);
 });

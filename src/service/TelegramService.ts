@@ -1,4 +1,4 @@
-import { Context } from 'grammy-context';
+import { Context } from 'grammy';
 import { Voice } from 'grammy-types';
 
 import { getCurrentModel, setCurrentModel } from '@/repository/ChatRepository.ts';
@@ -86,22 +86,24 @@ export default {
 
 		const startTime = Date.now();
 		const keepAliveId = keepDenoJobAlive();
-		const timeoutId = ctx.replyOnLongAnswer();
+		const typingId = ctx.startTypingIndicator();
 
-		modelCallFunction(ctx)
-			.then(() => {
-				clearTimeout(timeoutId);
-				clearInterval(keepAliveId);
-				console.log(`Request processed in ${Date.now() - startTime}ms`);
-			})
-			.catch((err) => {
-				clearTimeout(timeoutId);
-				clearInterval(keepAliveId);
-				console.error(err);
-				ctx.reply(`Eita, algo deu errado: ${err.message}`, {
-					reply_to_message_id: ctx.msg?.message_id,
-				});
+	modelCallFunction(ctx)
+		.then(() => {
+			ctx.chatAction = undefined;
+			clearInterval(typingId);
+			clearInterval(keepAliveId);
+			console.log(`Request processed in ${Date.now() - startTime}ms`);
+		})
+		.catch((err) => {
+			ctx.chatAction = undefined;
+			clearInterval(typingId);
+			clearInterval(keepAliveId);
+			console.error(err);
+			ctx.reply(`Eita, algo deu errado: ${err.message}`, {
+				reply_to_message_id: ctx.msg?.message_id,
 			});
+		});
 	},
 
 	/**

@@ -207,14 +207,14 @@ Deno.test('TelegramService', async (t) => {
 		globalThis.clearTimeout = mockClearTimeout;
 
 		const ctx = createMockContext();
-		ctx.replyOnLongAnswer = spy(() => 456);
+		ctx.startTypingIndicator = spy(() => 456);
 		const modelFunc = spy(() => Promise.resolve());
 
 		TelegramService.callModel(ctx, modelFunc);
 
 		assertSpyCalls(modelFunc, 1);
 		assertEquals(modelFunc.calls[0].args[0], ctx);
-		assertSpyCalls(ctx.replyOnLongAnswer, 1);
+		assertSpyCalls(ctx.startTypingIndicator, 1);
 		assertSpyCalls(mockSetInterval, 1);
 	});
 
@@ -230,7 +230,7 @@ Deno.test('TelegramService', async (t) => {
 		globalThis.clearTimeout = mockClearTimeout;
 
 		const ctx = createMockContext();
-		ctx.replyOnLongAnswer = spy(() => 456);
+		ctx.startTypingIndicator = spy(() => 456);
 		const error = new Error('Test error');
 		const modelFunc = spy(() => Promise.reject(error));
 

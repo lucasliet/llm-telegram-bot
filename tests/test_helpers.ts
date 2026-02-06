@@ -8,7 +8,7 @@ export function assertSpyCalls(spy: Spy, expectedCalls: number): void {
 export interface MockContext {
 	reply: Spy;
 	extractContextKeys: Spy;
-	replyOnLongAnswer: Spy;
+	startTypingIndicator?: Spy;
 	from?: {
 		id: number;
 	};
@@ -51,7 +51,6 @@ export function createMockContext(options: {
 				contextMessage: message,
 			})
 		),
-		replyOnLongAnswer: spy(() => 123),
 		from: {
 			id: userId,
 		},

@@ -1,4 +1,4 @@
-import { Context } from 'grammy-context';
+import { Context } from 'grammy';
 import ArtaService from '@/service/ArtaService.ts';
 
 /**
@@ -15,6 +15,7 @@ export async function handleArta(
 	const prompt = message?.replace(/^artaImage:/i, '').trim();
 	if (!prompt) return;
 
+	ctx.chatAction = 'upload_photo';
 	const imageUrl = await ArtaService.generateImage(prompt);
 	await ctx.replyWithPhoto(imageUrl);
 }

@@ -1,4 +1,4 @@
-import { Context } from 'grammy-context';
+import { Context } from 'grammy';
 import { InputMediaBuilder } from 'grammy';
 import OpenAiService from '@/service/openai/OpenAIService.ts';
 import { FileUtils } from '@/util/FileUtils.ts';
@@ -43,6 +43,7 @@ export async function handleOpenAI(
 
 		ctx.streamReply(reader, onComplete, responseMap);
 	} else if (command === 'gptimage') {
+		ctx.chatAction = 'upload_photo';
 		const output = await openAIService.generateImage(
 			userKey,
 			message!.replace('gptImage:', ''),

@@ -1,4 +1,5 @@
 import { Context } from 'grammy';
+import { Action } from 'grammy-auto-chat-action-types';
 import { Audio, Message, ParseMode, PhotoSize, Voice } from 'grammy-types';
 import { transcribeAudio } from '@/service/TelegramService.ts';
 
@@ -13,7 +14,7 @@ declare module 'grammy' {
 
 		replyWithVisionNotSupportedByModel(): Promise<Message.TextMessage>;
 
-		replyOnLongAnswer(): number;
+		startTypingIndicator(): number;
 
 		replyInChunks(output: string): void;
 
@@ -33,6 +34,8 @@ declare module 'grammy' {
 			caption?: string;
 			quote?: string;
 		}>;
+
+		chatAction: Action | null;
 	}
 }
 
@@ -60,15 +63,13 @@ Context.prototype.replyWithVisionNotSupportedByModel = function (
 };
 
 /**
- * Set a timeout to reply if the answer takes too long
+ * Start typing indicator that persists by re-sending every 4 seconds
  */
-Context.prototype.replyOnLongAnswer = function (this: Context): number {
-	return setTimeout(() => {
-		console.info('Request is taking too long, sending processing message...');
-		this.replyWithQuote(
-			'Estou processando sua solicitação, aguarde um momento...',
-		);
-	}, 12000);
+Context.prototype.startTypingIndicator = function (this: Context): number {
+	this.chatAction = 'typing';
+	return setInterval(() => {
+		this.chatAction = 'typing';
+	}, 4000);
 };
 
 /**

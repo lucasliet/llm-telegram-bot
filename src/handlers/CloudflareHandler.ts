@@ -1,4 +1,4 @@
-import { Context } from 'grammy-context';
+import { Context } from 'grammy';
 import { InputFile } from 'grammy-types';
 import CloudFlareService from '@/service/CloudFlareService.ts';
 import { FileUtils } from '@/util/FileUtils.ts';
@@ -40,6 +40,7 @@ export async function handleCloudflare(
 
 		ctx.streamReply(reader, onComplete, responseMap);
 	} else if (cloudflareCommand === 'cloudflareimage' || cloudflareCommand === 'image') {
+		ctx.chatAction = 'upload_photo';
 		ctx.replyWithPhoto(
 			new InputFile(
 				await CloudFlareService.generateImage(message!),

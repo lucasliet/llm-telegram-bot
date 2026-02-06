@@ -1,4 +1,4 @@
-import { Context } from 'grammy-context';
+import { Context } from 'grammy';
 import PollinationsService from '@/service/PollinationsService.ts';
 import { pollinationsModels } from '@/config/models.ts';
 
@@ -29,6 +29,7 @@ export async function handlePollinations(
 	const service = new PollinationsService(model);
 
 	if (command === 'polliimage') {
+		ctx.chatAction = 'upload_photo';
 		const imageUrl = await service.generateImage(prompt);
 		await ctx.replyWithPhoto(imageUrl);
 		return;

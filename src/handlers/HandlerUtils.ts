@@ -1,4 +1,4 @@
-import { Context } from 'grammy-context';
+import { Context } from 'grammy';
 import { FileUtils } from '@/util/FileUtils.ts';
 import { StreamReplyResponse } from '@/util/ChatConfigUtil.ts';
 

@@ -1,6 +1,6 @@
 import { Application } from 'oak';
 import { oakCors } from 'oak-cors';
-import { Bot, Context, webhookCallback } from 'grammy';
+import { Bot, Context, type MiddlewareFn, webhookCallback } from 'grammy';
 import { autoChatAction, AutoChatActionFlavor } from 'grammy-auto-chat-action';
 import TelegramService from '@/service/TelegramService.ts';
 import { clearChatHistory } from '@/repository/ChatRepository.ts';
@@ -19,7 +19,7 @@ const ADMIN_USER_IDS: number[] = (Deno.env.get('ADMIN_USER_IDS') as string)
 type MyContext = Context & AutoChatActionFlavor;
 
 const BOT = new Bot<MyContext>(TOKEN);
-BOT.use(autoChatAction());
+BOT.use(autoChatAction() as unknown as MiddlewareFn<MyContext>);
 const APP = new Application();
 
 APP.use(oakCors());
