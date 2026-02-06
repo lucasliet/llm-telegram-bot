@@ -16,7 +16,7 @@
 				"CLOUDFLARE_API_KEY": "${env:CLOUDFLARE_AI_API_KEY}",
 				"CLOUDFLARE_ACCOUNT_ID": "${env:CLOUDFLARE_AI_ACCOUNT_ID}",
 				"CODEX_ACCESS_TOKEN": "${env:CODEX_ACCESS_TOKEN}",
-				"CODEX_ACCOUNT_ID": "${env:CODEX_ACCOUNT_ID}"
+				"CODEX_ACCOUNT_ID": "${env:CODEX_ACCOUNT_ID}",
 			},
 			"runtimeExecutable": "deno",
 			"runtimeArgs": [

@@ -32,7 +32,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           COMMENTS=$(gh api repos/${{ github.repository }}/issues/${{ github.event.pull_request.number }}/comments --jq '.[] | select(.user.login == "claude[bot]") | .node_id')
-
+          
           echo "$COMMENTS" | while read NODE_ID; do
             echo "Minimizando comentário: $NODE_ID"
             gh api graphql -f query='
