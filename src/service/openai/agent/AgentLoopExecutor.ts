@@ -218,18 +218,19 @@ export class AgentLoopExecutor<TMessage, TGenerateArgs extends unknown[]> {
 			return toolResults;
 		}
 
+		const RESPONSE_BUFFER = 2000;
 		const currentTokens = this.estimateTokens(currentMessages);
 		const toolResultsTokens = this.estimateToolResultsTokens(toolResults);
 		const totalTokensAfterAdding = currentTokens + toolResultsTokens;
 
-		const shouldSummarize = totalTokensAfterAdding > this.maxTokens;
+		const shouldSummarize = totalTokensAfterAdding > (this.maxTokens - RESPONSE_BUFFER);
 
 		if (!shouldSummarize) {
 			return toolResults;
 		}
 
 		console.log(
-			`[AgentLoop] Context would exceed limit (${totalTokensAfterAdding}/${this.maxTokens}), summarizing ${toolResults.length} tool results...`,
+			`[AgentLoop] Context would exceed limit (currentTokens=${currentTokens}, toolResultsTokens=${toolResultsTokens}, total=${totalTokensAfterAdding}/${this.maxTokens - RESPONSE_BUFFER}), summarizing ${toolResults.length} tool results...`,
 		);
 
 		const summarizedResults: ToolExecutionResult[] = [];
@@ -292,7 +293,7 @@ Relevant information:`;
 	 */
 	private estimateToolResultsTokens(toolResults: ToolExecutionResult[]): number {
 		const totalChars = toolResults.reduce((sum, result) => {
-			return sum + JSON.stringify(result.result).length;
+			return sum + JSON.stringify(result).length;
 		}, 0);
 		return Math.ceil(totalChars / 4);
 	}
