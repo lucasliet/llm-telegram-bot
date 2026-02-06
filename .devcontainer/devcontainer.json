@@ -7,7 +7,7 @@
 	"postCreateCommand": "deno install --allow-import",
 	"customizations": {
 		"vscode": {
-			"extensions": [ "denoland.vscode-deno" ]
+			"extensions": ["denoland.vscode-deno"]
 		}
 	}
 }
