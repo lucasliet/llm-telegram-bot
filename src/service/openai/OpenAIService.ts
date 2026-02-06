@@ -156,22 +156,15 @@ export default class OpenAiService {
 		const streamProcessor = new ChatCompletionsStreamProcessor();
 
 		const generateFn = async (msgs: OpenAi.Chat.ChatCompletionMessageParam[]) => {
-			const availableTools = this.supportTools
-				? {
-					tools: ToolService.schemas,
-					tool_choice: 'auto',
-				}
-				: {};
-
-			// @ts-ignore - conditionally including tools
-			const response = await this.openai.chat.completions.create({
+			const params: OpenAi.Chat.ChatCompletionCreateParamsStreaming = {
 				model: this.model,
 				messages: msgs,
-				...availableTools,
 				max_tokens: this.maxTokens,
 				stream: true,
 				reasoning_effort: 'low',
-			});
+				...(this.supportTools ? { tools: ToolService.schemas, tool_choice: 'auto' as const } : {}),
+			};
+			const response = await this.openai.chat.completions.create(params);
 
 			return response.toReadableStream().getReader() as ReadableStreamDefaultReader<Uint8Array>;
 		};
@@ -272,6 +265,11 @@ export default class OpenAiService {
 	}
 }
 
+/**
+ * Maps the Chat Completions API streaming response body to extract generated text content.
+ * @param responseBody - The raw JSON string from the streaming response.
+ * @returns The extracted delta content text or empty string if parsing fails.
+ */
 export function responseMap(responseBody: string): string {
 	try {
 		return JSON.parse(responseBody).choices[0]?.delta?.content || '';
@@ -402,15 +400,8 @@ async function readInitialStreamAndExtract(
 
 				if (!tool_calls[index]) {
 					tool_calls[index] = call as ToolCall;
-				}
-
-				try {
-					if (!tool_calls[index].function.arguments || JSON.parse(tool_calls[index].function.arguments)) {
-						JSON.parse((call as ToolCall).function.arguments);
-					}
-					tool_calls[index].function.arguments = (call as ToolCall).function.arguments;
-				} catch {
-					tool_calls[index].function.arguments += (call as ToolCall).function.arguments;
+				} else if (call.function?.arguments) {
+					tool_calls[index].function.arguments += call.function.arguments;
 				}
 			}
 			continue;

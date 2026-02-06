@@ -138,7 +138,7 @@ export class AgentLoopExecutor<TMessage, TGenerateArgs extends unknown[]> {
 	}
 
 	/**
-	 * Execute all tool calls in parallel.
+	 * Execute all tool calls sequentially with timeout protection.
 	 */
 	private async executeTools(
 		toolCalls: ExtractedToolCall[],
