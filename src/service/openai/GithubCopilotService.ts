@@ -116,7 +116,6 @@ export default class GithubCopilotService extends OpenAiService {
 			});
 		} catch (error) {
 			console.warn('Failed to authenticate with GitHub Copilot, using fallback token:', error);
-			// Continue with the original token if authentication fails
 		}
 	}
 
