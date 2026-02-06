@@ -205,7 +205,7 @@ export class AgentLoopExecutor<TMessage, TGenerateArgs extends unknown[]> {
 
 	/**
 	 * Summarize tool results using LLM to extract only relevant information.
-	 * Only summarizes when necessary (close to token limit).
+	 * Summarizes when adding tool results would exceed the context window limit.
 	 * @param toolResults - Array of tool execution results
 	 * @param currentMessages - Current conversation messages to estimate tokens
 	 * @returns Array of tool results with summarized content
@@ -218,24 +218,18 @@ export class AgentLoopExecutor<TMessage, TGenerateArgs extends unknown[]> {
 			return toolResults;
 		}
 
-		// Estimate current token usage
 		const currentTokens = this.estimateTokens(currentMessages);
-		const remainingTokens = this.maxTokens - currentTokens;
+		const toolResultsTokens = this.estimateToolResultsTokens(toolResults);
+		const totalTokensAfterAdding = currentTokens + toolResultsTokens;
 
-		// Estimate summarization cost (prompt template + query + tool name/args + 15KB result + response)
-		const summarizationCost = this.estimateSummarizationTokens();
-
-		// Check if we're close to limit (need space for summarization + next response)
-		const minRequiredTokens = summarizationCost + 2000;
-		const shouldSummarize = remainingTokens < minRequiredTokens;
+		const shouldSummarize = totalTokensAfterAdding > this.maxTokens;
 
 		if (!shouldSummarize) {
-			// Not close to limit, return all results as-is
 			return toolResults;
 		}
 
 		console.log(
-			`[AgentLoop] Close to token limit (${currentTokens}/${this.maxTokens}, remaining: ${remainingTokens}), summarizing ${toolResults.length} tool results...`,
+			`[AgentLoop] Context would exceed limit (${totalTokensAfterAdding}/${this.maxTokens}), summarizing ${toolResults.length} tool results...`,
 		);
 
 		const summarizedResults: ToolExecutionResult[] = [];
@@ -294,20 +288,13 @@ Relevant information:`;
 	}
 
 	/**
-	 * Estimate tokens needed for summarization prompt.
+	 * Estimate token count for tool results.
 	 */
-	private estimateSummarizationTokens(): number {
-		// Build sample prompt to calculate realistic token count
-		const samplePrompt = this.buildSummarizationPrompt(
-			'sample_tool',
-			'{"sample":"args"}',
-			'x'.repeat(15000),
-		);
-
-		const estimatedPromptTokens = Math.ceil(samplePrompt.length / 4);
-		const maxResponseTokens = 1000; // From max_tokens in extractRelevantInfo()
-
-		return estimatedPromptTokens + maxResponseTokens;
+	private estimateToolResultsTokens(toolResults: ToolExecutionResult[]): number {
+		const totalChars = toolResults.reduce((sum, result) => {
+			return sum + JSON.stringify(result.result).length;
+		}, 0);
+		return Math.ceil(totalChars / 4);
 	}
 
 	/**
