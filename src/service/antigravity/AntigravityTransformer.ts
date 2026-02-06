@@ -81,7 +81,17 @@ export class AntigravityTransformer {
  */
 function cleanJsonSchema(schema: Record<string, unknown>): Record<string, unknown> {
 	const cleaned = { ...schema };
-	const unsupportedKeys = ['minLength', 'maxLength', 'pattern', 'format', 'examples', 'default', 'strict', '$schema'];
+	const unsupportedKeys = [
+		'minLength',
+		'maxLength',
+		'pattern',
+		'format',
+		'examples',
+		'default',
+		'strict',
+		'$schema',
+		'additionalProperties',
+	];
 
 	for (const key of unsupportedKeys) {
 		delete cleaned[key];

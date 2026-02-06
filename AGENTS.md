@@ -16,8 +16,8 @@
 - `deno task dev`: runs `devrun.sh` (loads `.env`, starts with `denon`, sets Telegram webhook).
 - `deno task test`: runs `run_tests.sh` (full suite + coverage).
 - `deno test -A --unstable-kv --unstable-cron tests/service/TelegramService.test.ts`: run a specific test.
-- `deno fmt --ext=ts,tsx,js,jsx`, `deno lint`: format and lint the codebase.
-- **IMPORTANTE:** NÃO rode `deno fmt` sem filtro de extensão. O formatter do Deno reformata arquivos `.md`, `.json` e `.yml` de forma indesejada. Use sempre `deno fmt --ext=ts,tsx,js,jsx` para formatar apenas código-fonte.
+- `deno fmt 'src/**/*.ts' 'tests/**/*.ts' 'main.ts'`, `deno lint`: format and lint the codebase.
+- **IMPORTANTE:** NÃO rode `deno fmt` sem argumentos. O formatter do Deno reformata arquivos `.md`, `.json` e `.yml` de forma indesejada. Use sempre globs para formatar apenas código-fonte TypeScript.
 
 ## Coding Style & Naming Conventions
 - Language: TypeScript (`strict` mode). Use TSDoc for all functions; avoid inline `//` comments.

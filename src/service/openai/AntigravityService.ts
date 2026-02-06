@@ -19,7 +19,7 @@ export default class AntigravityService extends OpenAiService {
 			new OpenAi({ apiKey: 'antigravity-placeholder', baseURL: 'https://cloudcode-pa.googleapis.com' }),
 			model,
 			true,
-			128000,
+			8192,
 		);
 		this.tokenManager = AntigravityTokenManager.getInstance();
 		this.sessionId = `telegram-${crypto.randomUUID().slice(0, 8)}`;
@@ -48,6 +48,7 @@ export default class AntigravityService extends OpenAiService {
 		const url = `${endpoint}/v1internal:streamGenerateContent`;
 
 		console.log(`[Antigravity] Calling ${url} with model ${payload.model}`);
+		console.log(`[Antigravity] Payload:`, JSON.stringify(payload, null, 2));
 
 		const response = await fetch(url, {
 			method: 'POST',

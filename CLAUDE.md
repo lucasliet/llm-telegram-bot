@@ -35,7 +35,7 @@ deno --version
 - **NÃO rode `deno fmt` em arquivos Markdown** (`.md`), JSON (`.json`), YAML (`.yml`/`.yaml`) ou outros arquivos de configuração — o formatter do Deno reformata esses arquivos de forma indesejada
 - Para formatar apenas os arquivos de código:
   ```bash
-  deno fmt --ext=ts,tsx,js,jsx
+  deno fmt 'src/**/*.ts' 'tests/**/*.ts' 'main.ts'
   ```
 
 ## Referência do projeto
