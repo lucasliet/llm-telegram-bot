@@ -201,14 +201,24 @@ private isThinkingCapableModel(modelName: string): boolean {
 ### Tratamento de Thinking Blocks
 
 **Claude:**
-- Strip all thinking blocks (removidos completamente)
+- Strip all thinking blocks (removidos completamente no `buildPayload()`)
 - Não aplica filtros de validação de signature
 - Gera thinking novo a cada turno
 
 **Gemini:**
-- Valida signatures de thinking blocks
+- Detecta thinking blocks via `part.thought === true` no stream
+- Formata com `<think>...</think>` tags (removidas automaticamente pelo `streamReply()`)
 - Preserva blocks com signatures válidas do cache
 - Injeta sentinel `skip_thought_signature_validator` quando necessário
+- **Configurável via `ANTIGRAVITY_KEEP_THINKING`**: define se thinking é visível (debug)
+
+### Variável de Ambiente: ANTIGRAVITY_KEEP_THINKING
+
+- **Padrão**: `false` (thinking blocks são ocultados)
+- **`true`**: Thinking blocks são exibidos na resposta (útil para debug)
+- **Funcionamento**: 
+  - `false`: Envolve thinking em `<think>` tags → removido por `removeThinkingChatCompletion()`
+  - `true`: Emite thinking diretamente como texto visível
 
 ### JSON Schema Cleaning (Claude VALIDATED Mode)
 

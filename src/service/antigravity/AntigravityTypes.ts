@@ -7,6 +7,7 @@ export interface AntigravityConfig {
 
 export interface GeminiContentPart {
 	text?: string;
+	thought?: boolean;
 	thoughtSignature?: string;
 	inlineData?: {
 		mimeType: string;

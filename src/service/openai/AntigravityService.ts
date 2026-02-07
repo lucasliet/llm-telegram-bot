@@ -15,6 +15,7 @@ import ToolService from '@/service/ToolService.ts';
 import { AgentLoopExecutor } from './agent/index.ts';
 import { ChatCompletionsStreamProcessor } from './stream/index.ts';
 import { cacheSignature, getCachedSignature } from '../antigravity/AntigravityCache.ts';
+import { getAntigravityConfig } from '../antigravity/AntigravityConfig.ts';
 import crypto from 'node:crypto';
 
 export default class AntigravityService extends OpenAiService {
@@ -93,6 +94,11 @@ export default class AntigravityService extends OpenAiService {
 		const transformedStream = new ReadableStream<Uint8Array>({
 			start: async (controller) => {
 				const reader = body.getReader();
+				const context = {
+					toolCallIndex: 0,
+					emittedFunctionCalls: new Set<number>(),
+				};
+
 				try {
 					while (true) {
 						const { done, value } = await reader.read();
@@ -111,7 +117,7 @@ export default class AntigravityService extends OpenAiService {
 
 							try {
 								const data = JSON.parse(jsonText);
-								this.processGeminiChunk(data, controller, encoder);
+								this.processGeminiChunk(data, controller, encoder, context);
 							} catch {
 								// Skip unparseable lines
 							}
@@ -126,7 +132,7 @@ export default class AntigravityService extends OpenAiService {
 							if (jsonText && jsonText !== '[DONE]') {
 								try {
 									const data = JSON.parse(jsonText);
-									this.processGeminiChunk(data, controller, encoder);
+									this.processGeminiChunk(data, controller, encoder, context);
 								} catch {
 									// Skip
 								}
@@ -137,7 +143,7 @@ export default class AntigravityService extends OpenAiService {
 								const dataArray = JSON.parse(trimmed);
 								const items = Array.isArray(dataArray) ? dataArray : [dataArray];
 								for (const data of items) {
-									this.processGeminiChunk(data, controller, encoder);
+									this.processGeminiChunk(data, controller, encoder, context);
 								}
 							} catch {
 								// Skip
@@ -172,14 +178,24 @@ export default class AntigravityService extends OpenAiService {
 		data: any,
 		controller: ReadableStreamDefaultController<Uint8Array>,
 		encoder: TextEncoder,
+		context: {
+			toolCallIndex: number;
+			emittedFunctionCalls: Set<number>;
+		},
 	): void {
 		const parts = data.response?.candidates?.[0]?.content?.parts || data.candidates?.[0]?.content?.parts;
 		if (!parts) return;
 
-		let toolCallIndex = 0;
+		const config = getAntigravityConfig();
 
-		for (const part of parts) {
+		for (let i = 0; i < parts.length; i++) {
+			const part = parts[i];
+
 			if (part.text) {
+				if (part.thought === true && !config.keepThinking) {
+					continue;
+				}
+
 				const chunk = JSON.stringify({
 					choices: [{ delta: { content: part.text }, finish_reason: null }],
 				});
@@ -187,6 +203,10 @@ export default class AntigravityService extends OpenAiService {
 			}
 
 			if (part.functionCall) {
+				if (context.emittedFunctionCalls.has(i)) {
+					continue;
+				}
+
 				const thoughtSig = part.thoughtSignature;
 
 				if (thoughtSig && this.sessionId) {
@@ -202,16 +222,19 @@ export default class AntigravityService extends OpenAiService {
 					this.toolCallSignatures.set(callId, thoughtSig);
 				}
 
+				// Clean __thinking_text from args
+				const { __thinking_text, ...cleanArgs } = part.functionCall.args || {};
+
 				const chunk = JSON.stringify({
 					choices: [{
 						delta: {
 							tool_calls: [{
-								index: toolCallIndex,
+								index: context.toolCallIndex,
 								id: callId,
 								type: 'function',
 								function: {
 									name: part.functionCall.name,
-									arguments: JSON.stringify(part.functionCall.args || {}),
+									arguments: JSON.stringify(cleanArgs),
 								},
 							}],
 						},
@@ -219,7 +242,8 @@ export default class AntigravityService extends OpenAiService {
 					}],
 				});
 				controller.enqueue(encoder.encode(chunk + '\n'));
-				toolCallIndex++;
+				context.emittedFunctionCalls.add(i);
+				context.toolCallIndex++;
 			}
 		}
 	}
