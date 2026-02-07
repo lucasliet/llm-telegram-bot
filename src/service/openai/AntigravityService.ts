@@ -1,8 +1,14 @@
 import OpenAi from 'npm:openai';
-import OpenAiService, { responseMap } from './OpenAIService.ts';
+import OpenAiService, { getImageBase64String, responseMap } from './OpenAIService.ts';
 import { AntigravityTokenManager } from '../antigravity/AntigravityOAuth.ts';
 import { AntigravityTransformer } from '../antigravity/AntigravityTransformer.ts';
-import { ANTIGRAVITY_ENDPOINTS, type AntigravityRequestPayload, MIN_SIGNATURE_LENGTH, SKIP_THOUGHT_SIGNATURE } from '../antigravity/AntigravityTypes.ts';
+import {
+	ANTIGRAVITY_ENDPOINTS,
+	type AntigravityRequestPayload,
+	DEFAULT_THINKING_BUDGET,
+	MIN_SIGNATURE_LENGTH,
+	SKIP_THOUGHT_SIGNATURE,
+} from '../antigravity/AntigravityTypes.ts';
 import { addContentToChatHistory, getChatHistory } from '@/repository/ChatRepository.ts';
 import { convertGeminiHistoryToGPT, getSystemPrompt, type StreamReplyResponse } from '@/util/ChatConfigUtil.ts';
 import ToolService from '@/service/ToolService.ts';
@@ -230,7 +236,11 @@ export default class AntigravityService extends OpenAiService {
 		const filteredSchemas = ToolService.schemas.filter(
 			(tool) => tool.type === 'function',
 		);
-		const tools = (includeTools && this.supportTools) ? AntigravityTransformer.toGeminiTools(filteredSchemas) : undefined;
+		const isClaudeModel = this.isClaudeModel(this.model);
+		const isThinkingModel = this.isThinkingCapableModel(this.model);
+		const tools = (includeTools && this.supportTools) ? AntigravityTransformer.toGeminiTools(filteredSchemas, isClaudeModel) : undefined;
+
+		const thinkingConfig = isThinkingModel ? { thinkingBudget: DEFAULT_THINKING_BUDGET, includeThoughts: true } : undefined;
 
 		const payload: any = {
 			project: projectId,
@@ -243,7 +253,16 @@ export default class AntigravityService extends OpenAiService {
 				tools,
 				generationConfig: {
 					maxOutputTokens: this.maxTokens,
+					...(!isClaudeModel && thinkingConfig ? { thinkingConfig } : {}),
 				},
+				...(isClaudeModel && thinkingConfig
+					? {
+						thinking: {
+							type: 'enabled',
+							budgetTokens: thinkingConfig.thinkingBudget,
+						},
+					}
+					: {}),
 				...(systemInstruction ? { systemInstruction: { role: 'user', parts: [{ text: systemInstruction }] } } : {}),
 				sessionId: this.sessionId,
 			},
@@ -261,6 +280,7 @@ export default class AntigravityService extends OpenAiService {
 				payload.request.contents,
 				signatureSessionKey,
 				getCachedSignature,
+				isClaudeModel,
 			);
 		}
 
@@ -330,14 +350,21 @@ export default class AntigravityService extends OpenAiService {
 		const openAIMessages = convertGeminiHistoryToGPT(geminiHistory);
 		const requestPrompt = quote ? `quote: "${quote}"\n\n${prompt}` : prompt;
 
-		const urls = await Promise.all(photosUrl);
-		const imageDescription = urls.map((url) => `[imagem: ${url}]`).join('\n');
-		const fullPrompt = `${requestPrompt}\n\n${imageDescription}`;
+		const base64Urls = await getImageBase64String(photosUrl);
 
 		const messages: OpenAi.Chat.ChatCompletionMessageParam[] = [
 			{ role: 'system', content: getSystemPrompt('Antigravity', this.model, this.maxTokens) },
 			...openAIMessages,
-			{ role: 'user', content: fullPrompt },
+			{
+				role: 'user',
+				content: [
+					{ type: 'text', text: requestPrompt },
+					...base64Urls.map((url: string) => ({
+						type: 'image_url' as const,
+						image_url: { url },
+					})),
+				],
+			},
 		];
 
 		const generateFn = (msgs: OpenAi.Chat.ChatCompletionMessageParam[]) => this.callAntigravity(msgs);
@@ -407,6 +434,7 @@ export default class AntigravityService extends OpenAiService {
 		contents: any[],
 		sessionId: string,
 		getCachedSignatureFn: (sessionId: string, text: string) => string | undefined,
+		isClaudeModel: boolean = false,
 	): any[] {
 		const lastAssistantIdx = this.findLastAssistantIndex(contents, 'model');
 
@@ -421,9 +449,12 @@ export default class AntigravityService extends OpenAiService {
 					sessionId,
 					getCachedSignatureFn,
 					isLastAssistant,
+					isClaudeModel,
 				);
 
-				const trimmedParts = content.role === 'model' ? this.removeTrailingThinkingBlocks(filteredParts, sessionId, getCachedSignatureFn) : filteredParts;
+				const trimmedParts = content.role === 'model' && !isClaudeModel
+					? this.removeTrailingThinkingBlocks(filteredParts, sessionId, getCachedSignatureFn)
+					: filteredParts;
 
 				return { ...content, parts: trimmedParts };
 			}
@@ -437,9 +468,12 @@ export default class AntigravityService extends OpenAiService {
 					sessionId,
 					getCachedSignatureFn,
 					isLastAssistant,
+					isClaudeModel,
 				);
 
-				const trimmedContent = isAssistantRole ? this.removeTrailingThinkingBlocks(filteredContent, sessionId, getCachedSignatureFn) : filteredContent;
+				const trimmedContent = isAssistantRole && !isClaudeModel
+					? this.removeTrailingThinkingBlocks(filteredContent, sessionId, getCachedSignatureFn)
+					: filteredContent;
 
 				return { ...content, content: trimmedContent };
 			}
@@ -453,7 +487,12 @@ export default class AntigravityService extends OpenAiService {
 		sessionId: string,
 		getCachedSignatureFn: (sessionId: string, text: string) => string | undefined,
 		isLastAssistantMessage: boolean = false,
+		isClaudeModel: boolean = false,
 	): any[] {
+		if (isClaudeModel) {
+			return this.stripAllThinkingBlocks(contentArray);
+		}
+
 		const filtered: any[] = [];
 
 		for (const item of contentArray) {
@@ -518,6 +557,16 @@ export default class AntigravityService extends OpenAiService {
 		}
 
 		return filtered;
+	}
+
+	private stripAllThinkingBlocks(contentArray: any[]): any[] {
+		return contentArray.filter((item) => {
+			if (!item || typeof item !== 'object') return true;
+			if (this.isToolBlock(item)) return true;
+			if (this.isThinkingPart(item)) return false;
+			if (this.hasSignatureField(item)) return false;
+			return true;
+		});
 	}
 
 	private isToolBlock(part: any): boolean {
@@ -607,6 +656,18 @@ export default class AntigravityService extends OpenAiService {
 		return -1;
 	}
 
+	private isClaudeModel(modelName: string): boolean {
+		const lower = modelName.toLowerCase();
+		return lower.includes('claude') || lower.includes('opus');
+	}
+
+	private isThinkingCapableModel(modelName: string): boolean {
+		const lower = modelName.toLowerCase();
+		return lower.includes('thinking') ||
+			lower.includes('gemini-3') ||
+			lower.includes('opus');
+	}
+
 	private buildSignatureSessionKey(
 		sessionId: string,
 		model?: string,
@@ -641,8 +702,8 @@ export default class AntigravityService extends OpenAiService {
 		const systemText = typeof anyPayload.systemInstruction === 'string'
 			? anyPayload.systemInstruction
 			: typeof anyPayload.systemInstruction?.parts?.[0]?.text === 'string'
-				? anyPayload.systemInstruction.parts[0].text
-				: '';
+			? anyPayload.systemInstruction.parts[0].text
+			: '';
 
 		const messageSeed = Array.isArray(anyPayload.contents) ? this.extractTextFromContents(anyPayload.contents) : '';
 

@@ -1,6 +1,7 @@
 import OpenAi from 'npm:openai';
 import type { GeminiContent, GeminiContentPart } from './AntigravityTypes.ts';
 import { SKIP_THOUGHT_SIGNATURE } from './AntigravityTypes.ts';
+import { cleanJSONSchemaForAntigravity } from './AntigravitySchemaCleanup.ts';
 
 /**
  * Transforms between OpenAI Chat Completions and Gemini/Antigravity formats.
@@ -77,8 +78,31 @@ export class AntigravityTransformer {
 			}
 
 			const role: 'user' | 'model' = msg.role === 'assistant' ? 'model' : 'user';
-			const text = typeof msg.content === 'string' ? msg.content : '';
-			contents.push({ role, parts: [{ text }] });
+			const parts: GeminiContentPart[] = [];
+
+			if (typeof msg.content === 'string') {
+				parts.push({ text: msg.content });
+			} else if (Array.isArray(msg.content)) {
+				for (const item of msg.content) {
+					if (item.type === 'text') {
+						parts.push({ text: item.text });
+					} else if (item.type === 'image_url') {
+						const imageUrl = typeof item.image_url === 'string' ? item.image_url : item.image_url?.url || '';
+
+						const match = imageUrl.match(/^data:(image\/[^;]+);base64,(.+)$/);
+						if (match) {
+							parts.push({
+								inlineData: {
+									mimeType: match[1],
+									data: match[2],
+								},
+							});
+						}
+					}
+				}
+			}
+
+			contents.push({ role, parts });
 		}
 
 		return { systemInstruction, contents };
@@ -89,6 +113,7 @@ export class AntigravityTransformer {
 	 */
 	static toGeminiTools(
 		tools: OpenAi.Chat.Completions.ChatCompletionTool[],
+		isClaudeModel: boolean = false,
 	): Array<{ functionDeclarations: Array<{ name: string; description: string; parameters: Record<string, unknown> }> }> {
 		const toolsArray = tools as any[];
 		return [{
@@ -96,10 +121,13 @@ export class AntigravityTransformer {
 				const toolName = tool.function?.name || String(tool);
 				const toolDescription = tool.function?.description || '';
 				const toolParams = tool.function?.parameters || {};
+				const cleanedParams = isClaudeModel
+					? cleanJSONSchemaForAntigravity(typeof toolParams === 'object' ? toolParams : {})
+					: cleanJsonSchema(typeof toolParams === 'object' ? toolParams : {});
 				return {
 					name: toolName,
 					description: toolDescription,
-					parameters: cleanJsonSchema(typeof toolParams === 'object' ? toolParams : {}),
+					parameters: cleanedParams,
 				};
 			}),
 		}];

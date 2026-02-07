@@ -1,4 +1,4 @@
-# Provider Antigravity - Arquitetura e Thought Signatures
+# Provider Antigravity - Arquitetura e Implementação
 
 O provider Antigravity integra o bot com a API Cloud Code (Google Cloud AI Companion), permitindo acesso gratuito a modelos como Gemini 3 Flash e Claude Sonnet 4.5 via OAuth2.
 
@@ -11,7 +11,8 @@ src/service/
 │   ├── AntigravityTypes.ts        # Tipos Gemini (GeminiContent, GeminiContentPart, payload)
 │   ├── AntigravityTransformer.ts  # Conversao OpenAI <-> Gemini format
 │   ├── AntigravityCache.ts        # Cache em memoria de thought signatures
-│   └── AntigravityConfig.ts       # Configuracao runtime
+│   ├── AntigravityConfig.ts       # Configuracao runtime
+│   └── AntigravitySchemaCleanup.ts # Limpeza de schemas JSON para Claude (VALIDATED mode)
 └── openai/
     └── AntigravityService.ts      # Service principal (extends OpenAiService)
 ```
@@ -104,6 +105,154 @@ Quando a signature original nao esta disponivel (ex: tool calls de sessoes anter
 export const SKIP_THOUGHT_SIGNATURE = 'skip_thought_signature_validator';
 ```
 
+## Suporte a Imagens
+
+O Antigravity suporta analise de imagens atraves do formato nativo Gemini `inlineData`.
+
+### Formato de Conversão
+
+**OpenAI (entrada):**
+```typescript
+{
+  role: 'user',
+  content: [
+    { type: 'text', text: 'O que é isso?' },
+    { 
+      type: 'image_url', 
+      image_url: { url: 'data:image/jpeg;base64,/9j/4AAQ...' }
+    }
+  ]
+}
+```
+
+**Gemini (convertido):**
+```typescript
+{
+  role: 'user',
+  parts: [
+    { text: 'O que é isso?' },
+    { 
+      inlineData: { 
+        mimeType: 'image/jpeg', 
+        data: '/9j/4AAQ...' 
+      }
+    }
+  ]
+}
+```
+
+### Uso
+
+```bash
+antigravity: descreva esta imagem
+# [envie imagem via Telegram]
+```
+
+O sistema converte automaticamente a imagem para base64 e envia no formato correto.
+
+## Diferenças Claude vs Gemini
+
+O provider detecta automaticamente o modelo e aplica configurações específicas:
+
+### Detecção de Modelo
+
+```typescript
+private isClaudeModel(modelName: string): boolean {
+  const lower = modelName.toLowerCase();
+  return lower.includes('claude') || lower.includes('opus');
+}
+
+private isThinkingCapableModel(modelName: string): boolean {
+  const lower = modelName.toLowerCase();
+  return lower.includes('thinking') ||
+         lower.includes('gemini-3') ||
+         lower.includes('opus');
+}
+```
+
+### Thinking Configuration
+
+**Gemini:**
+```json
+{
+  "generationConfig": {
+    "maxOutputTokens": 8192,
+    "thinkingConfig": {
+      "thinkingBudget": 16000,
+      "includeThoughts": true
+    }
+  }
+}
+```
+
+**Claude:**
+```json
+{
+  "generationConfig": {
+    "maxOutputTokens": 8192
+  },
+  "thinking": {
+    "type": "enabled",
+    "budgetTokens": 16000
+  }
+}
+```
+
+### Tratamento de Thinking Blocks
+
+**Claude:**
+- Strip all thinking blocks (removidos completamente)
+- Não aplica filtros de validação de signature
+- Gera thinking novo a cada turno
+
+**Gemini:**
+- Valida signatures de thinking blocks
+- Preserva blocks com signatures válidas do cache
+- Injeta sentinel `skip_thought_signature_validator` quando necessário
+
+### JSON Schema Cleaning (Claude VALIDATED Mode)
+
+Claude no modo VALIDATED rejeita schemas complexos. O `AntigravitySchemaCleanup.ts` aplica transformações:
+
+- **$ref** → Convertido para hints na descrição
+- **const** → Convertido para enum
+- **allOf/anyOf/oneOf** → Flattened para single schema
+- **additionalProperties** → Convertido para hint
+- **Constraints** (minLength, maxLength, pattern, etc.) → Movidos para descrição
+- **Type arrays** (string | null) → Flattened com hint "nullable"
+- **Empty objects** → Adiciona placeholder property
+
+### Exemplo de Limpeza
+
+**Entrada:**
+```json
+{
+  "type": "object",
+  "properties": {
+    "query": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 100
+    }
+  },
+  "additionalProperties": false
+}
+```
+
+**Saída (Claude):**
+```json
+{
+  "type": "object",
+  "properties": {
+    "query": {
+      "type": "string",
+      "description": "(minLength: 1) (maxLength: 100)"
+    }
+  },
+  "description": "(No extra properties allowed)"
+}
+```
+
 ## Cache de Thinking Signatures
 
 O `AntigravityCache.ts` mantem um cache em memoria de signatures para thinking blocks (diferente de tool call signatures). Caracteristicas:
@@ -135,7 +284,15 @@ O `AntigravityOAuth.ts` gerencia o ciclo de vida dos tokens:
 
 ## Comandos Disponiveis
 
-| Comando | Modelo |
-| --- | --- |
-| `antigravity:` / `antigemini:` | Gemini 3 Flash |
-| `anticlaude:` | Claude Sonnet 4.5 |
+| Comando | Modelo | Thinking |
+| --- | --- | --- |
+| `antigravity:` / `antigemini:` | Gemini 3 Flash | Sim |
+| `anticlaude:` | Claude Sonnet 4.5 | Sim |
+
+## Limitações Conhecidas
+
+1. **Tool Pairing Validation**: Não implementado. Claude exige que todo `tool_use` tenha `tool_result` correspondente. Pode causar erros intermitentes em conversas complexas com múltiplas tools.
+
+2. **Imagens no Histórico**: Imagens enviadas em mensagens anteriores não são preservadas no histórico de conversa. Cada análise de imagem é independente.
+
+3. **Rate Limits**: Como o provider é gratuito, pode haver limitações de uso não documentadas.

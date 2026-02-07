@@ -1,4 +1,5 @@
 import { assertEquals } from 'asserts';
+import OpenAi from 'npm:openai';
 import { AntigravityTransformer } from '../../../src/service/antigravity/AntigravityTransformer.ts';
 import { SKIP_THOUGHT_SIGNATURE } from '../../../src/service/antigravity/AntigravityTypes.ts';
 
@@ -112,4 +113,52 @@ Deno.test('AntigravityTransformer.toGeminiTools converts OpenAI tool schemas', (
 	assertEquals(result[0].functionDeclarations.length, 1);
 	assertEquals(result[0].functionDeclarations[0].name, 'search_searx');
 	assertEquals(result[0].functionDeclarations[0].description, 'Search the web');
+});
+
+Deno.test('AntigravityTransformer.toGeminiFormat converts images to inlineData', () => {
+	const messages: OpenAi.Chat.ChatCompletionMessageParam[] = [
+		{
+			role: 'user',
+			content: [
+				{ type: 'text', text: 'O que é isso?' },
+				{
+					type: 'image_url',
+					image_url: { url: 'data:image/jpeg;base64,/9j/4AAQSkZJRg==' },
+				},
+			],
+		},
+	];
+
+	const result = AntigravityTransformer.toGeminiFormat(messages);
+
+	assertEquals(result.contents.length, 1);
+	assertEquals(result.contents[0].parts.length, 2);
+	assertEquals(result.contents[0].parts[0].text, 'O que é isso?');
+	assertEquals(result.contents[0].parts[1].inlineData?.mimeType, 'image/jpeg');
+	assertEquals(result.contents[0].parts[1].inlineData?.data, '/9j/4AAQSkZJRg==');
+});
+
+Deno.test('AntigravityTransformer.toGeminiFormat handles multiple images', () => {
+	const messages: OpenAi.Chat.ChatCompletionMessageParam[] = [
+		{
+			role: 'user',
+			content: [
+				{ type: 'text', text: 'Compare estas imagens' },
+				{
+					type: 'image_url',
+					image_url: { url: 'data:image/jpeg;base64,abc123' },
+				},
+				{
+					type: 'image_url',
+					image_url: { url: 'data:image/png;base64,xyz789' },
+				},
+			],
+		},
+	];
+
+	const result = AntigravityTransformer.toGeminiFormat(messages);
+
+	assertEquals(result.contents[0].parts.length, 3);
+	assertEquals(result.contents[0].parts[1].inlineData?.mimeType, 'image/jpeg');
+	assertEquals(result.contents[0].parts[2].inlineData?.mimeType, 'image/png');
 });

@@ -107,6 +107,24 @@ O access token é renovado automaticamente (válido por ~1h). O project ID é de
 
 Para detalhes sobre a arquitetura, thought signatures e o ciclo de tool calls do Antigravity, consulte o arquivo [ANTIGRAVITY.md](./.github/ANTIGRAVITY.md).
 
+### Enviar Imagens
+
+O provider Antigravity suporta análise de imagens. Para usar:
+
+```bash
+antigravity: descreva esta imagem
+# [envie a foto via Telegram]
+```
+
+Ou:
+
+```bash
+anticlaude: o que você vê nesta imagem?
+# [envie a foto via Telegram]
+```
+
+O sistema converte automaticamente a imagem para o formato nativo Gemini (`inlineData`) e envia para o modelo.
+
 ## Mudando a Fonte de um Modelo para Outro Provedor
 
 Para mudar a fonte de um modelo para outro provedor disponível, consulte o arquivo [CHANGE_PROVIDER.md](./.github/CHANGE_PROVIDER.md).

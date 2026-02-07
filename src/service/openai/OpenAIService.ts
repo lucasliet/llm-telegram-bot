@@ -295,7 +295,7 @@ export function responsesResponseMap(responseBody: string): string {
 	}
 }
 
-function getImageBase64String(
+export function getImageBase64String(
 	photoUrls: Promise<string>[],
 ): Promise<string[]> {
 	const promises = photoUrls.map(async (photoUrl) => {

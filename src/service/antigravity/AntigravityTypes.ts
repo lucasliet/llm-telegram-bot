@@ -8,6 +8,10 @@ export interface AntigravityConfig {
 export interface GeminiContentPart {
 	text?: string;
 	thoughtSignature?: string;
+	inlineData?: {
+		mimeType: string;
+		data: string;
+	};
 	functionCall?: {
 		id?: string;
 		name: string;
@@ -72,3 +76,10 @@ export const ANTIGRAVITY_SCOPES = [
 export const SKIP_THOUGHT_SIGNATURE = 'skip_thought_signature_validator';
 
 export const MIN_SIGNATURE_LENGTH = 50;
+
+export interface ThinkingConfig {
+	thinkingBudget?: number;
+	includeThoughts?: boolean;
+}
+
+export const DEFAULT_THINKING_BUDGET = 16000;
