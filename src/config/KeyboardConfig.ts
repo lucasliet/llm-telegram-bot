@@ -18,8 +18,8 @@ const adminCommandButtons = [
 		['Gemini 2.5 Pro', '/geminiPro'],
 	],
 	[
-		['Sonar', '/perplexity'],
-		['Sonar Reasoning', '/perplexityReasoning'],
+		['Gemini 3 Flash', '/antigravity'],
+		['Claude Sonnet 4.5', '/anticlaude'],
 	],
 	[['Limpar Histórico', '/clear']],
 ];

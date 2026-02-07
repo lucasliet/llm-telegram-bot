@@ -105,6 +105,8 @@ ANTIGRAVITY_PROJECT_ID=seu-project-id
 
 O access token é renovado automaticamente (válido por ~1h). O project ID é descoberto via API se não configurado.
 
+Para detalhes sobre a arquitetura, thought signatures e o ciclo de tool calls do Antigravity, consulte o arquivo [ANTIGRAVITY.md](./.github/ANTIGRAVITY.md).
+
 ## Mudando a Fonte de um Modelo para Outro Provedor
 
 Para mudar a fonte de um modelo para outro provedor disponível, consulte o arquivo [CHANGE_PROVIDER.md](./.github/CHANGE_PROVIDER.md).

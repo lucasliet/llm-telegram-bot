@@ -217,8 +217,8 @@ Interações Premium:
 			'/llama': () => handleOpenRouter(ctx, `llama: ${message!}`),
 			'/gemini': () => handleVertex(ctx, `gemini: ${message}`),
 			'/geminiPro': () => handleVertex(ctx, `geminiPro: ${message}`),
-			'/perplexity': () => handlePerplexity(ctx, `perplexity: ${message}`),
-			'/perplexityReasoning': () => handlePerplexity(ctx, `perplexityReasoning: ${message}`),
+			'/antigravity': () => handleAntigravity(ctx, `antigravity: ${message}`),
+			'/anticlaude': () => handleAntigravity(ctx, `anticlaude: ${message}`),
 		};
 
 		const handler = modelHandlers[currentModel];

@@ -40,15 +40,15 @@ export class AntigravityTransformer {
 					queue.push(callId);
 					pendingCallIdsByName.set(callName, queue);
 
-				const signature = signatureMap?.get(callId);
-				parts.push({
-					functionCall: {
-						id: callId,
-						name: callName,
-						args: typeof callArgs === 'string' ? JSON.parse(callArgs) : callArgs,
-					},
-					thoughtSignature: signature || SKIP_THOUGHT_SIGNATURE,
-				});
+					const signature = signatureMap?.get(callId);
+					parts.push({
+						functionCall: {
+							id: callId,
+							name: callName,
+							args: typeof callArgs === 'string' ? JSON.parse(callArgs) : callArgs,
+						},
+						thoughtSignature: signature || SKIP_THOUGHT_SIGNATURE,
+					});
 				}
 				contents.push({ role: 'model', parts });
 				continue;

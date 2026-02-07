@@ -25,7 +25,7 @@ export default class AntigravityService extends OpenAiService {
 			8192,
 		);
 		this.tokenManager = AntigravityTokenManager.getInstance();
-		this.sessionId = `telegram-${crypto.randomUUID().slice(0, 8)}`;
+		this.sessionId = crypto.randomUUID().slice(0, 8);
 	}
 
 	/**
@@ -641,8 +641,8 @@ export default class AntigravityService extends OpenAiService {
 		const systemText = typeof anyPayload.systemInstruction === 'string'
 			? anyPayload.systemInstruction
 			: typeof anyPayload.systemInstruction?.parts?.[0]?.text === 'string'
-			? anyPayload.systemInstruction.parts[0].text
-			: '';
+				? anyPayload.systemInstruction.parts[0].text
+				: '';
 
 		const messageSeed = Array.isArray(anyPayload.contents) ? this.extractTextFromContents(anyPayload.contents) : '';
 

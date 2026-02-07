@@ -5,6 +5,7 @@
 - `src/`: production code
   - `handlers/`: command and model handlers (suffix `Handler`)
   - `service/`: integrations and orchestration (suffix `Service`)
+    - `antigravity/`: Antigravity provider modules (OAuth, Transformer, Cache, Types). See [ANTIGRAVITY.md](./.github/ANTIGRAVITY.md)
   - `repository/`: persistence via Deno KV (suffix `Repository`)
   - `adapter/`, `config/`, `prototype/`, `util/`: support modules
 - `tests/`: mirrors `src/` with `*.test.ts`
