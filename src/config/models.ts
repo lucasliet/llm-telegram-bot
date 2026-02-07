@@ -45,6 +45,11 @@ export const openWebUiModels = {
 	sonnetThinking: 'pplx.claude-4.0-sonnet-think-search',
 };
 
+export const antigravityModels = {
+	geminiFlash: 'gemini-3-flash',
+	claudeSonnet: 'claude-sonnet-4.5-antigravity',
+};
+
 /**
  * Type definitions
  */

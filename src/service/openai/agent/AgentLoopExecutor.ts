@@ -230,7 +230,9 @@ export class AgentLoopExecutor<TMessage, TGenerateArgs extends unknown[]> {
 		}
 
 		console.log(
-			`[AgentLoop] Context would exceed limit (currentTokens=${currentTokens}, toolResultsTokens=${toolResultsTokens}, total=${totalTokensAfterAdding}/${this.maxTokens - RESPONSE_BUFFER}), summarizing ${toolResults.length} tool results...`,
+			`[AgentLoop] Context would exceed limit (currentTokens=${currentTokens}, toolResultsTokens=${toolResultsTokens}, total=${totalTokensAfterAdding}/${
+				this.maxTokens - RESPONSE_BUFFER
+			}), summarizing ${toolResults.length} tool results...`,
 		);
 
 		const summarizedResults: ToolExecutionResult[] = [];

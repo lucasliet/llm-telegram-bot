@@ -6,6 +6,7 @@ import { getCurrentModel, setCurrentModel } from '@/repository/ChatRepository.ts
 import { ModelCommand, modelCommands, WHITELISTED_MODELS } from '@/config/models.ts';
 
 import {
+	handleAntigravity,
 	handleArta,
 	handleCloudflare,
 	handleFala,
@@ -88,22 +89,22 @@ export default {
 		const keepAliveId = keepDenoJobAlive();
 		const typingId = ctx.startTypingIndicator();
 
-	modelCallFunction(ctx)
-		.then(() => {
-			ctx.chatAction = undefined;
-			clearInterval(typingId);
-			clearInterval(keepAliveId);
-			console.log(`Request processed in ${Date.now() - startTime}ms`);
-		})
-		.catch((err) => {
-			ctx.chatAction = undefined;
-			clearInterval(typingId);
-			clearInterval(keepAliveId);
-			console.error(err);
-			ctx.reply(`Eita, algo deu errado: ${err.message}`, {
-				reply_to_message_id: ctx.msg?.message_id,
+		modelCallFunction(ctx)
+			.then(() => {
+				ctx.chatAction = undefined;
+				clearInterval(typingId);
+				clearInterval(keepAliveId);
+				console.log(`Request processed in ${Date.now() - startTime}ms`);
+			})
+			.catch((err) => {
+				ctx.chatAction = undefined;
+				clearInterval(typingId);
+				clearInterval(keepAliveId);
+				console.error(err);
+				ctx.reply(`Eita, algo deu errado: ${err.message}`, {
+					reply_to_message_id: ctx.msg?.message_id,
+				});
 			});
-		});
 	},
 
 	/**
@@ -263,6 +264,9 @@ Interações Premium:
 	},
 	callFala(ctx: Context, commandMessage?: string): Promise<void> {
 		return handleFala(ctx, new GithubCopilotService(), commandMessage);
+	},
+	callAntigravityModel(ctx: Context, commandMessage?: string): Promise<void> {
+		return handleAntigravity(ctx, commandMessage);
 	},
 };
 
