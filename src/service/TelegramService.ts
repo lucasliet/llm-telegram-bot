@@ -4,6 +4,7 @@ import { Voice } from 'grammy-types';
 import { getCurrentModel, setCurrentModel } from '@/repository/ChatRepository.ts';
 
 import { ModelCommand, modelCommands, WHITELISTED_MODELS } from '@/config/models.ts';
+import { escapeMarkdownV1 } from '@/util/MarkdownUtils.ts';
 
 import {
 	handleAntigravity,
@@ -128,8 +129,8 @@ GitHub Copilot - Status de Uso
 
 📋
 Informações Gerais:
-• *Plano*: ${(data as any).copilot_plan ?? 'n/a'}
-• *Tipo de acesso*: ${(data as any).access_type_sku?.replaceAll('_', '\\_') ?? 'n/a'}
+• *Plano*: ${escapeMarkdownV1((data as any).copilot_plan ?? 'n/a')}
+• *Tipo de acesso*: ${escapeMarkdownV1((data as any).access_type_sku ?? 'n/a')}
 • *Chat habilitado*: ${(data as any).chat_enabled ? 'Sim' : 'Não'}
 • *Data de atribuição*: ${formatDate((data as any).assigned_date)}
 • *Próxima renovação de cota*: ${formatDate((data as any).quota_reset_date)}

@@ -2,6 +2,7 @@ import { Context } from 'grammy';
 import { Action } from 'grammy-auto-chat-action-types';
 import { Audio, Message, ParseMode, PhotoSize, Voice } from 'grammy-types';
 import { transcribeAudio } from '@/service/TelegramService.ts';
+import { toTelegramMarkdown } from '@/util/MarkdownUtils.ts';
 
 const MARKDOWN_ERROR_MESSAGE = 'Error on markdown parse_mode, message:';
 
@@ -35,7 +36,7 @@ declare module 'grammy' {
 			quote?: string;
 		}>;
 
-		chatAction: Action | null;
+		chatAction: Action | undefined;
 	}
 }
 
@@ -85,8 +86,9 @@ Context.prototype.replyInChunks = function (
 		outputChunks.forEach((chunk, index) => {
 			const isLastChunk = index === outputChunks.length - 1;
 			const chunkOutput = `${chunk}${isLastChunk ? '' : '...'}`;
+			const sanitizedOutput = toTelegramMarkdown(chunkOutput);
 
-			this.replyWithQuote(chunkOutput, { parse_mode: 'Markdown' })
+			this.replyWithQuote(sanitizedOutput, { parse_mode: 'Markdown' })
 				.catch(() => {
 					console.warn(MARKDOWN_ERROR_MESSAGE, chunkOutput);
 					this.replyWithQuote(chunkOutput);
@@ -95,7 +97,8 @@ Context.prototype.replyInChunks = function (
 		return;
 	}
 
-	this.replyWithQuote(output, { parse_mode: 'Markdown' })
+	const sanitizedOutput = toTelegramMarkdown(output);
+	this.replyWithQuote(sanitizedOutput, { parse_mode: 'Markdown' })
 		.catch(() => {
 			console.warn(MARKDOWN_ERROR_MESSAGE, output);
 			this.replyWithQuote(output);
@@ -172,7 +175,7 @@ Context.prototype.streamReply = async function (
 		this.replyInChunks(remainingChunk);
 	}
 
-	this.api.editMessageText(this.chat!.id, message_id, sanitizedResult, {
+	this.api.editMessageText(this.chat!.id, message_id, toTelegramMarkdown(sanitizedResult), {
 		parse_mode: 'Markdown',
 	})
 		.catch(() => {
@@ -243,7 +246,7 @@ async function editMessageWithCompletionEvery3Seconds(
 
 	if ((isLastMessage || has2SecondsPassed) && displayMessage !== lastSentMessage) {
 		try {
-			await ctx.api.editMessageText(ctx.chat!.id, messageId, displayMessage, {
+			await ctx.api.editMessageText(ctx.chat!.id, messageId, toTelegramMarkdown(displayMessage), {
 				parse_mode: 'Markdown',
 			});
 			return { timestamp: now, lastMessage: displayMessage };
