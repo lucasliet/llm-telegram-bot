@@ -1,5 +1,6 @@
 import OpenAi from 'npm:openai';
 import type { GeminiContent, GeminiContentPart } from './AntigravityTypes.ts';
+import { SKIP_THOUGHT_SIGNATURE } from './AntigravityTypes.ts';
 
 /**
  * Transforms between OpenAI Chat Completions and Gemini/Antigravity formats.
@@ -12,9 +13,11 @@ export class AntigravityTransformer {
 	 */
 	static toGeminiFormat(
 		messages: OpenAi.Chat.ChatCompletionMessageParam[],
+		signatureMap?: Map<string, string>,
 	): { systemInstruction?: string; contents: GeminiContent[] } {
 		let systemInstruction: string | undefined;
 		const contents: GeminiContent[] = [];
+		const pendingCallIdsByName = new Map<string, string[]>();
 
 		for (const msg of messages) {
 			if (msg.role === 'system') {
@@ -28,23 +31,44 @@ export class AntigravityTransformer {
 					parts.push({ text: typeof msg.content === 'string' ? msg.content : '' });
 				}
 				for (const call of msg.tool_calls) {
-					parts.push({
-						functionCall: {
-							name: call.function.name,
-							args: JSON.parse(call.function.arguments || '{}'),
-						},
-					});
+					const toolCall = call as any;
+					const callId = toolCall.id || `call_${crypto.randomUUID().replace(/-/g, '').slice(0, 24)}`;
+					const callName = toolCall.function?.name || String(call);
+					const callArgs = toolCall.function?.arguments || '{}';
+
+					const queue = pendingCallIdsByName.get(callName) || [];
+					queue.push(callId);
+					pendingCallIdsByName.set(callName, queue);
+
+				const signature = signatureMap?.get(callId);
+				parts.push({
+					functionCall: {
+						id: callId,
+						name: callName,
+						args: typeof callArgs === 'string' ? JSON.parse(callArgs) : callArgs,
+					},
+					thoughtSignature: signature || SKIP_THOUGHT_SIGNATURE,
+				});
 				}
 				contents.push({ role: 'model', parts });
 				continue;
 			}
 
 			if (msg.role === 'tool') {
+				const toolName = (msg as any).name || 'unknown';
+				const queue = pendingCallIdsByName.get(toolName);
+				const matchedId = queue && queue.length > 0 ? queue.shift() : undefined;
+
+				if (matchedId && queue) {
+					pendingCallIdsByName.set(toolName, queue);
+				}
+
 				contents.push({
 					role: 'user',
 					parts: [{
 						functionResponse: {
-							name: (msg as any).name || (msg as any).tool_call_id || 'unknown',
+							id: matchedId || (msg as any).tool_call_id || 'unknown',
+							name: toolName,
 							response: { result: msg.content },
 						},
 					}],
@@ -66,12 +90,18 @@ export class AntigravityTransformer {
 	static toGeminiTools(
 		tools: OpenAi.Chat.Completions.ChatCompletionTool[],
 	): Array<{ functionDeclarations: Array<{ name: string; description: string; parameters: Record<string, unknown> }> }> {
+		const toolsArray = tools as any[];
 		return [{
-			functionDeclarations: tools.map((tool) => ({
-				name: tool.function.name,
-				description: tool.function.description || '',
-				parameters: cleanJsonSchema(tool.function.parameters || {}),
-			})),
+			functionDeclarations: toolsArray.map((tool) => {
+				const toolName = tool.function?.name || String(tool);
+				const toolDescription = tool.function?.description || '';
+				const toolParams = tool.function?.parameters || {};
+				return {
+					name: toolName,
+					description: toolDescription,
+					parameters: cleanJsonSchema(typeof toolParams === 'object' ? toolParams : {}),
+				};
+			}),
 		}];
 	}
 }

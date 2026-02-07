@@ -4,7 +4,7 @@ import { mockDenoEnv } from '../test_helpers.ts';
 import { setupKvStub } from '../stubs/kv.ts';
 
 Deno.test('AntigravityHandler streams text path', async () => {
-	mockDenoEnv({ ANTIGRAVITY_REFRESH_TOKEN: 'test-token', ANTIGRAVITY_PROJECT_ID: 'test-project' });
+	mockDenoEnv({ ANTIGRAVITY_REFRESH_TOKEN: 'test-token', ANTIGRAVITY_PROJECT_ID: 'test-project', ADMIN_USER_IDS: '123,456' });
 	const restore = setupKvStub();
 	const ctx: any = {
 		streamReply: spy(() => Promise.resolve()),
@@ -24,7 +24,7 @@ Deno.test('AntigravityHandler streams text path', async () => {
 });
 
 Deno.test('AntigravityHandler routes anticlaude command', async () => {
-	mockDenoEnv({ ANTIGRAVITY_REFRESH_TOKEN: 'test-token', ANTIGRAVITY_PROJECT_ID: 'test-project' });
+	mockDenoEnv({ ANTIGRAVITY_REFRESH_TOKEN: 'test-token', ANTIGRAVITY_PROJECT_ID: 'test-project', ADMIN_USER_IDS: '123,456' });
 	const restore = setupKvStub();
 	const ctx: any = {
 		streamReply: spy(() => Promise.resolve()),

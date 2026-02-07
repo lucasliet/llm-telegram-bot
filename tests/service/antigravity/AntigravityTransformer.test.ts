@@ -1,5 +1,6 @@
 import { assertEquals } from 'asserts';
 import { AntigravityTransformer } from '../../../src/service/antigravity/AntigravityTransformer.ts';
+import { SKIP_THOUGHT_SIGNATURE } from '../../../src/service/antigravity/AntigravityTypes.ts';
 
 Deno.test('AntigravityTransformer.toGeminiFormat converts system message to systemInstruction', () => {
 	const messages = [
@@ -56,8 +57,37 @@ Deno.test('AntigravityTransformer.toGeminiFormat converts tool calls', () => {
 	assertEquals(result.contents[1].role, 'model');
 	assertEquals(result.contents[1].parts[0].functionCall?.name, 'search_searx');
 	assertEquals(result.contents[1].parts[0].functionCall?.args.query, 'cats');
+	assertEquals(result.contents[1].parts[0].thoughtSignature, SKIP_THOUGHT_SIGNATURE);
 	assertEquals(result.contents[2].role, 'user');
 	assertEquals(result.contents[2].parts[0].functionResponse?.response.result, '{"results":[]}');
+});
+
+Deno.test('AntigravityTransformer.toGeminiFormat uses cached signature from signatureMap', () => {
+	const signatureMap = new Map<string, string>();
+	signatureMap.set('call_1', 'real_signature_abc123_long_enough_to_pass_validation_check_minimum_length');
+
+	const messages = [
+		{ role: 'user' as const, content: 'Search for cats' },
+		{
+			role: 'assistant' as const,
+			content: null,
+			tool_calls: [{
+				id: 'call_1',
+				type: 'function' as const,
+				function: { name: 'search_searx', arguments: '{"query":"cats"}' },
+			}],
+		},
+		{
+			role: 'tool' as const,
+			tool_call_id: 'call_1',
+			content: '{"results":[]}',
+		} as any,
+	];
+
+	const result = AntigravityTransformer.toGeminiFormat(messages, signatureMap);
+
+	assertEquals(result.contents[1].parts[0].functionCall?.name, 'search_searx');
+	assertEquals(result.contents[1].parts[0].thoughtSignature, 'real_signature_abc123_long_enough_to_pass_validation_check_minimum_length');
 });
 
 Deno.test('AntigravityTransformer.toGeminiTools converts OpenAI tool schemas', () => {

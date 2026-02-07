@@ -7,11 +7,14 @@ export interface AntigravityConfig {
 
 export interface GeminiContentPart {
 	text?: string;
+	thoughtSignature?: string;
 	functionCall?: {
+		id?: string;
 		name: string;
 		args: Record<string, unknown>;
 	};
 	functionResponse?: {
+		id?: string;
 		name: string;
 		response: { result: unknown };
 	};
@@ -27,6 +30,7 @@ export interface AntigravityRequestPayload {
 	model: string;
 	userAgent: string;
 	requestId: string;
+	requestType?: string;
 	request: {
 		contents: GeminiContent[];
 		tools?: Array<{
@@ -41,6 +45,7 @@ export interface AntigravityRequestPayload {
 			maxOutputTokens?: number;
 		};
 		systemInstruction?: {
+			role: 'user';
 			parts: Array<{ text: string }>;
 		};
 		sessionId?: string;
@@ -63,3 +68,7 @@ export const ANTIGRAVITY_SCOPES = [
 	'https://www.googleapis.com/auth/cclog',
 	'https://www.googleapis.com/auth/experimentsandconfigs',
 ];
+
+export const SKIP_THOUGHT_SIGNATURE = 'skip_thought_signature_validator';
+
+export const MIN_SIGNATURE_LENGTH = 50;
