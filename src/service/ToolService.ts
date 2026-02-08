@@ -550,6 +550,91 @@ export default class ToolService {
 				},
 			},
 		],
+		[
+			'antigravity_quota',
+			{
+				schema: {
+					type: 'function',
+					function: {
+						name: 'antigravity_quota',
+						description: 'Fetch Antigravity available models and quota info',
+						parameters: {
+							type: 'object',
+							properties: {
+								project: {
+									type: 'string',
+									description: 'Optional project id',
+								},
+							},
+							additionalProperties: false,
+						},
+					},
+				},
+				/**
+				 * Fetches available Antigravity models and their quota information.
+				 *
+				 * @param args - Arguments for the tool.
+				 * @param args.project - Optional project ID to fetch quota for.
+				 * @returns A promise that resolves to an array of model quota information.
+				 */
+				fn: async (args: { project?: string }) => {
+					const { AntigravityTokenManager } = await import(
+						'./antigravity/AntigravityOAuth.ts'
+					);
+					const { ANTIGRAVITY_ENDPOINTS } = await import(
+						'./antigravity/AntigravityTypes.ts'
+					);
+
+					const tm = AntigravityTokenManager.getInstance();
+					const token = await tm.getAccessToken();
+					const projectId = args?.project || (await tm.getProjectId());
+					const endpoint = ANTIGRAVITY_ENDPOINTS[0];
+
+					const res = await fetch(`${endpoint}/v1internal:fetchAvailableModels`, {
+						method: 'POST',
+						headers: {
+							Authorization: `Bearer ${token}`,
+							'Content-Type': 'application/json',
+							'User-Agent': 'antigravity',
+						},
+						body: JSON.stringify({ project: projectId }),
+					});
+
+					const json = await res.json();
+
+					return Object.entries(json.models || {}).flatMap(
+						([id, val]: any) => {
+							if (!val?.displayName) return [];
+
+							const raw = val?.quotaInfo?.remainingFraction;
+							let remaining: number | null = null;
+
+							if (typeof raw === 'number') {
+								remaining = raw;
+							} else if (typeof raw === 'string' && /^[0-9.]+$/.test(raw)) {
+								remaining = Number(raw);
+							}
+
+							const resetTime = val?.quotaInfo?.resetTime ?? null;
+							const resetsInSeconds = resetTime
+								? Math.max(
+									0,
+									Math.floor((Date.parse(resetTime) - Date.now()) / 1000),
+								)
+								: null;
+
+							return [{
+								id,
+								displayName: val.displayName,
+								remainingFraction: remaining,
+								resetTime,
+								resetsInSeconds,
+							}];
+						},
+					);
+				},
+			},
+		],
 	]);
 
 	static schemas: OpenAi.ChatCompletionTool[] = Array.from(
