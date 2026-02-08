@@ -96,6 +96,11 @@ function registerBotCommands() {
 	);
 
 	BOT.hears(
+		/^(zai):/gi,
+		(ctx) => TelegramService.callAdminModel(ctx, TelegramService.callZaiModel),
+	);
+
+	BOT.hears(
 		new RegExp(`^(${modelCommands.join('|')})$`),
 		async (ctx) => await TelegramService.setCurrentModel(ctx),
 	);

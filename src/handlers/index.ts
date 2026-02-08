@@ -10,3 +10,4 @@ export { handlePollinations } from './PollinationsHandler.ts';
 export { handleArta } from './ArtaHandler.ts';
 export { handleFala } from './ElevenlabsHandler.ts';
 export { handleAntigravity } from './AntigravityHandler.ts';
+export { handleZai } from './ZaiHandler.ts';

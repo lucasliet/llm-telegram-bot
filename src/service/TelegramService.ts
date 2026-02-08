@@ -19,6 +19,7 @@ import {
 	handlePerplexity,
 	handlePollinations,
 	handleVertex,
+	handleZai,
 } from '@/handlers/index.ts';
 
 import { FileUtils } from '@/util/FileUtils.ts';
@@ -220,6 +221,7 @@ Interações Premium:
 			'/geminiPro': () => handleVertex(ctx, `geminiPro: ${message}`),
 			'/antigravity': () => handleAntigravity(ctx, `antigravity: ${message}`),
 			'/anticlaude': () => handleAntigravity(ctx, `anticlaude: ${message}`),
+			'/zai': () => handleZai(ctx, `zai: ${message}`),
 		};
 
 		const handler = modelHandlers[currentModel];
@@ -268,6 +270,9 @@ Interações Premium:
 	},
 	callAntigravityModel(ctx: Context, commandMessage?: string): Promise<void> {
 		return handleAntigravity(ctx, commandMessage);
+	},
+	callZaiModel(ctx: Context, commandMessage?: string): Promise<void> {
+		return handleZai(ctx, commandMessage);
 	},
 };
 

@@ -50,6 +50,10 @@ export const openWebUiModels = {
 	sonnetThinking: 'pplx.claude-4.0-sonnet-think-search',
 };
 
+export const zaiModels = {
+	flash: 'glm-4.7-flash',
+};
+
 /**
  * Type definitions
  */
@@ -62,6 +66,7 @@ export const MODEL_COMMANDS = [
 	'/geminiPro',
 	'/antigravity',
 	'/anticlaude',
+	'/zai',
 ] as const;
 
 /**
@@ -75,6 +80,7 @@ export const WHITELISTED_MODELS: ModelCommand[] = [
 	'/llama',
 	'/oss',
 	'/gpt',
+	'/zai',
 ];
 
 export const MODELS_USING_RESPONSES_API: string[] = [
