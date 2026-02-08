@@ -58,13 +58,12 @@ esse projeto utiliza o [Deno deploy](https://deno.com/deploy) e [Deno kv](https:
   - `GEMINI_API_KEY` - api key da [Google](https://aistudio.google.com/app/apikey?hl=pt-br) para uso do modelo pago
   - `OPENROUTER_API_KEY` - api key da [OpenRouter](https://openrouter.ai/settings/keys) para uso do modelo pago
   - `COPILOT_GITHUB_TOKEN` - token do [Copilot](https://github.com/features/copilot) para uso do modelo pago. Para obter o token, configure a extensão do
-    Copilot no VSCode e extraia o token do arquivo `~/.config/github-copilot/apps.json`.
+    Copilot no [neovim](https://github.com/zbirenbaum/copilot.lua) e extraia o token do arquivo `~/.config/github-copilot/apps.json`.
   - `VERTEX_CREDENTIALS_BASE64` - credenciais do [Vertex AI](https://cloud.google.com/vertex-ai) em base64 (service account ou ADC)
   - `VERTEX_PROJECT_ID` - ID do projeto GCP para o Vertex AI
   - `VERTEX_LOCATION` - região do Vertex AI (padrão: `us-central1`)
   - `OPENWEBUI_API_KEY` - api key do [OpenWebUI](https://openwebui.com/)
   - `ANTIGRAVITY_REFRESH_TOKEN` - refresh token OAuth2 para o provider Antigravity (ver seção abaixo)
-  - `ANTIGRAVITY_PROJECT_ID` - (opcional) ID do projeto Cloud AI Companion, descoberto automaticamente se não configurado
 
 - crie um arquivo .env na raiz do projeto e configure as variaveis de ambiente nele, no formato `VARIAVEL=valor`
   ```bash
@@ -77,22 +76,13 @@ O provider Antigravity permite acesso aos modelos Gemini 3 Flash e Claude Sonnet
 
 ### 1. Obter o Refresh Token
 
-Execute o fluxo OAuth2 para obter o refresh token. O fluxo utiliza o client ID do Gemini Code Assist:
+Execute o comando abaixo para iniciar o fluxo de autenticação automatizado:
 
 ```bash
-# 1. Abra a URL abaixo no navegador para autorizar:
-https://accounts.google.com/o/oauth2/auth?client_id=1071006060591-tmhssin2h21lcre235vtolojh4g403ep.apps.googleusercontent.com&redirect_uri=http://localhost:9004&response_type=code&scope=https://www.googleapis.com/auth/cloud-platform%20https://www.googleapis.com/auth/userinfo.email%20https://www.googleapis.com/auth/userinfo.profile%20https://www.googleapis.com/auth/cclog%20https://www.googleapis.com/auth/experimentsandconfigs&access_type=offline&prompt=consent
-
-# 2. Após autorizar, copie o 'code' da URL de callback e troque por tokens:
-curl -s -X POST https://oauth2.googleapis.com/token \
-  -d "client_id=1071006060591-tmhssin2h21lcre235vtolojh4g403ep.apps.googleusercontent.com" \
-  -d "client_secret=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" \
-  -d "code=SEU_CODE_AQUI" \
-  -d "redirect_uri=http://localhost:9004" \
-  -d "grant_type=authorization_code" | python3 -m json.tool
-
-# 3. Da resposta JSON, copie o valor de 'refresh_token'
+./devrun.sh antigravity-login
 ```
+
+Siga as instruções no terminal para autorizar o acesso e obter o `ANTIGRAVITY_REFRESH_TOKEN`.
 
 ### 2. Configurar variáveis de ambiente
 
@@ -107,23 +97,6 @@ O access token é renovado automaticamente (válido por ~1h). O project ID é de
 
 Para detalhes sobre a arquitetura, thought signatures e o ciclo de tool calls do Antigravity, consulte o arquivo [ANTIGRAVITY.md](./.github/ANTIGRAVITY.md).
 
-### Enviar Imagens
-
-O provider Antigravity suporta análise de imagens. Para usar:
-
-```bash
-antigravity: descreva esta imagem
-# [envie a foto via Telegram]
-```
-
-Ou:
-
-```bash
-anticlaude: o que você vê nesta imagem?
-# [envie a foto via Telegram]
-```
-
-O sistema converte automaticamente a imagem para o formato nativo Gemini (`inlineData`) e envia para o modelo.
 
 ## Mudando a Fonte de um Modelo para Outro Provedor
 

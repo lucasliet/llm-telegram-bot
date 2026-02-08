@@ -10,6 +10,7 @@ import { adminHelpMessage, adminKeyboard, userHelpMessage, userKeyboard } from '
 import '@/prototype/StringExtensionPrototype.ts';
 import '@/prototype/ContextExtensionPrototype.ts';
 import '@/prototype/ReadableStreamDefaultReaderPrototype.ts';
+import { AntigravityAuth } from '@/scripts/AntigravityAuth.ts';
 
 const TOKEN: string = Deno.env.get('BOT_TOKEN') as string;
 const PORT: number = parseInt(Deno.env.get('PORT') as string) || 3333;
@@ -185,7 +186,12 @@ async function clearChatHistoryHandler(ctx: MyContext) {
 /**
  * Initialize and start the application
  */
-function initializeApp() {
+async function initializeApp() {
+	if (Deno.args.includes('antigravity-login')) {
+		await new AntigravityAuth().run();
+		return;
+	}
+
 	registerBotCommands();
 	configureMiddleware();
 
@@ -201,4 +207,4 @@ function initializeApp() {
 	}
 }
 
-initializeApp();
+await initializeApp();
