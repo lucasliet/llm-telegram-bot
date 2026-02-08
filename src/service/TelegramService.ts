@@ -4,8 +4,10 @@ import { Voice } from 'grammy-types';
 import { getCurrentModel, setCurrentModel } from '@/repository/ChatRepository.ts';
 
 import { ModelCommand, modelCommands, WHITELISTED_MODELS } from '@/config/models.ts';
+import { escapeMarkdownV1 } from '@/util/MarkdownUtils.ts';
 
 import {
+	handleAntigravity,
 	handleArta,
 	handleCloudflare,
 	handleFala,
@@ -17,6 +19,7 @@ import {
 	handlePerplexity,
 	handlePollinations,
 	handleVertex,
+	handleZai,
 } from '@/handlers/index.ts';
 
 import { FileUtils } from '@/util/FileUtils.ts';
@@ -88,22 +91,22 @@ export default {
 		const keepAliveId = keepDenoJobAlive();
 		const typingId = ctx.startTypingIndicator();
 
-	modelCallFunction(ctx)
-		.then(() => {
-			ctx.chatAction = undefined;
-			clearInterval(typingId);
-			clearInterval(keepAliveId);
-			console.log(`Request processed in ${Date.now() - startTime}ms`);
-		})
-		.catch((err) => {
-			ctx.chatAction = undefined;
-			clearInterval(typingId);
-			clearInterval(keepAliveId);
-			console.error(err);
-			ctx.reply(`Eita, algo deu errado: ${err.message}`, {
-				reply_to_message_id: ctx.msg?.message_id,
+		modelCallFunction(ctx)
+			.then(() => {
+				ctx.chatAction = undefined;
+				clearInterval(typingId);
+				clearInterval(keepAliveId);
+				console.log(`Request processed in ${Date.now() - startTime}ms`);
+			})
+			.catch((err) => {
+				ctx.chatAction = undefined;
+				clearInterval(typingId);
+				clearInterval(keepAliveId);
+				console.error(err);
+				ctx.reply(`Eita, algo deu errado: ${err.message}`, {
+					reply_to_message_id: ctx.msg?.message_id,
+				});
 			});
-		});
 	},
 
 	/**
@@ -127,8 +130,8 @@ GitHub Copilot - Status de Uso
 
 📋
 Informações Gerais:
-• *Plano*: ${(data as any).copilot_plan ?? 'n/a'}
-• *Tipo de acesso*: ${(data as any).access_type_sku?.replaceAll('_', '\\_') ?? 'n/a'}
+• *Plano*: ${escapeMarkdownV1((data as any).copilot_plan ?? 'n/a')}
+• *Tipo de acesso*: ${escapeMarkdownV1((data as any).access_type_sku ?? 'n/a')}
 • *Chat habilitado*: ${(data as any).chat_enabled ? 'Sim' : 'Não'}
 • *Data de atribuição*: ${formatDate((data as any).assigned_date)}
 • *Próxima renovação de cota*: ${formatDate((data as any).quota_reset_date)}
@@ -216,8 +219,9 @@ Interações Premium:
 			'/llama': () => handleOpenRouter(ctx, `llama: ${message!}`),
 			'/gemini': () => handleVertex(ctx, `gemini: ${message}`),
 			'/geminiPro': () => handleVertex(ctx, `geminiPro: ${message}`),
-			'/perplexity': () => handlePerplexity(ctx, `perplexity: ${message}`),
-			'/perplexityReasoning': () => handlePerplexity(ctx, `perplexityReasoning: ${message}`),
+			'/antigravity': () => handleAntigravity(ctx, `antigravity: ${message}`),
+			'/anticlaude': () => handleAntigravity(ctx, `anticlaude: ${message}`),
+			'/zai': () => handleZai(ctx, `zai: ${message}`),
 		};
 
 		const handler = modelHandlers[currentModel];
@@ -263,6 +267,12 @@ Interações Premium:
 	},
 	callFala(ctx: Context, commandMessage?: string): Promise<void> {
 		return handleFala(ctx, new GithubCopilotService(), commandMessage);
+	},
+	callAntigravityModel(ctx: Context, commandMessage?: string): Promise<void> {
+		return handleAntigravity(ctx, commandMessage);
+	},
+	callZaiModel(ctx: Context, commandMessage?: string): Promise<void> {
+		return handleZai(ctx, commandMessage);
 	},
 };
 

@@ -5,6 +5,7 @@
 - `src/`: production code
   - `handlers/`: command and model handlers (suffix `Handler`)
   - `service/`: integrations and orchestration (suffix `Service`)
+    - `antigravity/`: Antigravity provider modules (OAuth, Transformer, Cache, Types). See [ANTIGRAVITY.md](./.github/ANTIGRAVITY.md)
   - `repository/`: persistence via Deno KV (suffix `Repository`)
   - `adapter/`, `config/`, `prototype/`, `util/`: support modules
 - `tests/`: mirrors `src/` with `*.test.ts`
@@ -16,7 +17,8 @@
 - `deno task dev`: runs `devrun.sh` (loads `.env`, starts with `denon`, sets Telegram webhook).
 - `deno task test`: runs `run_tests.sh` (full suite + coverage).
 - `deno test -A --unstable-kv --unstable-cron tests/service/TelegramService.test.ts`: run a specific test.
-- `deno fmt`, `deno lint`: format and lint the codebase.
+- `deno fmt 'src/**/*.ts' 'tests/**/*.ts' 'main.ts'`, `deno lint`: format and lint the codebase.
+- **IMPORTANTE:** NÃO rode `deno fmt` sem argumentos. O formatter do Deno reformata arquivos `.md`, `.json` e `.yml` de forma indesejada. Use sempre globs para formatar apenas código-fonte TypeScript.
 
 ## Coding Style & Naming Conventions
 - Language: TypeScript (`strict` mode). Use TSDoc for all functions; avoid inline `//` comments.
@@ -37,6 +39,7 @@
 ## Security & Configuration Tips
 - Never commit secrets. Store provider keys and tokens in `.env` (e.g., `BOT_TOKEN`, `SERVER_URL`, `ADMIN_USER_IDS`, provider API keys).
 - Validate inputs and sanitize outputs when interacting with external providers.
+- **Never read env var values into context** - only check if they are filled. Use `$VAR` directly in bash commands or `Deno.env.get("VAR")` in code to avoid exposing secrets in AI context. Example: `echo ${VAR:-"vazia"}` shows only status, not the actual value.
 
 ## Code Conventions
 

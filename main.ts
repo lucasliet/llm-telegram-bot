@@ -90,6 +90,15 @@ function registerBotCommands() {
 		/^(artaImage):/gi,
 		(ctx) => TelegramService.callAdminModel(ctx, TelegramService.callArtaModel),
 	);
+	BOT.hears(
+		/^(antigravity|antigemini|anticlaude):/gi,
+		(ctx) => TelegramService.callAdminModel(ctx, TelegramService.callAntigravityModel),
+	);
+
+	BOT.hears(
+		/^(zai):/gi,
+		(ctx) => TelegramService.callAdminModel(ctx, TelegramService.callZaiModel),
+	);
 
 	BOT.hears(
 		new RegExp(`^(${modelCommands.join('|')})$`),

@@ -15,6 +15,7 @@ Provedores compatíveis com OpenAI que estendem a classe `openai` e suportam o u
 - OpenRouter Service `src/service/openai/OpenrouterService.ts`
 - GitHub Service `src/service/openai/GithubService.ts`
 - OpenAI Service `src/service/openai/OpenAIService.ts`
+- Antigravity Service `src/service/openai/AntigravityService.ts` (usa formato Gemini nativo, ver [ANTIGRAVITY.md](./ANTIGRAVITY.md))
 
 ## Observações
 

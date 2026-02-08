@@ -295,7 +295,7 @@ export function responsesResponseMap(responseBody: string): string {
 	}
 }
 
-function getImageBase64String(
+export function getImageBase64String(
 	photoUrls: Promise<string>[],
 ): Promise<string[]> {
 	const promises = photoUrls.map(async (photoUrl) => {
@@ -388,20 +388,33 @@ async function readInitialStreamAndExtract(
 	controller: ReadableStreamDefaultController<Uint8Array>,
 ): Promise<ToolCall[]> {
 	const tool_calls: ToolCall[] = [];
+	const decoder = new TextDecoder();
 	while (true) {
 		const { done, value } = await initialReader.read();
 		if (done) break;
 		controller.enqueue(value);
 		try {
-			const text = new TextDecoder().decode(value);
-			const toolCalls = JSON.parse(text)?.choices?.[0]?.delta?.tool_calls;
-			for (const call of toolCalls || []) {
-				const { index } = call;
+			const text = decoder.decode(value);
+			const lines = text.split('\n');
 
-				if (!tool_calls[index]) {
-					tool_calls[index] = call as ToolCall;
-				} else if (call.function?.arguments) {
-					tool_calls[index].function.arguments += call.function.arguments;
+			for (const line of lines) {
+				const trimmed = line.trim();
+				if (!trimmed) continue;
+
+				try {
+					const toolCalls = JSON.parse(trimmed)?.choices?.[0]?.delta?.tool_calls;
+					for (const call of toolCalls || []) {
+						const { index } = call;
+
+						if (!tool_calls[index]) {
+							tool_calls[index] = call as ToolCall;
+						} else if (call.function?.arguments) {
+							tool_calls[index].function.arguments += call.function.arguments;
+						}
+					}
+				} catch (e) {
+					// Skip partial or invalid JSON lines in the initial stream
+					console.warn('Error parsing initial stream line:', e);
 				}
 			}
 			continue;

@@ -3,6 +3,11 @@ export const geminiModels = {
 	geminiFlash: 'gemini-2.5-flash-lite',
 };
 
+export const antigravityModels = {
+	geminiFlash: 'gemini-3-flash',
+	claudeSonnet: 'claude-sonnet-4-5',
+};
+
 export const perplexityModels = {
 	textModel: 'sonar',
 	reasoningModel: 'sonar-reasoning-pro',
@@ -45,6 +50,10 @@ export const openWebUiModels = {
 	sonnetThinking: 'pplx.claude-4.0-sonnet-think-search',
 };
 
+export const zaiModels = {
+	flash: 'glm-4.7-flash',
+};
+
 /**
  * Type definitions
  */
@@ -55,8 +64,9 @@ export const MODEL_COMMANDS = [
 	'/oss',
 	'/gemini',
 	'/geminiPro',
-	'/perplexity',
-	'/perplexityReasoning',
+	'/antigravity',
+	'/anticlaude',
+	'/zai',
 ] as const;
 
 /**
@@ -70,6 +80,7 @@ export const WHITELISTED_MODELS: ModelCommand[] = [
 	'/llama',
 	'/oss',
 	'/gpt',
+	'/zai',
 ];
 
 export const MODELS_USING_RESPONSES_API: string[] = [
