@@ -23,13 +23,13 @@ Deno.test('AntigravityHandler streams text path', async () => {
 	restore();
 });
 
-Deno.test('AntigravityHandler routes anticlaude command', async () => {
+Deno.test('AntigravityHandler routes antigeminipro command', async () => {
 	mockDenoEnv({ ANTIGRAVITY_REFRESH_TOKEN: 'test-token', ANTIGRAVITY_PROJECT_ID: 'test-project', ADMIN_USER_IDS: '123,456' });
 	const restore = setupKvStub();
 	const ctx: any = {
 		streamReply: spy(() => Promise.resolve()),
 		extractContextKeys: spy(() =>
-			Promise.resolve({ userKey: 'user:1', contextMessage: 'anticlaude: hello', photos: undefined, caption: undefined, quote: undefined })
+			Promise.resolve({ userKey: 'user:1', contextMessage: 'antigeminipro: hello', photos: undefined, caption: undefined, quote: undefined })
 		),
 	};
 	await import('../../src/service/TelegramService.ts');

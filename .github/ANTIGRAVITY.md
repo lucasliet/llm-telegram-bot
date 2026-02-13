@@ -1,6 +1,6 @@
 # Provider Antigravity - Arquitetura e Implementação
 
-O provider Antigravity integra o bot com a API Cloud Code (Google Cloud AI Companion), permitindo acesso gratuito a modelos como Gemini 3 Flash e Claude Sonnet 4.5 via OAuth2.
+O provider Antigravity integra o bot com a API Cloud Code (Google Cloud AI Companion), permitindo acesso gratuito a modelos como Gemini 3 Flash e Gemini 3 Pro via OAuth2.
 
 ## Arquitetura
 
@@ -220,9 +220,9 @@ private isThinkingCapableModel(modelName: string): boolean {
   - `false`: Envolve thinking em `<think>` tags → removido por `removeThinkingChatCompletion()`
   - `true`: Emite thinking diretamente como texto visível
 
-### JSON Schema Cleaning (Claude VALIDATED Mode)
+### JSON Schema Cleaning (Gemini VALIDATED Mode)
 
-Claude no modo VALIDATED rejeita schemas complexos. O `AntigravitySchemaCleanup.ts` aplica transformações:
+Alguns modelos no modo VALIDATED rejeitam schemas complexos. O `AntigravitySchemaCleanup.ts` aplica transformações:
 
 - **$ref** → Convertido para hints na descrição
 - **const** → Convertido para enum
@@ -297,7 +297,7 @@ O `AntigravityOAuth.ts` gerencia o ciclo de vida dos tokens:
 | Comando | Modelo | Thinking |
 | --- | --- | --- |
 | `antigravity:` / `antigemini:` | Gemini 3 Flash | Sim |
-| `anticlaude:` | Claude Sonnet 4.5 | Sim |
+| `antigeminipro:` | Gemini 3 Pro | Sim |
 
 ## Limitações Conhecidas
 

@@ -18,6 +18,12 @@ import { cacheSignature, getCachedSignature } from '../antigravity/AntigravityCa
 import { getAntigravityConfig } from '../antigravity/AntigravityConfig.ts';
 import crypto from 'node:crypto';
 
+const GEMINI_CLI_USER_AGENT = 'google-api-nodejs-client/9.15.1';
+const GEMINI_CLI_API_CLIENT = 'gl-node/22.17.0';
+const GEMINI_CLI_CLIENT_METADATA = 'ideType=IDE_UNSPECIFIED,platform=PLATFORM_UNSPECIFIED,pluginType=GEMINI';
+
+type HeaderStyle = 'antigravity' | 'gemini-cli';
+
 export default class AntigravityService extends OpenAiService {
 	private tokenManager: AntigravityTokenManager;
 	private currentEndpointIndex = 0;
@@ -38,26 +44,44 @@ export default class AntigravityService extends OpenAiService {
 	/**
 	 * Builds Antigravity-specific request headers with a valid access token.
 	 */
-	private async getHeaders(): Promise<Record<string, string>> {
+	private async getHeaders(style: HeaderStyle = 'antigravity'): Promise<Record<string, string>> {
 		const accessToken = await this.tokenManager.getAccessToken();
-		return {
+
+		const commonHeaders = {
 			'Authorization': `Bearer ${accessToken}`,
 			'Content-Type': 'application/json',
+			'Accept': 'text/event-stream',
+			'anthropic-beta': 'interleaved-thinking-2025-05-14',
+		};
+
+		if (style === 'gemini-cli') {
+			return {
+				...commonHeaders,
+				'User-Agent': GEMINI_CLI_USER_AGENT,
+				'X-Goog-Api-Client': GEMINI_CLI_API_CLIENT,
+				'Client-Metadata': GEMINI_CLI_CLIENT_METADATA,
+			};
+		}
+
+		return {
+			...commonHeaders,
 			'User-Agent':
 				'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Antigravity/1.16.5 Chrome/138.0.7204.235 Electron/37.3.1 Safari/537.36',
 			'X-Goog-Api-Client': 'google-cloud-sdk vscode_cloudshelleditor/0.1',
 			'Client-Metadata': JSON.stringify({ ideType: 'IDE_UNSPECIFIED', platform: 'PLATFORM_UNSPECIFIED', pluginType: 'GEMINI' }),
-			'Accept': 'text/event-stream',
-			'anthropic-beta': 'interleaved-thinking-2025-05-14',
 		};
 	}
 
 	/**
 	 * Makes a streaming request to the Antigravity API with endpoint fallback.
 	 */
-	private async makeRequest(payload: AntigravityRequestPayload): Promise<Response> {
-		const headers = await this.getHeaders();
-		const endpoint = ANTIGRAVITY_ENDPOINTS[this.currentEndpointIndex];
+	private async makeRequest(payload: AntigravityRequestPayload, style?: HeaderStyle): Promise<Response> {
+		// Enforce gemini-cli style for gemini-3-pro, otherwise use provided style or default to antigravity
+		const effectiveStyle = style ?? (payload.model.toLowerCase().includes('gemini-3-pro') ? 'gemini-cli' : 'antigravity');
+
+		const headers = await this.getHeaders(effectiveStyle);
+		const endpoints = effectiveStyle === 'gemini-cli' ? ['https://cloudcode-pa.googleapis.com'] : ANTIGRAVITY_ENDPOINTS;
+		const endpoint = effectiveStyle === 'gemini-cli' ? endpoints[0] : ANTIGRAVITY_ENDPOINTS[this.currentEndpointIndex];
 		const url = `${endpoint}/v1internal:streamGenerateContent?alt=sse`;
 
 		const response = await fetch(url, {
@@ -66,13 +90,27 @@ export default class AntigravityService extends OpenAiService {
 			body: JSON.stringify(payload),
 		});
 
-		if ((response.status === 429 || response.status >= 500) && this.currentEndpointIndex < ANTIGRAVITY_ENDPOINTS.length - 1) {
-			console.warn(`[Antigravity] Endpoint ${endpoint} returned ${response.status}, trying next...`);
-			this.currentEndpointIndex++;
-			return this.makeRequest(payload);
+		if (response.status === 429 || response.status >= 500) {
+			console.warn(`[Antigravity] Endpoint ${endpoint} returned ${response.status} (style: ${effectiveStyle})`);
+
+			if (effectiveStyle === 'antigravity' && this.currentEndpointIndex < ANTIGRAVITY_ENDPOINTS.length - 1) {
+				console.warn(`[Antigravity] Trying next Antigravity endpoint...`);
+				this.currentEndpointIndex++;
+				return this.makeRequest(payload, 'antigravity');
+			}
+
+			// If all Antigravity endpoints fail (or we are already on the last one), try Gemini CLI fallback
+			if (effectiveStyle === 'antigravity' && !this.isClaudeModel(payload.model)) {
+				console.warn(`[Antigravity] All Antigravity endpoints failed/exhausted. Switching to Gemini CLI fallback...`);
+				const cliModel = this.resolveModelForHeaderStyle(payload.model, 'gemini-cli');
+				const cliPayload = { ...payload, model: cliModel };
+				return this.makeRequest(cliPayload, 'gemini-cli');
+			}
 		}
 
-		this.currentEndpointIndex = 0;
+		if (effectiveStyle === 'antigravity') {
+			this.currentEndpointIndex = 0;
+		}
 
 		if (!response.ok) {
 			const errorText = await response.text();
@@ -80,6 +118,26 @@ export default class AntigravityService extends OpenAiService {
 		}
 
 		return response;
+	}
+
+	private resolveModelForHeaderStyle(model: string, style: HeaderStyle): string {
+		const lower = model.toLowerCase();
+		const isGemini3 = lower.includes('gemini-3');
+
+		if (style === 'antigravity') {
+			if (isGemini3 && model.endsWith('-preview')) {
+				return model.replace(/-preview$/i, '');
+			}
+			return model;
+		}
+
+		const withoutTier = model.replace(/-(low|medium|high|minimal)$/i, '');
+
+		if (isGemini3 && !withoutTier.endsWith('-preview')) {
+			return `${withoutTier}-preview`;
+		}
+
+		return withoutTier;
 	}
 
 	/**
@@ -726,8 +784,8 @@ export default class AntigravityService extends OpenAiService {
 		const systemText = typeof anyPayload.systemInstruction === 'string'
 			? anyPayload.systemInstruction
 			: typeof anyPayload.systemInstruction?.parts?.[0]?.text === 'string'
-			? anyPayload.systemInstruction.parts[0].text
-			: '';
+				? anyPayload.systemInstruction.parts[0].text
+				: '';
 
 		const messageSeed = Array.isArray(anyPayload.contents) ? this.extractTextFromContents(anyPayload.contents) : '';
 

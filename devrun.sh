@@ -13,13 +13,6 @@ then
     exec $SHELL;
 fi
 
-if ! command -v denon &> /dev/null
-then
-    echo "denon could not be found, installing...";
-    deno install -qAf --global --unstable "https://deno.land/x/denon/denon.ts";
-    exec $SHELL;
-fi
-
 if [ -f .env ]; then
     set -a;
     source .env;
@@ -41,7 +34,7 @@ fi
 if [ "$1" = "antigravity-login" ]; then
     deno run --allow-env --allow-net --allow-read --allow-write --allow-import --unstable-kv --unstable-cron main.ts antigravity-login;
 else
-    denon run --allow-env --allow-net --allow-read --allow-write --allow-import --unstable-kv --unstable-cron main.ts;
+    deno run --watch --allow-env --allow-net --allow-read --allow-write --allow-import --unstable-kv --unstable-cron main.ts;
 fi
 
 curl -X POST "https://api.telegram.org/bot$BOT_TOKEN/setWebhook" \

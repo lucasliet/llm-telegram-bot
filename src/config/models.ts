@@ -5,7 +5,7 @@ export const geminiModels = {
 
 export const antigravityModels = {
 	geminiFlash: 'gemini-3-flash',
-	claudeSonnet: 'claude-sonnet-4-5',
+	geminiPro: 'gemini-3-pro-preview',
 };
 
 export const perplexityModels = {
@@ -65,7 +65,7 @@ export const MODEL_COMMANDS = [
 	'/gemini',
 	'/geminiPro',
 	'/antigravity',
-	'/anticlaude',
+	'/antigeminipro',
 	'/zai',
 ] as const;
 

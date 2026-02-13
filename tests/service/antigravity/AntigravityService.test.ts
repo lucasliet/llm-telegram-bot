@@ -18,7 +18,7 @@ function createDefaultContext() {
 }
 
 Deno.test('processGeminiChunk - removes thinking blocks when keepThinking is false', async () => {
-	const service = new AntigravityService('gemini-3-flash');
+	const service = new AntigravityService('gemini-3-flash-preview');
 	const chunks: string[] = [];
 	const controller = createMockController(chunks);
 	const encoder = new TextEncoder();
@@ -43,7 +43,7 @@ Deno.test('processGeminiChunk - removes thinking blocks when keepThinking is fal
 });
 
 Deno.test('processGeminiChunk - removes __thinking_text from functionCall args', () => {
-	const service = new AntigravityService('gemini-3-flash');
+	const service = new AntigravityService('gemini-3-flash-preview');
 	const chunks: string[] = [];
 	const controller = createMockController(chunks);
 	const encoder = new TextEncoder();
@@ -80,7 +80,7 @@ Deno.test('processGeminiChunk - removes __thinking_text from functionCall args',
 });
 
 Deno.test('processGeminiChunk - increments toolCallIndex correctly across chunks', () => {
-	const service = new AntigravityService('gemini-3-flash');
+	const service = new AntigravityService('gemini-3-flash-preview');
 	const chunks: string[] = [];
 	const controller = createMockController(chunks);
 	const encoder = new TextEncoder();
@@ -120,7 +120,7 @@ Deno.test('processGeminiChunk - increments toolCallIndex correctly across chunks
 });
 
 Deno.test('processGeminiChunk - handles cumulative parts from Gemini correctly', () => {
-	const service = new AntigravityService('gemini-3-flash');
+	const service = new AntigravityService('gemini-3-flash-preview');
 	const chunks: string[] = [];
 	const controller = createMockController(chunks);
 	const encoder = new TextEncoder();
@@ -197,7 +197,7 @@ Deno.test('processGeminiChunk - preserves thinking when keepThinking is true', a
 	Deno.env.set('ANTIGRAVITY_KEEP_THINKING', 'true');
 	
 	try {
-		const service = new AntigravityService('gemini-3-flash');
+		const service = new AntigravityService('gemini-3-flash-preview');
 		const chunks: string[] = [];
 		const controller = createMockController(chunks);
 		const encoder = new TextEncoder();
@@ -227,7 +227,7 @@ Deno.test('processGeminiChunk - preserves thinking when keepThinking is true', a
 });
 
 Deno.test('processGeminiChunk - does not affect regular text parts', () => {
-	const service = new AntigravityService('gemini-3-flash');
+	const service = new AntigravityService('gemini-3-flash-preview');
 	const chunks: string[] = [];
 	const controller = createMockController(chunks);
 	const encoder = new TextEncoder();

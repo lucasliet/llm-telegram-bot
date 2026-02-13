@@ -71,7 +71,7 @@ function registerBotCommands() {
 		(ctx) => TelegramService.callAdminModel(ctx, TelegramService.callOpenAIModel),
 	);
 	BOT.hears(
-		/^(gpt|gpt5|claude|geminiPro):/gi,
+		/^(gpt|gpt5|claude):/gi,
 		(ctx) => TelegramService.callAdminModel(ctx, TelegramService.callGithubCopilotModel),
 	);
 	BOT.hears(
@@ -92,7 +92,7 @@ function registerBotCommands() {
 		(ctx) => TelegramService.callAdminModel(ctx, TelegramService.callArtaModel),
 	);
 	BOT.hears(
-		/^(antigravity|antigemini|anticlaude):/gi,
+		/^(antigravity|antigemini|antigeminipro):/gi,
 		(ctx) => TelegramService.callAdminModel(ctx, TelegramService.callAntigravityModel),
 	);
 

@@ -14,12 +14,8 @@ const adminCommandButtons = [
 		['GPT OSS 120b', '/oss'],
 	],
 	[
-		['Gemini 2.5 Flash', '/gemini'],
-		['Gemini 2.5 Pro', '/geminiPro'],
-	],
-	[
 		['Gemini 3 Flash', '/antigravity'],
-		['Claude Sonnet 4.5', '/anticlaude'],
+		['Gemini 3 Pro', '/antigeminipro'],
 	],
 	[['Limpar Histórico', '/clear']],
 ];
@@ -74,7 +70,7 @@ export const adminHelpMessage = `*Comandos inline*:
 \\- \`polliReasoning:\` mensagem \\- Faz uma pergunta usando o __Pollinations Reasoning__
 \\- \`antigravity:\` mensagem \\- Faz uma pergunta usando o __Gemini 3 Flash__ pelo __Antigravity__
 \\- \`antigemini:\` mensagem \\- Faz uma pergunta usando o __Gemini 3 Flash__ pelo __Antigravity__
-\\- \`anticlaude:\` mensagem \\- Faz uma pergunta usando o __Claude Sonnet 4\\.5__ pelo __Antigravity__
+\\- \`antigeminipro:\` mensagem \\- Faz uma pergunta usando o __Gemini 3 Pro__ pelo __Antigravity__
 \\- \`fala:\` mensagem \\- Faz uma pergunta usando __Elevenlabs__ para TTS
 
 *Seleção de modelos de linguagem*:`;

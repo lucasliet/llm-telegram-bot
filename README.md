@@ -30,7 +30,7 @@ esse projeto utiliza o [Deno deploy](https://deno.com/deploy) e [Deno kv](https:
 | Perplexity     | `reasonSearch:`                          | Sonar Reasoning Pro   | Nao         |
 | OpenWebUI      | `pgpt:` / `pgrok:` / `po3:` / `pclaude:` | PPLX models           | Nao         |
 | Antigravity    | `antigravity:` / `antigemini:`           | Gemini 3 Flash        | Sim         |
-| Antigravity    | `anticlaude:`                            | Claude Sonnet 4.5     | Sim         |
+| Antigravity    | `antigeminipro:`                         | Gemini 3 Pro          | Sim         |
 | DALL-E         | `gptImage:`                              | DALL-E 3              | -           |
 | Cloudflare     | `cloudflareImage:`                       | Stable Diffusion      | -           |
 | Pollinations   | `polliImage:`                            | Pollinations          | -           |

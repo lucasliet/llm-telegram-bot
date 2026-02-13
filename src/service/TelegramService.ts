@@ -220,7 +220,7 @@ Interações Premium:
 			'/gemini': () => handleVertex(ctx, `gemini: ${message}`),
 			'/geminiPro': () => handleVertex(ctx, `geminiPro: ${message}`),
 			'/antigravity': () => handleAntigravity(ctx, `antigravity: ${message}`),
-			'/anticlaude': () => handleAntigravity(ctx, `anticlaude: ${message}`),
+			'/antigeminipro': () => handleAntigravity(ctx, `antigeminipro: ${message}`),
 			'/zai': () => handleZai(ctx, `zai: ${message}`),
 		};
 

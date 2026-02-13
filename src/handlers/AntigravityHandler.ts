@@ -5,7 +5,7 @@ import { antigravityModels } from '@/config/models.ts';
 const modelMap = {
 	'antigravity': antigravityModels.geminiFlash,
 	'antigemini': antigravityModels.geminiFlash,
-	'anticlaude': antigravityModels.claudeSonnet,
+	'antigeminipro': antigravityModels.geminiPro,
 };
 
 /**
