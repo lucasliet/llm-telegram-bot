@@ -17,6 +17,10 @@ const adminCommandButtons = [
 		['Gemini 3 Flash', '/antigravity'],
 		['Gemini 3 Pro', '/antigeminipro'],
 	],
+	[
+		['GLM 4.7', '/glm'],
+		['GLM 4.7 Flash', '/glmflash'],
+	],
 	[['Limpar Histórico', '/clear']],
 ];
 
@@ -71,6 +75,9 @@ export const adminHelpMessage = `*Comandos inline*:
 \\- \`antigravity:\` mensagem \\- Faz uma pergunta usando o __Gemini 3 Flash__ pelo __Antigravity__
 \\- \`antigemini:\` mensagem \\- Faz uma pergunta usando o __Gemini 3 Flash__ pelo __Antigravity__
 \\- \`antigeminipro:\` mensagem \\- Faz uma pergunta usando o __Gemini 3 Pro__ pelo __Antigravity__
+\\- \`zai:\` mensagem \\- Faz uma pergunta usando o __GLM 4\\.7 Flash__ pelo __Zai__
+\\- \`glm:\` mensagem \\- Faz uma pergunta usando o __GLM 4\\.7__ pelo __Zai__
+\\- \`glmflash:\` mensagem \\- Faz uma pergunta usando o __GLM 4\\.7 Flash__ pelo __Zai__
 \\- \`fala:\` mensagem \\- Faz uma pergunta usando __Elevenlabs__ para TTS
 
 *Seleção de modelos de linguagem*:`;

@@ -4,6 +4,8 @@ import { zaiModels } from '@/config/models.ts';
 
 const modelMap = {
   'zai': zaiModels.flash,
+  'glm': zaiModels.standard,
+  'glmflash': zaiModels.flash,
 };
 
 /**

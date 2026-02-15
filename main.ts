@@ -97,7 +97,7 @@ function registerBotCommands() {
 	);
 
 	BOT.hears(
-		/^(zai):/gi,
+		/^(zai|glm|glmflash):/gi,
 		(ctx) => TelegramService.callAdminModel(ctx, TelegramService.callZaiModel),
 	);
 

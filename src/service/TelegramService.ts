@@ -222,6 +222,8 @@ Interações Premium:
 			'/antigravity': () => handleAntigravity(ctx, `antigravity: ${message}`),
 			'/antigeminipro': () => handleAntigravity(ctx, `antigeminipro: ${message}`),
 			'/zai': () => handleZai(ctx, `zai: ${message}`),
+			'/glm': () => handleZai(ctx, `glm: ${message}`),
+			'/glmflash': () => handleZai(ctx, `glmflash: ${message}`),
 		};
 
 		const handler = modelHandlers[currentModel];

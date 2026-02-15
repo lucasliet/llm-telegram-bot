@@ -52,6 +52,7 @@ export const openWebUiModels = {
 
 export const zaiModels = {
 	flash: 'glm-4.7-flash',
+	standard: 'glm-4.7',
 };
 
 /**
@@ -67,6 +68,8 @@ export const MODEL_COMMANDS = [
 	'/antigravity',
 	'/antigeminipro',
 	'/zai',
+	'/glm',
+	'/glmflash',
 ] as const;
 
 /**
