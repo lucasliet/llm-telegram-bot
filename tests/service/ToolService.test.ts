@@ -225,3 +225,54 @@ Deno.test('ToolService copilot_usage returns JSON on success', async () => {
 		globalThis.fetch = originalFetch;
 	}
 });
+
+Deno.test('ToolService search_tavily returns mapped results', async () => {
+	const json = {
+		results: [
+			{
+				title: 'Tavily Result',
+				url: 'https://tavily.com',
+				content: 'Content',
+				score: 0.99,
+			},
+		],
+	};
+	const originalFetch = globalThis.fetch;
+	const originalEnv = Deno.env.get;
+	try {
+		Deno.env.get = (k: string) =>
+			(k === 'TAVILY_API_KEY' ? 'key' : originalEnv(k)) as any;
+		globalThis.fetch = mockFetchSequence([
+			new Response(JSON.stringify(json), { status: 200 }),
+		]) as any;
+
+		const fn = (ToolService as any).tools.get('search_tavily').fn as (args: {
+			query: string;
+			max_results?: number;
+		}) => Promise<any[]>;
+
+		const res = await fn({ query: 'q', max_results: 1 });
+		assertEquals(res.length, 1);
+		assertEquals(res[0].title, 'Tavily Result');
+	} finally {
+		globalThis.fetch = originalFetch;
+		Deno.env.get = originalEnv;
+	}
+});
+
+Deno.test('ToolService search_tavily throws without API key', async () => {
+	const originalEnv = Deno.env.get;
+	try {
+		Deno.env.get = (_k: string) => undefined as any;
+		const fn = (ToolService as any).tools.get('search_tavily').fn;
+		let threw = false;
+		try {
+			await fn({ query: 'q' });
+		} catch {
+			threw = true;
+		}
+		assertEquals(threw, true);
+	} finally {
+		Deno.env.get = originalEnv;
+	}
+});

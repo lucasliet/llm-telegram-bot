@@ -14,6 +14,17 @@ export interface SearxResult {
 }
 
 /**
+ * Represents a search result from Tavily.
+ */
+export interface TavilyResult {
+	title: string;
+	url: string;
+	content: string;
+	score: number;
+	published_date?: string;
+}
+
+/**
  * Represents a segment of a YouTube transcript.
  */
 interface YouTubeTranscriptSegment {
@@ -119,6 +130,68 @@ export default class ToolService {
 					}
 
 					throw lastError || new Error('Todas as instâncias SearxNG falharam');
+				},
+			},
+		],
+		[
+			'search_tavily',
+			{
+				schema: {
+					type: 'function',
+					function: {
+						name: 'search_tavily',
+						description:
+							'Search the web using Tavily API to get recent and relevant information',
+						parameters: {
+							type: 'object',
+							properties: {
+								query: { type: 'string', description: 'Search query' },
+								max_results: {
+									type: 'number',
+									description: 'Number of results to return (default 5)',
+								},
+							},
+							required: ['query'],
+							additionalProperties: false,
+						},
+						strict: true,
+					},
+				},
+				/**
+				 * Searches the web using Tavily API.
+				 *
+				 * @param args - The search parameters.
+				 * @param args.query - The search query string.
+				 * @param args.max_results - The number of results to return.
+				 * @returns A promise that resolves to an array of {@link TavilyResult}.
+				 */
+				fn: async (args: {
+					query: string;
+					max_results?: number;
+				}): Promise<TavilyResult[]> => {
+					const apiKey = Deno.env.get('TAVILY_API_KEY');
+					if (!apiKey) {
+						throw new Error('TAVILY_API_KEY environment variable is not set');
+					}
+					const { query, max_results = 5 } = args;
+					const response = await fetch('https://api.tavily.com/search', {
+						method: 'POST',
+						headers: {
+							'Content-Type': 'application/json',
+						},
+						body: JSON.stringify({
+							api_key: apiKey,
+							query,
+							max_results,
+						}),
+					});
+
+					if (!response.ok) {
+						throw new Error(`Tavily search failed: ${response.statusText}`);
+					}
+
+					const data = await response.json();
+					return data.results;
 				},
 			},
 		],
