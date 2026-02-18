@@ -23,7 +23,7 @@ Deno.test('processGeminiChunk - removes thinking blocks when keepThinking is fal
 	const controller = createMockController(chunks);
 	const encoder = new TextEncoder();
 	const context = createDefaultContext();
-	
+
 	const data = {
 		candidates: [{
 			content: {
@@ -34,9 +34,9 @@ Deno.test('processGeminiChunk - removes thinking blocks when keepThinking is fal
 			},
 		}],
 	};
-	
+
 	(service as any).processGeminiChunk(data, controller, encoder, context);
-	
+
 	assertEquals(chunks.length, 1);
 	assertEquals(chunks[0].includes('My thinking process'), false);
 	assertStringIncludes(chunks[0], 'The answer is 42');
@@ -48,7 +48,7 @@ Deno.test('processGeminiChunk - removes __thinking_text from functionCall args',
 	const controller = createMockController(chunks);
 	const encoder = new TextEncoder();
 	const context = createDefaultContext();
-	
+
 	const data = {
 		candidates: [{
 			content: {
@@ -66,14 +66,14 @@ Deno.test('processGeminiChunk - removes __thinking_text from functionCall args',
 			},
 		}],
 	};
-	
+
 	(service as any).processGeminiChunk(data, controller, encoder, context);
-	
+
 	const chunk = JSON.parse(chunks[0]);
 	const argsString = chunk.choices[0].delta.tool_calls[0].function.arguments;
-	
+
 	assertEquals(argsString.includes('__thinking_text'), false);
-	
+
 	const args = JSON.parse(argsString);
 	assertEquals(args.query, 'weather tomorrow');
 	assertEquals(args.__thinking_text, undefined);
@@ -85,7 +85,7 @@ Deno.test('processGeminiChunk - increments toolCallIndex correctly across chunks
 	const controller = createMockController(chunks);
 	const encoder = new TextEncoder();
 	const context = createDefaultContext();
-	
+
 	// Chunk 1: Tool Call A
 	const data1 = {
 		candidates: [{
@@ -94,9 +94,9 @@ Deno.test('processGeminiChunk - increments toolCallIndex correctly across chunks
 			},
 		}],
 	};
-	
+
 	(service as any).processGeminiChunk(data1, controller, encoder, context);
-	
+
 	// Chunk 2: Tool Call B
 	const data2 = {
 		candidates: [{
@@ -108,12 +108,12 @@ Deno.test('processGeminiChunk - increments toolCallIndex correctly across chunks
 			},
 		}],
 	};
-	
+
 	(service as any).processGeminiChunk(data2, controller, encoder, context);
-	
+
 	const chunk1 = JSON.parse(chunks[0]);
 	const chunk2 = JSON.parse(chunks[1]);
-	
+
 	assertEquals(chunk1.choices[0].delta.tool_calls[0].index, 0);
 	assertEquals(chunk2.choices[0].delta.tool_calls[0].index, 1);
 	assertEquals(context.toolCallIndex, 2);
@@ -151,7 +151,7 @@ Deno.test('processGeminiChunk - handles cumulative parts from Gemini correctly',
 		}],
 	};
 
-	// Note: If Gemini sends cumulative text in parts array, we will re-emit. 
+	// Note: If Gemini sends cumulative text in parts array, we will re-emit.
 	// But our priority is NOT losing text.
 	(service as any).processGeminiChunk(data2, controller, encoder, context);
 	assertEquals(chunks.length, 3);
@@ -187,22 +187,22 @@ Deno.test('processGeminiChunk - handles cumulative parts from Gemini correctly',
 	// Should emit text again, BUT TOOL CALL SHOULD NOT BE EMITTED AGAIN
 	// If text is re-emitted, chunks length increases.
 	// We want to verify tool deduplication specifically.
-	
-	const toolCalls = chunks.slice(chunksBefore).filter(c => c.includes('tool_calls'));
+
+	const toolCalls = chunks.slice(chunksBefore).filter((c) => c.includes('tool_calls'));
 	assertEquals(toolCalls.length, 0); // Tool call was deduplicated!
 });
 
 Deno.test('processGeminiChunk - preserves thinking when keepThinking is true', async () => {
 	const originalEnv = Deno.env.get('ANTIGRAVITY_KEEP_THINKING');
 	Deno.env.set('ANTIGRAVITY_KEEP_THINKING', 'true');
-	
+
 	try {
 		const service = new AntigravityService('gemini-3-flash-preview');
 		const chunks: string[] = [];
 		const controller = createMockController(chunks);
 		const encoder = new TextEncoder();
 		const context = createDefaultContext();
-		
+
 		const data = {
 			candidates: [{
 				content: {
@@ -212,9 +212,9 @@ Deno.test('processGeminiChunk - preserves thinking when keepThinking is true', a
 				},
 			}],
 		};
-		
+
 		(service as any).processGeminiChunk(data, controller, encoder, context);
-		
+
 		assertEquals(chunks.length, 1);
 		assertStringIncludes(chunks[0], 'My thinking process');
 	} finally {
@@ -232,7 +232,7 @@ Deno.test('processGeminiChunk - does not affect regular text parts', () => {
 	const controller = createMockController(chunks);
 	const encoder = new TextEncoder();
 	const context = createDefaultContext();
-	
+
 	const data = {
 		candidates: [{
 			content: {
@@ -240,9 +240,9 @@ Deno.test('processGeminiChunk - does not affect regular text parts', () => {
 			},
 		}],
 	};
-	
+
 	(service as any).processGeminiChunk(data, controller, encoder, context);
-	
+
 	assertEquals(chunks.length, 1);
 	assertStringIncludes(chunks[0], 'Regular text without thinking');
 });

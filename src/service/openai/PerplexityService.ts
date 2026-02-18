@@ -1,4 +1,4 @@
-import OpenAi from 'npm:openai';
+import OpenAi from 'openai';
 import OpenAiService from './OpenAIService.ts';
 import { perplexityModels } from '@/config/models.ts';
 

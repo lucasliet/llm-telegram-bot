@@ -1,6 +1,6 @@
-import OpenAi from 'npm:openai';
-import { XMLParser } from 'npm:fast-xml-parser';
-import { parse } from 'npm:node-html-parser';
+import OpenAi from 'openai';
+import { XMLParser } from 'fast-xml-parser';
+import { parse } from 'node-html-parser';
 import { mapChatToolsToResponsesTools } from '@/util/ChatConfigUtil.ts';
 /**
  * Represents a search result from SearxNG.
@@ -140,8 +140,7 @@ export default class ToolService {
 					type: 'function',
 					function: {
 						name: 'search_tavily',
-						description:
-							'Search the web using Tavily API to get recent and relevant information',
+						description: 'Search the web using Tavily API to get recent and relevant information',
 						parameters: {
 							type: 'object',
 							properties: {
@@ -705,6 +704,73 @@ export default class ToolService {
 							}];
 						},
 					);
+				},
+			},
+		],
+		[
+			'current_date',
+			{
+				schema: {
+					type: 'function',
+					function: {
+						name: 'current_date',
+						description: 'Get the current date and time in ISO format',
+						parameters: {
+							type: 'object',
+							properties: {},
+							additionalProperties: false,
+						},
+						strict: true,
+					},
+				},
+				/**
+				 * Returns the current date and time in ISO format.
+				 *
+				 * @returns A promise that resolves to the current date string.
+				 */
+				fn: (_args: Record<PropertyKey, never>): string => {
+					return new Date().toISOString();
+				},
+			},
+		],
+		[
+			'calculator',
+			{
+				schema: {
+					type: 'function',
+					function: {
+						name: 'calculator',
+						description: 'Evaluates a mathematical expression',
+						parameters: {
+							type: 'object',
+							properties: {
+								expression: {
+									type: 'string',
+									description: 'The mathematical expression to evaluate (e.g., "2 + 2")',
+								},
+							},
+							required: ['expression'],
+							additionalProperties: false,
+						},
+						strict: true,
+					},
+				},
+				/**
+				 * Evaluates a mathematical expression.
+				 *
+				 * @param args - The arguments for the calculator.
+				 * @param args.expression - The mathematical expression to evaluate.
+				 * @returns A promise that resolves to the result of the evaluation.
+				 * @throws An error if the expression contains invalid characters.
+				 */
+				fn: (args: { expression: string }): string => {
+					const { expression } = args;
+					if (!/^[\d+\-*/().\s]+$/.test(expression)) {
+						throw new Error('Invalid characters in expression');
+					}
+					// deno-lint-ignore no-new-func
+					const result = new Function(`return ${expression}`)();
+					return String(result);
 				},
 			},
 		],

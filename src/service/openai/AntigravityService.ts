@@ -1,4 +1,4 @@
-import OpenAi from 'npm:openai';
+import OpenAi from 'openai';
 import OpenAiService, { getImageBase64String, responseMap } from './OpenAIService.ts';
 import { AntigravityTokenManager } from '../antigravity/AntigravityOAuth.ts';
 import { AntigravityTransformer } from '../antigravity/AntigravityTransformer.ts';

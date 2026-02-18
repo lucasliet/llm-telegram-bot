@@ -1,4 +1,4 @@
-import OpenAi from 'npm:openai';
+import OpenAi from 'openai';
 import OpenAiService from './OpenAIService.ts';
 
 const ZHIPU_API_KEY: string = Deno.env.get('ZHIPU_API_KEY') as string;

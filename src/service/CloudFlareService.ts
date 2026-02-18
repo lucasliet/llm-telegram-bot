@@ -1,4 +1,4 @@
-import OpenAi from 'npm:openai';
+import OpenAi from 'openai';
 import { addContentToChatHistory, getChatHistory } from '@/repository/ChatRepository.ts';
 import { convertGeminiHistoryToGPT, getSystemPrompt, mapChatToolsToResponsesTools, StreamReplyResponse } from '@/util/ChatConfigUtil.ts';
 import ToolService from '@/service/ToolService.ts';

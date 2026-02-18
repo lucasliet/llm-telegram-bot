@@ -3,6 +3,8 @@ import { Action } from 'grammy-auto-chat-action-types';
 import { Audio, Message, ParseMode, PhotoSize, Voice } from 'grammy-types';
 import { transcribeAudio } from '@/service/TelegramService.ts';
 import { toTelegramMarkdown } from '@/util/MarkdownUtils.ts';
+import { COMPRESSION_WARNING_MSG } from '@/service/ContextCompressorService.ts';
+import { StreamReplyResponse } from '@/util/ChatConfigUtil.ts';
 
 const MARKDOWN_ERROR_MESSAGE = 'Error on markdown parse_mode, message:';
 
@@ -20,9 +22,7 @@ declare module 'grammy' {
 		replyInChunks(output: string): void;
 
 		streamReply(
-			reader: ReadableStreamDefaultReader<Uint8Array>,
-			onComplete: (completedAnswer: string) => Promise<void>,
-			responseMap?: (responseBody: string) => string,
+			response: StreamReplyResponse,
 			lastResult?: string,
 		): Promise<void>;
 
@@ -110,11 +110,15 @@ Context.prototype.replyInChunks = function (
  */
 Context.prototype.streamReply = async function (
 	this: Context,
-	reader: ReadableStreamDefaultReader<Uint8Array>,
-	onComplete: (completedAnswer: string) => Promise<void>,
-	responseMap?: (responseBody: string) => string,
+	response: StreamReplyResponse,
 	lastResult?: string,
 ): Promise<void> {
+	const { reader, onComplete, responseMap, isCompressed } = response;
+
+	if (isCompressed) {
+		await this.replyWithQuote(COMPRESSION_WARNING_MSG);
+	}
+
 	const { message_id } = await this.replyWithQuote('processando...');
 	let result = lastResult || '';
 	let lastUpdate = Date.now();
@@ -147,9 +151,7 @@ Context.prototype.streamReply = async function (
 				lastSentMessage = updateResult.lastMessage;
 				onComplete(result);
 				return this.streamReply(
-					reader,
-					onComplete,
-					responseMap,
+					{ reader, onComplete, responseMap, isCompressed: false },
 					remainingChunk,
 				);
 			}

@@ -19,7 +19,7 @@ export async function handleOpenAI(
 
 	if (photos && caption) {
 		const photosUrl = FileUtils.getTelegramFilesUrl(ctx, photos);
-		const { reader, onComplete, responseMap } = await openAIService
+		const response = await openAIService
 			.generateTextFromImage(
 				userKey,
 				quote,
@@ -27,7 +27,7 @@ export async function handleOpenAI(
 				caption,
 			);
 
-		ctx.streamReply(reader, onComplete, responseMap);
+		ctx.streamReply(response);
 		return;
 	}
 
@@ -35,13 +35,13 @@ export async function handleOpenAI(
 	const command = message!.split(':')[0].toLowerCase();
 
 	if (command === 'gpt') {
-		const { reader, onComplete, responseMap } = await new GithubService().generateText(
+		const response = await new GithubService().generateText(
 			userKey,
 			quote,
 			message!.replace('gpt:', ''),
 		);
 
-		ctx.streamReply(reader, onComplete, responseMap);
+		ctx.streamReply(response);
 	} else if (command === 'gptimage') {
 		ctx.chatAction = 'upload_photo';
 		const output = await openAIService.generateImage(

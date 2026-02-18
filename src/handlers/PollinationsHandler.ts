@@ -35,11 +35,11 @@ export async function handlePollinations(
 		return;
 	}
 
-	const { reader, onComplete, responseMap } = await service.generateText(
+	const response = await service.generateText(
 		userKey,
 		quote ?? '',
 		prompt,
 	);
 
-	ctx.streamReply(reader, onComplete, responseMap);
+	ctx.streamReply(response);
 }

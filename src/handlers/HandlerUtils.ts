@@ -58,17 +58,17 @@ export function createVisionHandler<T extends string>(options: VisionHandlerOpti
 
 		if (photos && caption) {
 			const photosUrl = FileUtils.getTelegramFilesUrl(ctx, photos);
-			const { reader, onComplete, responseMap } = await service.generateTextFromImage(
+			const response = await service.generateTextFromImage(
 				userKey,
 				quote,
 				photosUrl,
 				prompt!,
 			);
-			return ctx.streamReply(reader, onComplete, responseMap);
+			return ctx.streamReply(response);
 		}
 
-		const { reader, onComplete, responseMap } = await service.generateText(userKey, quote ?? '', prompt!);
-		return ctx.streamReply(reader, onComplete, responseMap);
+		const response = await service.generateText(userKey, quote ?? '', prompt!);
+		return ctx.streamReply(response);
 	};
 }
 
@@ -94,8 +94,8 @@ export function createTextOnlyHandler<T extends string>(options: TextOnlyHandler
 
 		const service = createService(model);
 
-		const { reader, onComplete, responseMap } = await service.generateText(userKey, quote ?? '', prompt);
-		ctx.streamReply(reader, onComplete, responseMap);
+		const response = await service.generateText(userKey, quote ?? '', prompt);
+		ctx.streamReply(response);
 	};
 }
 
@@ -135,7 +135,7 @@ export function createHybridHandler(options: HybridHandlerOptions) {
 			return;
 		}
 
-		const { reader, onComplete, responseMap } = await service.generateText(userKey, quote ?? '', prompt);
-		ctx.streamReply(reader, onComplete, responseMap);
+		const response = await service.generateText(userKey, quote ?? '', prompt);
+		ctx.streamReply(response);
 	};
 }

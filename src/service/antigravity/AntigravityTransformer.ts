@@ -1,4 +1,4 @@
-import OpenAi from 'npm:openai';
+import OpenAi from 'openai';
 import type { GeminiContent, GeminiContentPart } from './AntigravityTypes.ts';
 import { SKIP_THOUGHT_SIGNATURE } from './AntigravityTypes.ts';
 import { cleanJSONSchemaForAntigravity } from './AntigravitySchemaCleanup.ts';

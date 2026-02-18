@@ -240,8 +240,7 @@ Deno.test('ToolService search_tavily returns mapped results', async () => {
 	const originalFetch = globalThis.fetch;
 	const originalEnv = Deno.env.get;
 	try {
-		Deno.env.get = (k: string) =>
-			(k === 'TAVILY_API_KEY' ? 'key' : originalEnv(k)) as any;
+		Deno.env.get = (k: string) => (k === 'TAVILY_API_KEY' ? 'key' : originalEnv(k)) as any;
 		globalThis.fetch = mockFetchSequence([
 			new Response(JSON.stringify(json), { status: 200 }),
 		]) as any;
@@ -275,4 +274,43 @@ Deno.test('ToolService search_tavily throws without API key', async () => {
 	} finally {
 		Deno.env.get = originalEnv;
 	}
+});
+
+Deno.test('ToolService current_date returns ISO string', async () => {
+	const fn = (ToolService as any).tools.get('current_date').fn as (
+		args: Record<string, never>,
+	) => Promise<string>;
+	const res = await fn({} as never);
+	assertEquals(typeof res, 'string');
+	// Check if it's a valid date
+	assertEquals(!isNaN(Date.parse(res)), true);
+});
+
+Deno.test('ToolService calculator evaluates simple expression', async () => {
+	const fn = (ToolService as any).tools.get('calculator').fn as (args: {
+		expression: string;
+	}) => Promise<string>;
+	const res = await fn({ expression: '2 + 2' });
+	assertEquals(res, '4');
+});
+
+Deno.test('ToolService calculator evaluates complex expression', async () => {
+	const fn = (ToolService as any).tools.get('calculator').fn as (args: {
+		expression: string;
+	}) => Promise<string>;
+	const res = await fn({ expression: '(10 / 2) * 3 - 5' });
+	assertEquals(res, '10');
+});
+
+Deno.test('ToolService calculator throws on invalid characters', async () => {
+	const fn = (ToolService as any).tools.get('calculator').fn as (args: {
+		expression: string;
+	}) => Promise<string>;
+	let threw = false;
+	try {
+		await fn({ expression: 'console.log("hacked")' });
+	} catch {
+		threw = true;
+	}
+	assertEquals(threw, true);
 });

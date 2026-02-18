@@ -1,4 +1,4 @@
-import OpenAi from 'npm:openai';
+import OpenAi from 'openai';
 import { executeToolCalls, responseMap as OpenaiResponseMap } from '../service/openai/OpenAIService.ts';
 
 export interface ToolOptions {

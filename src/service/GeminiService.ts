@@ -1,10 +1,10 @@
-import { CoreMessage, streamText } from 'npm:ai';
-import { createGoogleGenerativeAI, GoogleGenerativeAIProvider } from 'npm:@ai-sdk/google';
+import { CoreMessage, streamText } from 'ai';
+import { createGoogleGenerativeAI, GoogleGenerativeAIProvider } from '@ai-sdk/google';
 
 import { ExpirableContent, getChatHistory } from '@/repository/ChatRepository.ts';
 import { addContentToChatHistory } from '@/repository/ChatRepository.ts';
 import { convertGeminiHistoryToGPT, getSystemPrompt, StreamReplyResponse } from '@/util/ChatConfigUtil.ts';
-import OpenAI from 'npm:openai';
+import OpenAI from 'openai';
 
 const GEMINI_API_KEY = Deno.env.get('GEMINI_API_KEY') as string;
 
@@ -153,9 +153,9 @@ export default class GeminiService {
 			| { type: 'text'; text: string }
 			| { type: 'image'; image: string; mimeType?: string }
 		)[] = [
-			{ type: 'text', text: textualPrompt },
-			...imageContentParts,
-		];
+				{ type: 'text', text: textualPrompt },
+				...imageContentParts,
+			];
 
 		const systemMessageContent = getSystemPrompt('Gemini', this.model, 1000);
 		const mappedHistory = GeminiService._mapOpenAiHistoryToCoreMessages(historyMessages);

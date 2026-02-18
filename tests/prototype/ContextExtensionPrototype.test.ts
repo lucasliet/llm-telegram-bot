@@ -3,6 +3,9 @@ import { assertSpyCalls, spy } from 'mock';
 import '../../src/prototype/StringExtensionPrototype.ts';
 import { Context } from 'grammy';
 
+
+Deno.env.set('ADMIN_USER_IDS', '123');
+
 /**
  * Creates a mock Context-like object with minimal API used by extensions.
  * @param overrides - Optional overrides for default fields.
@@ -126,7 +129,7 @@ Deno.test('streamReply edits message and calls onComplete', async () => {
 	}).getReader();
 	const onComplete = spy(() => Promise.resolve());
 	await import('../../src/prototype/ContextExtensionPrototype.ts');
-	await (Context.prototype as any).streamReply.call(ctx, reader, onComplete);
+	await (Context.prototype as any).streamReply.call(ctx, { reader, onComplete });
 	assertEquals(ctx.api.editMessageText.calls.length > 0, true);
 	assertEquals(onComplete.calls.length, 1);
 	Deno.openKv = originalOpenKv;

@@ -1,7 +1,7 @@
 import { assertEquals } from 'asserts';
 import { convertGeminiHistoryToGPT, getSystemPrompt, mapChatToolsToResponsesTools } from '../../src/util/ChatConfigUtil.ts';
 import type { ExpirableContent } from '../../src/repository/ChatRepository.ts';
-import type OpenAI from 'npm:openai';
+import type OpenAI from 'openai';
 
 Deno.test('convertGeminiHistoryToGPT', () => {
 	const history: ExpirableContent[] = [

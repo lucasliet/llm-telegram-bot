@@ -1,4 +1,4 @@
-import OpenAi from 'npm:openai';
+import OpenAi from 'openai';
 import OpenAiService from './OpenAIService.ts';
 
 const OPENWEBUI_API_KEY: string = Deno.env.get('OPENWEBUI_API_KEY') as string;

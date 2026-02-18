@@ -1,6 +1,6 @@
 import { addContentToChatHistory, getChatHistory } from '@/repository/ChatRepository.ts';
 import { convertGeminiHistoryToGPT, getSystemPrompt, StreamReplyResponse } from '@/util/ChatConfigUtil.ts';
-import { OpenAI } from 'npm:openai';
+import { OpenAI } from 'openai';
 import { pollinationsModels } from '@/config/models.ts';
 
 const { openai } = pollinationsModels;

@@ -31,14 +31,14 @@ export async function handleCloudflare(
 	const cloudflareCommand = message!.split(':')[0].toLowerCase();
 
 	if (cloudflareCommand === 'oss') {
-		const { reader, onComplete, responseMap } = await CloudFlareService
+		const response = await CloudFlareService
 			.generateText(
 				userKey,
 				quote,
 				message!.replace('oss:', ''),
 			);
 
-		ctx.streamReply(reader, onComplete, responseMap);
+		ctx.streamReply(response);
 	} else if (cloudflareCommand === 'cloudflareimage' || cloudflareCommand === 'image') {
 		ctx.chatAction = 'upload_photo';
 		ctx.replyWithPhoto(

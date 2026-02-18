@@ -20,8 +20,14 @@
 		"oak": "https://deno.land/x/oak@v12.6.1/mod.ts",
 		"oak-cors": "https://deno.land/x/cors@v1.2.2/mod.ts",
 		"textcompress": "jsr:@lucasliet/textcompress",
-		"npm:openai": "npm:openai@5.16.0",
+		"openai": "npm:openai@5.16.0",
 		"base64": "jsr:@std/encoding/base64",
+		"@google/generative-ai": "npm:@google/generative-ai",
+		"@std/path": "jsr:@std/path@1.0.8",
+		"ai": "npm:ai",
+		"@ai-sdk/google": "npm:@ai-sdk/google",
+		"fast-xml-parser": "npm:fast-xml-parser",
+		"node-html-parser": "npm:node-html-parser",
 		"@/": "./src/"
 	},
 	"lint": {

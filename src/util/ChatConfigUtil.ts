@@ -1,4 +1,4 @@
-import OpenAi from 'npm:openai';
+import OpenAi from 'openai';
 import { ExpirableContent } from '@/repository/ChatRepository.ts';
 
 /**
@@ -13,6 +13,9 @@ export interface StreamReplyResponse {
 
 	/** Optional function to map response body to a different format */
 	responseMap?: (responseBody: string) => string;
+
+	/** Indicates if the context was compressed */
+	isCompressed?: boolean;
 }
 
 /**

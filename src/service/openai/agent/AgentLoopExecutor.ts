@@ -1,7 +1,8 @@
 import ToolService from '@/service/ToolService.ts';
-import OpenAi from 'npm:openai';
+import OpenAi from 'openai';
 import { AgentLoopConfig, AgentLoopState, DEFAULT_AGENT_CONFIG, ToolExecutionResult } from './AgentLoopConfig.ts';
 import { ExtractedToolCall, StreamProcessor } from '../stream/StreamProcessor.ts';
+import { estimateTokens, shouldCompress } from '@/util/TokenEstimator.ts';
 
 /**
  * Executor for the Agent Loop.
@@ -205,7 +206,7 @@ export class AgentLoopExecutor<TMessage, TGenerateArgs extends unknown[]> {
 
 	/**
 	 * Summarize tool results using LLM to extract only relevant information.
-	 * Summarizes when adding tool results would exceed the context window limit.
+	 * Summarizes when adding tool results would exceed 80% of the context window limit.
 	 * @param toolResults - Array of tool execution results
 	 * @param currentMessages - Current conversation messages to estimate tokens
 	 * @returns Array of tool results with summarized content
@@ -218,20 +219,17 @@ export class AgentLoopExecutor<TMessage, TGenerateArgs extends unknown[]> {
 			return toolResults;
 		}
 
-		const RESPONSE_BUFFER = 2000;
-		const currentTokens = this.estimateTokens(currentMessages);
+		const currentTokens = estimateTokens(currentMessages);
 		const toolResultsTokens = this.estimateToolResultsTokens(toolResults);
 		const totalTokensAfterAdding = currentTokens + toolResultsTokens;
 
-		const shouldSummarize = totalTokensAfterAdding > (this.maxTokens - RESPONSE_BUFFER);
-
-		if (!shouldSummarize) {
+		if (!shouldCompress(totalTokensAfterAdding, this.maxTokens)) {
 			return toolResults;
 		}
 
 		console.log(
-			`[AgentLoop] Context would exceed limit (currentTokens=${currentTokens}, toolResultsTokens=${toolResultsTokens}, total=${totalTokensAfterAdding}/${
-				this.maxTokens - RESPONSE_BUFFER
+			`[AgentLoop] Context would exceed 80% limit (currentTokens=${currentTokens}, toolResultsTokens=${toolResultsTokens}, total=${totalTokensAfterAdding}/${
+				Math.floor(this.maxTokens * 0.8)
 			}), summarizing ${toolResults.length} tool results...`,
 		);
 
@@ -294,10 +292,7 @@ Relevant information:`;
 	 * Estimate token count for tool results.
 	 */
 	private estimateToolResultsTokens(toolResults: ToolExecutionResult[]): number {
-		const totalChars = toolResults.reduce((sum, result) => {
-			return sum + JSON.stringify(result).length;
-		}, 0);
-		return Math.ceil(totalChars / 4);
+		return estimateTokens(toolResults);
 	}
 
 	/**
@@ -318,13 +313,6 @@ Relevant information:`;
 		});
 
 		return response.choices[0]?.message?.content || toolResult.substring(0, 4000);
-	}
-
-	/**
-	 * Estimate token count (rough approximation: 1 token ≈ 4 characters).
-	 */
-	private estimateTokens(messages: TMessage[]): number {
-		return Math.ceil(JSON.stringify(messages).length / 4);
 	}
 
 	/**

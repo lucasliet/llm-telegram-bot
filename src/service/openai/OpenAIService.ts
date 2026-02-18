@@ -1,10 +1,12 @@
-import OpenAi, { toFile } from 'npm:openai';
-import { addContentToChatHistory, getChatHistory } from '@/repository/ChatRepository.ts';
+import OpenAi, { toFile } from 'openai';
+import { addContentToChatHistory, getChatHistory, overwriteChatHistory } from '@/repository/ChatRepository.ts';
 import { convertGeminiHistoryToGPT, convertGeminiHistoryToResponsesInput, getSystemPrompt, StreamReplyResponse } from '@/util/ChatConfigUtil.ts';
 import { MODELS_USING_RESPONSES_API, openAIModels } from '@/config/models.ts';
-import * as path from 'jsr:@std/path';
+import * as path from '@std/path';
 import ToolService from '@/service/ToolService.ts';
-import { encodeBase64 } from 'jsr:@std/encoding/base64';
+import { encodeBase64 } from 'base64';
+
+import { ContextCompressorService } from '@/service/ContextCompressorService.ts';
 
 // Agent Loop imports
 import { AgentLoopConfig, AgentLoopExecutor, DEFAULT_AGENT_CONFIG } from './agent/index.ts';
@@ -94,8 +96,22 @@ export default class OpenAiService {
 		quote: string = '',
 		prompt: string,
 	): Promise<StreamReplyResponse> {
-		const geminiHistory = await getChatHistory(userKey);
+		let geminiHistory = await getChatHistory(userKey);
 		const requestPrompt = quote ? `quote: "${quote}"\n\n${prompt}` : prompt;
+
+
+
+		const { history, didCompress } = await ContextCompressorService.compressIfNeeded(
+			geminiHistory,
+			this.maxTokens,
+			this.model,
+			this.openai,
+		);
+
+		if (didCompress) {
+			geminiHistory = history;
+			await overwriteChatHistory(userKey, geminiHistory);
+		}
 
 		// Decide which API to use
 		if (MODELS_USING_RESPONSES_API.includes(this.model)) {
@@ -112,7 +128,9 @@ export default class OpenAiService {
 
 		const onComplete = (completedAnswer: string) => addContentToChatHistory(geminiHistory, quote, requestPrompt, completedAnswer, userKey);
 
-		return { reader, onComplete, responseMap };
+
+
+		return { reader, onComplete, responseMap, isCompressed: didCompress };
 	}
 
 	/**
@@ -127,8 +145,22 @@ export default class OpenAiService {
 		quote: string = '',
 		prompt: string,
 	): Promise<StreamReplyResponse> {
-		const geminiHistory = await getChatHistory(userKey);
+		let geminiHistory = await getChatHistory(userKey);
 		const requestPrompt = quote ? `quote: "${quote}"\n\n${prompt}` : prompt;
+
+
+
+		const { history, didCompress } = await ContextCompressorService.compressIfNeeded(
+			geminiHistory,
+			this.maxTokens,
+			this.model,
+			this.openai,
+		);
+
+		if (didCompress) {
+			geminiHistory = history;
+			await overwriteChatHistory(userKey, geminiHistory);
+		}
 
 		const input: OpenAi.Responses.ResponseInputItem[] = [
 			{
@@ -143,7 +175,9 @@ export default class OpenAiService {
 
 		const onComplete = (completedAnswer: string) => addContentToChatHistory(geminiHistory, quote, requestPrompt, completedAnswer, userKey);
 
-		return { reader, onComplete, responseMap: responsesResponseMap };
+
+
+		return { reader, onComplete, responseMap: responsesResponseMap, isCompressed: didCompress };
 	}
 
 	/**

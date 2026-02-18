@@ -1,5 +1,5 @@
 import { assertEquals } from 'asserts';
-import OpenAi from 'npm:openai';
+import OpenAi from 'openai';
 import { AntigravityTransformer } from '../../../src/service/antigravity/AntigravityTransformer.ts';
 import { SKIP_THOUGHT_SIGNATURE } from '../../../src/service/antigravity/AntigravityTypes.ts';
 

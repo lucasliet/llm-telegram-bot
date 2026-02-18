@@ -1,4 +1,4 @@
-import OpenAi from 'npm:openai';
+import OpenAi from 'openai';
 import { ExtractedToolCall, StreamProcessingResult, StreamProcessor } from './StreamProcessor.ts';
 import { ToolExecutionResult } from '../agent/AgentLoopConfig.ts';
 

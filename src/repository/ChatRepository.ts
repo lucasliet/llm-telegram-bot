@@ -1,5 +1,5 @@
 import { compressObject, decompressObject } from 'textcompress';
-import { Content } from 'npm:@google/generative-ai';
+import { Content } from '@google/generative-ai';
 import { ModelCommand } from '@/config/models.ts';
 
 /**
@@ -99,6 +99,19 @@ async function saveHistoryToStorage(
  */
 export async function clearChatHistory(userKey: string): Promise<void> {
 	await kv.delete([userKey, 'chat-history']);
+}
+
+/**
+ * Overwrite chat history with a new history (used after compression)
+ */
+export async function overwriteChatHistory(
+	userKey: string,
+	history: ExpirableContent[],
+): Promise<void> {
+	const compressedChatHistory = compressObject(history);
+	await kv.set([userKey, 'chat-history'], compressedChatHistory, {
+		expireIn: THIRTY_DAYS_IN_MILLIS,
+	});
 }
 
 /**

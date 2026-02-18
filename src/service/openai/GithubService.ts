@@ -1,4 +1,4 @@
-import OpenAi from 'npm:openai';
+import OpenAi from 'openai';
 import OpenAiService from './OpenAIService.ts';
 
 const GITHUB_TOKEN: string = Deno.env.get('GITHUB_TOKEN') as string;
