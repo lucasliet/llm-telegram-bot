@@ -33,6 +33,8 @@ fi
 
 if [ "$1" = "antigravity-login" ]; then
     deno run --allow-env --allow-net --allow-read --allow-write --allow-import --unstable-kv --unstable-cron main.ts antigravity-login;
+elif [ "$1" = "copilot-login" ]; then
+    deno run --allow-env --allow-net --allow-read --allow-write --allow-import --unstable-kv --unstable-cron main.ts copilot-login;
 else
     deno run --watch --allow-env --allow-net --allow-read --allow-write --allow-import --unstable-kv --unstable-cron main.ts;
 fi

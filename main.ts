@@ -11,6 +11,7 @@ import '@/prototype/StringExtensionPrototype.ts';
 import '@/prototype/ContextExtensionPrototype.ts';
 import '@/prototype/ReadableStreamDefaultReaderPrototype.ts';
 import { AntigravityAuth } from '@/scripts/AntigravityAuth.ts';
+import { CopilotAuth } from '@/scripts/CopilotAuth.ts';
 
 const TOKEN: string = Deno.env.get('BOT_TOKEN') as string;
 const PORT: number = parseInt(Deno.env.get('PORT') as string) || 3333;
@@ -189,6 +190,11 @@ async function clearChatHistoryHandler(ctx: MyContext) {
 async function initializeApp() {
 	if (Deno.args.includes('antigravity-login')) {
 		await new AntigravityAuth().run();
+		return;
+	}
+
+	if (Deno.args.includes('copilot-login')) {
+		await new CopilotAuth().run();
 		return;
 	}
 
