@@ -1,6 +1,6 @@
 import OpenAi, { toFile } from 'openai';
 import { addContentToChatHistory, getChatHistory, overwriteChatHistory } from '@/repository/ChatRepository.ts';
-import { convertGeminiHistoryToGPT, convertGeminiHistoryToResponsesInput, getSystemPrompt, StreamReplyResponse } from '@/util/ChatConfigUtil.ts';
+import { getSystemPrompt, StreamReplyResponse } from '@/util/ChatConfigUtil.ts';
 import { MODELS_USING_RESPONSES_API, openAIModels } from '@/config/models.ts';
 import * as path from '@std/path';
 import ToolService from '@/service/ToolService.ts';
@@ -59,11 +59,11 @@ export default class OpenAiService {
 						this.maxTokens,
 					),
 				},
-				...convertGeminiHistoryToGPT(geminiHistory),
-				{
-					role: 'user',
-					content: [
-						{ type: 'text', text: requestPrompt },
+			...geminiHistory,
+			{
+				role: 'user',
+				content: [
+					{ type: 'text', text: requestPrompt },
 						...urls.map(
 							(photoUrl) => ({
 								type: 'image_url',
@@ -80,13 +80,7 @@ export default class OpenAiService {
 		const reader = completion.toReadableStream().getReader() as ReadableStreamDefaultReader<Uint8Array>;
 
 		const onComplete = (completedAnswer: string) =>
-			addContentToChatHistory(
-				geminiHistory,
-				quote,
-				requestPrompt,
-				completedAnswer,
-				userKey,
-			);
+			addContentToChatHistory(geminiHistory, requestPrompt, completedAnswer, userKey);
 
 		return { reader, onComplete, responseMap };
 	}
@@ -120,13 +114,13 @@ export default class OpenAiService {
 
 		const messages: OpenAi.Chat.ChatCompletionMessageParam[] = [
 			{ role: 'system', content: getSystemPrompt('OpenAI', this.model, this.maxTokens) },
-			...convertGeminiHistoryToGPT(geminiHistory),
+			...geminiHistory,
 			{ role: 'user', content: requestPrompt },
 		];
 
 		const reader = await this.executeAgentLoopForChatCompletions(messages, requestPrompt);
 
-		const onComplete = (completedAnswer: string) => addContentToChatHistory(geminiHistory, quote, requestPrompt, completedAnswer, userKey);
+		const onComplete = (completedAnswer: string) => addContentToChatHistory(geminiHistory, requestPrompt, completedAnswer, userKey);
 
 
 
@@ -167,13 +161,13 @@ export default class OpenAiService {
 				role: 'system',
 				content: getSystemPrompt('OpenAI', this.model, this.maxTokens),
 			},
-			...convertGeminiHistoryToResponsesInput(geminiHistory),
+			...(geminiHistory as OpenAi.Responses.ResponseInputItem[]),
 			{ role: 'user', content: requestPrompt },
 		];
 
 		const reader = await this.executeAgentLoopForResponsesAPI(input, requestPrompt);
 
-		const onComplete = (completedAnswer: string) => addContentToChatHistory(geminiHistory, quote, requestPrompt, completedAnswer, userKey);
+		const onComplete = (completedAnswer: string) => addContentToChatHistory(geminiHistory, requestPrompt, completedAnswer, userKey);
 
 
 

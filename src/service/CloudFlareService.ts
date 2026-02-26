@@ -1,6 +1,6 @@
 import OpenAi from 'openai';
 import { addContentToChatHistory, getChatHistory } from '@/repository/ChatRepository.ts';
-import { convertGeminiHistoryToGPT, getSystemPrompt, mapChatToolsToResponsesTools, StreamReplyResponse } from '@/util/ChatConfigUtil.ts';
+import { getSystemPrompt, mapChatToolsToResponsesTools, StreamReplyResponse } from '@/util/ChatConfigUtil.ts';
 import ToolService from '@/service/ToolService.ts';
 import { cloudflareModels } from '@/config/models.ts';
 import { downloadTelegramFile } from './TelegramService.ts';
@@ -71,13 +71,7 @@ export default {
 		}
 		const { result: { description } } = await apiResponse.json();
 
-		addContentToChatHistory(
-			geminiHistory,
-			quote,
-			requestPrompt,
-			description,
-			userKey,
-		);
+		addContentToChatHistory(geminiHistory, requestPrompt, description, userKey);
 
 		return description;
 	},
@@ -109,7 +103,7 @@ export default {
 					CLOUDFLARE_MAX_TOKENS,
 				),
 			},
-			...convertGeminiHistoryToGPT(geminiHistory),
+			...geminiHistory,
 			{ role: 'user', content: requestPrompt },
 		];
 
@@ -144,13 +138,7 @@ export default {
 		);
 
 		const onComplete = (completedAnswer: string) =>
-			addContentToChatHistory(
-				geminiHistory,
-				quote,
-				requestPrompt,
-				completedAnswer,
-				userKey,
-			);
+			addContentToChatHistory(geminiHistory, requestPrompt, completedAnswer, userKey);
 
 		return { reader, onComplete };
 	},

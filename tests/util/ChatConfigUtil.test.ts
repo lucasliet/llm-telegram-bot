@@ -1,19 +1,6 @@
 import { assertEquals } from 'asserts';
-import { convertGeminiHistoryToGPT, getSystemPrompt, mapChatToolsToResponsesTools } from '../../src/util/ChatConfigUtil.ts';
-import type { Content } from '@google/generative-ai';
+import { getSystemPrompt, mapChatToolsToResponsesTools } from '../../src/util/ChatConfigUtil.ts';
 import type OpenAI from 'openai';
-
-Deno.test('convertGeminiHistoryToGPT', () => {
-	const history: Content[] = [
-		{ role: 'user', parts: [{ text: 'Hello' }] },
-		{ role: 'model', parts: [{ text: 'Hi there' }] },
-	];
-	const gpt = convertGeminiHistoryToGPT(history);
-	assertEquals(gpt[0].role, 'user');
-	assertEquals(gpt[0].content, 'Hello');
-	assertEquals(gpt[1].role, 'assistant');
-	assertEquals(gpt[1].content, 'Hi there');
-});
 
 Deno.test('mapChatToolsToResponsesTools', () => {
 	const tools: OpenAI.Chat.Completions.ChatCompletionTool[] = [

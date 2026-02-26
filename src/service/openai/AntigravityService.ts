@@ -10,7 +10,7 @@ import {
 	SKIP_THOUGHT_SIGNATURE,
 } from '../antigravity/AntigravityTypes.ts';
 import { addContentToChatHistory, getChatHistory } from '@/repository/ChatRepository.ts';
-import { convertGeminiHistoryToGPT, getSystemPrompt, type StreamReplyResponse } from '@/util/ChatConfigUtil.ts';
+import { getSystemPrompt, type StreamReplyResponse } from '@/util/ChatConfigUtil.ts';
 import ToolService from '@/service/ToolService.ts';
 import { AgentLoopExecutor } from './agent/index.ts';
 import { ChatCompletionsStreamProcessor } from './stream/index.ts';
@@ -391,12 +391,11 @@ export default class AntigravityService extends OpenAiService {
 		prompt: string,
 	): Promise<StreamReplyResponse> {
 		const geminiHistory = await getChatHistory(userKey);
-		const openAIMessages = convertGeminiHistoryToGPT(geminiHistory);
 		const requestPrompt = quote ? `quote: "${quote}"\n\n${prompt}` : prompt;
 
 		const messages: OpenAi.Chat.ChatCompletionMessageParam[] = [
 			{ role: 'system', content: getSystemPrompt('Antigravity', this.model, this.maxTokens) },
-			...openAIMessages,
+			...geminiHistory,
 			{ role: 'user', content: requestPrompt },
 		];
 
@@ -417,7 +416,7 @@ export default class AntigravityService extends OpenAiService {
 		const initialReader = await generateFn(messages);
 		const reader = executor.execute(initialReader, messages);
 
-		const onComplete = (completedAnswer: string) => addContentToChatHistory(geminiHistory, quote, requestPrompt, completedAnswer, userKey);
+		const onComplete = (completedAnswer: string) => addContentToChatHistory(geminiHistory, requestPrompt, completedAnswer, userKey);
 
 		return { reader, onComplete, responseMap };
 	}
@@ -429,14 +428,13 @@ export default class AntigravityService extends OpenAiService {
 		prompt: string,
 	): Promise<StreamReplyResponse> {
 		const geminiHistory = await getChatHistory(userKey);
-		const openAIMessages = convertGeminiHistoryToGPT(geminiHistory);
 		const requestPrompt = quote ? `quote: "${quote}"\n\n${prompt}` : prompt;
 
 		const base64Urls = await getImageBase64String(photosUrl);
 
 		const messages: OpenAi.Chat.ChatCompletionMessageParam[] = [
 			{ role: 'system', content: getSystemPrompt('Antigravity', this.model, this.maxTokens) },
-			...openAIMessages,
+			...geminiHistory,
 			{
 				role: 'user',
 				content: [
@@ -466,7 +464,7 @@ export default class AntigravityService extends OpenAiService {
 		const initialReader = await generateFn(messages);
 		const reader = executor.execute(initialReader, messages);
 
-		const onComplete = (completedAnswer: string) => addContentToChatHistory(geminiHistory, quote, requestPrompt, completedAnswer, userKey);
+		const onComplete = (completedAnswer: string) => addContentToChatHistory(geminiHistory, requestPrompt, completedAnswer, userKey);
 
 		return { reader, onComplete, responseMap };
 	}

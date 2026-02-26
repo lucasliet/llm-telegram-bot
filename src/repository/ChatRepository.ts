@@ -1,5 +1,5 @@
 import { compressObject, decompressObject } from 'textcompress';
-import { Content } from '@google/generative-ai';
+import OpenAI from 'openai';
 import { ModelCommand } from '@/config/models.ts';
 
 const kv = await Deno.openKv();
@@ -9,32 +9,29 @@ const THIRTY_DAYS_IN_MILLIS = 60 * 60 * 24 * 1000 * 30;
 /**
  * Get chat history for a user
  */
-export async function getChatHistory(userKey: string): Promise<Content[]> {
-	const compressedChatHistory = (await kv.get<string>([userKey, 'chat-history'])).value;
+export async function getChatHistory(userKey: string): Promise<OpenAI.ChatCompletionMessageParam[]> {
+	const compressed = (await kv.get<string>([userKey, 'chat-history'])).value;
 
-	if (!compressedChatHistory) {
+	if (!compressed) {
 		return [];
 	}
 
-	return decompressObject<Content[]>(compressedChatHistory);
+	return decompressObject<OpenAI.ChatCompletionMessageParam[]>(compressed);
 }
 
 /**
  * Add new content to chat history
  */
 export async function addContentToChatHistory(
-	history: Content[],
-	quote: string = '',
+	history: OpenAI.ChatCompletionMessageParam[],
 	userPrompt: string,
 	modelPrompt: string,
 	userKey: string,
 ): Promise<void> {
-	const userPart = quote ? [{ text: quote }, { text: userPrompt }] : [{ text: userPrompt }];
-
 	history = [
 		...history,
-		{ role: 'user', parts: userPart },
-		{ role: 'model', parts: [{ text: modelPrompt }] },
+		{ role: 'user', content: userPrompt },
+		{ role: 'assistant', content: modelPrompt },
 	];
 
 	await saveHistoryToStorage(history, userKey);
@@ -43,9 +40,9 @@ export async function addContentToChatHistory(
 /**
  * Save chat history to storage with compression
  */
-async function saveHistoryToStorage(history: Content[], userKey: string): Promise<void> {
-	const compressedChatHistory = compressObject(history);
-	await kv.set([userKey, 'chat-history'], compressedChatHistory, {
+async function saveHistoryToStorage(history: OpenAI.ChatCompletionMessageParam[], userKey: string): Promise<void> {
+	const compressed = compressObject(history);
+	await kv.set([userKey, 'chat-history'], compressed, {
 		expireIn: THIRTY_DAYS_IN_MILLIS,
 	});
 }
@@ -60,9 +57,9 @@ export async function clearChatHistory(userKey: string): Promise<void> {
 /**
  * Overwrite chat history with a new history (used after compression)
  */
-export async function overwriteChatHistory(userKey: string, history: Content[]): Promise<void> {
-	const compressedChatHistory = compressObject(history);
-	await kv.set([userKey, 'chat-history'], compressedChatHistory, {
+export async function overwriteChatHistory(userKey: string, history: OpenAI.ChatCompletionMessageParam[]): Promise<void> {
+	const compressed = compressObject(history);
+	await kv.set([userKey, 'chat-history'], compressed, {
 		expireIn: THIRTY_DAYS_IN_MILLIS,
 	});
 }

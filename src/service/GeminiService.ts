@@ -1,11 +1,9 @@
 import { CoreMessage, streamText } from 'ai';
 import { createGoogleGenerativeAI, GoogleGenerativeAIProvider } from '@ai-sdk/google';
 
-import { Content } from '@google/generative-ai';
-import { getChatHistory } from '@/repository/ChatRepository.ts';
-import { addContentToChatHistory } from '@/repository/ChatRepository.ts';
-import { convertGeminiHistoryToGPT, getSystemPrompt, StreamReplyResponse } from '@/util/ChatConfigUtil.ts';
 import OpenAI from 'openai';
+import { getChatHistory, addContentToChatHistory } from '@/repository/ChatRepository.ts';
+import { getSystemPrompt, StreamReplyResponse } from '@/util/ChatConfigUtil.ts';
 
 const GEMINI_API_KEY = Deno.env.get('GEMINI_API_KEY') as string;
 
@@ -32,20 +30,18 @@ export default class GeminiService {
 	 * @private
 	 * @param modelName - The specific model identifier (e.g., 'models/gemini-pro').
 	 * @param messages - The array of messages to send to the model.
-	 * @param geminiHistoryForUpdate - The chat history to be updated upon completion.
-	 * @param originalQuote - The original quote included in the user's prompt.
+	 * @param historyForUpdate - The GPT-format chat history to be updated upon completion.
 	 * @param originalPrompt - The original text prompt from the user.
 	 * @param userKey - The user's unique key for chat history management.
-	 * @returns A promise that resolves to a StreamReplyResponse object.
+	 * @returns A StreamReplyResponse object.
 	 */
 	private _streamResponse(
 		modelName: string,
 		messages: CoreMessage[],
-		geminiHistoryForUpdate: Content[],
-		originalQuote: string,
+		historyForUpdate: OpenAI.ChatCompletionMessageParam[],
 		originalPrompt: string,
 		userKey: string,
-	): Promise<StreamReplyResponse> {
+	): StreamReplyResponse {
 		const { textStream } = streamText({
 			model: this.googleAI(modelName),
 			messages,
@@ -62,13 +58,7 @@ export default class GeminiService {
 		const reader = transformedStream.getReader();
 
 		const onComplete = (completedAnswer: string) =>
-			addContentToChatHistory(
-				geminiHistoryForUpdate,
-				originalQuote,
-				originalPrompt,
-				completedAnswer,
-				userKey,
-			);
+			addContentToChatHistory(historyForUpdate, originalPrompt, completedAnswer, userKey);
 
 		return { reader, onComplete };
 	}
@@ -77,19 +67,14 @@ export default class GeminiService {
 	 * Maps OpenAI formatted chat history messages to CoreMessage format.
 	 * @private
 	 * @static
-	 * @param openAiHistory - An array of chat messages in OpenAI.ChatCompletionMessageParam format.
+	 * @param history - An array of chat messages in OpenAI.ChatCompletionMessageParam format.
 	 * @returns An array of CoreMessage objects.
 	 */
-	private static _mapOpenAiHistoryToCoreMessages(
-		openAiHistory: OpenAI.ChatCompletionMessageParam[],
-	): CoreMessage[] {
-		return openAiHistory.map((msg) => {
-			const role: 'user' | 'assistant' = msg.role === 'assistant' ? 'assistant' : 'user';
-			return {
-				role,
-				content: msg.content as string,
-			};
-		});
+	private static _toCoreMessages(history: OpenAI.ChatCompletionMessageParam[]): CoreMessage[] {
+		return history.map((msg) => ({
+			role: msg.role === 'assistant' ? 'assistant' : 'user',
+			content: msg.content as string,
+		}));
 	}
 
 	/**
@@ -97,31 +82,19 @@ export default class GeminiService {
 	 * @param userKey - The user key for accessing and updating chat history.
 	 * @param quote - An optional quote to prepend to the prompt.
 	 * @param prompt - The main text prompt for the AI.
-	 * @returns A promise that resolves to a StreamReplyResponse object,
-	 *          containing the response stream and an onComplete callback.
+	 * @returns A promise that resolves to a StreamReplyResponse object.
 	 */
 	async generateText(userKey: string, quote: string = '', prompt: string): Promise<StreamReplyResponse> {
-		const geminiHistory: Content[] = await getChatHistory(this.model);
-		const history: OpenAI.ChatCompletionMessageParam[] = convertGeminiHistoryToGPT(geminiHistory);
+		const history = await getChatHistory(this.model);
 		const requestPrompt = quote ? `quote: "${quote}"\n\n${prompt}` : prompt;
 
-		const systemMessageContent = getSystemPrompt('Gemini', this.model, 1000);
-		const mappedHistory = GeminiService._mapOpenAiHistoryToCoreMessages(history);
-
-		const finalMessagesForApi: CoreMessage[] = [
-			{ role: 'system', content: systemMessageContent },
-			...mappedHistory,
+		const messages: CoreMessage[] = [
+			{ role: 'system', content: getSystemPrompt('Gemini', this.model, 1000) },
+			...GeminiService._toCoreMessages(history),
 			{ role: 'user', content: requestPrompt },
 		];
 
-		return this._streamResponse(
-			`models/${this.model}`,
-			finalMessagesForApi,
-			geminiHistory,
-			quote,
-			requestPrompt,
-			userKey,
-		);
+		return this._streamResponse(`models/${this.model}`, messages, history, requestPrompt, userKey);
 	}
 
 	/**
@@ -130,8 +103,7 @@ export default class GeminiService {
 	 * @param quote - An optional quote to prepend to the text prompt.
 	 * @param photosUrl - An array of promises, each resolving to a URL of an image.
 	 * @param prompt - The main text prompt accompanying the images.
-	 * @returns A promise that resolves to a StreamReplyResponse object,
-	 *          containing the response stream and an onComplete callback.
+	 * @returns A promise that resolves to a StreamReplyResponse object.
 	 */
 	async generateTextFromImage(
 		userKey: string,
@@ -139,44 +111,23 @@ export default class GeminiService {
 		photosUrl: Promise<string>[],
 		prompt: string,
 	): Promise<StreamReplyResponse> {
-		const geminiHistory: Content[] = await getChatHistory(this.model);
-		const historyMessages: OpenAI.ChatCompletionMessageParam[] = convertGeminiHistoryToGPT(geminiHistory);
+		const history = await getChatHistory(this.model);
+		const textualPrompt = quote ? `quote: "${quote}"\n\n${prompt}` : prompt;
 
 		const resolvedImageUrls = await Promise.all(photosUrl);
-		const imageContentParts = await Promise.all(
-			resolvedImageUrls.map((url) => {
-				return { type: 'image' as const, image: url };
-			}),
-		);
+		const imageContentParts = resolvedImageUrls.map((url) => ({ type: 'image' as const, image: url }));
 
-		const textualPrompt = quote ? `quote: "${quote}"\n\n${prompt}` : prompt;
 		const userPromptContent: (
 			| { type: 'text'; text: string }
 			| { type: 'image'; image: string; mimeType?: string }
-		)[] = [
-				{ type: 'text', text: textualPrompt },
-				...imageContentParts,
-			];
+		)[] = [{ type: 'text', text: textualPrompt }, ...imageContentParts];
 
-		const systemMessageContent = getSystemPrompt('Gemini', this.model, 1000);
-		const mappedHistory = GeminiService._mapOpenAiHistoryToCoreMessages(historyMessages);
-
-		const messagesForApi: CoreMessage[] = [
-			{
-				role: 'system',
-				content: systemMessageContent,
-			},
-			...mappedHistory,
+		const messages: CoreMessage[] = [
+			{ role: 'system', content: getSystemPrompt('Gemini', this.model, 1000) },
+			...GeminiService._toCoreMessages(history),
 			{ role: 'user', content: userPromptContent },
 		];
 
-		return this._streamResponse(
-			`models/${this.model}`,
-			messagesForApi,
-			geminiHistory,
-			quote,
-			prompt,
-			userKey,
-		);
+		return this._streamResponse(`models/${this.model}`, messages, history, textualPrompt, userKey);
 	}
 }

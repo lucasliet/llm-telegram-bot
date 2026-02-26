@@ -43,19 +43,18 @@ Deno.test('ChatRepository', async (t) => {
 			let history = await getChatHistory(userKey);
 			assertEquals(history, []);
 
-			await addContentToChatHistory(history, '', 'Hello', 'Hi there!', userKey);
+			await addContentToChatHistory(history, 'Hello', 'Hi there!', userKey);
 
 			history = await getChatHistory(userKey);
 			assertEquals(history.length, 2);
 			assertEquals(history[0].role, 'user');
-			assertEquals(history[0].parts[0].text, 'Hello');
-			assertEquals(history[1].role, 'model');
-			assertEquals(history[1].parts[0].text, 'Hi there!');
+			assertEquals((history[0] as any).content, 'Hello');
+			assertEquals(history[1].role, 'assistant');
+			assertEquals((history[1] as any).content, 'Hi there!');
 
 			await addContentToChatHistory(
 				history,
-				'Previous message',
-				'Follow-up',
+				'quote: "Previous message"\n\nFollow-up',
 				'Response to follow-up',
 				userKey,
 			);
@@ -63,11 +62,9 @@ Deno.test('ChatRepository', async (t) => {
 			history = await getChatHistory(userKey);
 			assertEquals(history.length, 4);
 			assertEquals(history[2].role, 'user');
-			assertEquals(history[2].parts.length, 2);
-			assertEquals(history[2].parts[0].text, 'Previous message');
-			assertEquals(history[2].parts[1].text, 'Follow-up');
-			assertEquals(history[3].role, 'model');
-			assertEquals(history[3].parts[0].text, 'Response to follow-up');
+			assertEquals((history[2] as any).content, 'quote: "Previous message"\n\nFollow-up');
+			assertEquals(history[3].role, 'assistant');
+			assertEquals((history[3] as any).content, 'Response to follow-up');
 		},
 	);
 
@@ -75,7 +72,7 @@ Deno.test('ChatRepository', async (t) => {
 		resetKv();
 
 		let history = await getChatHistory(userKey);
-		await addContentToChatHistory(history, '', 'Hello', 'Hi there!', userKey);
+		await addContentToChatHistory(history, 'Hello', 'Hi there!', userKey);
 
 		history = await getChatHistory(userKey);
 		assertEquals(history.length, 2);

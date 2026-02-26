@@ -1,5 +1,5 @@
 import { addContentToChatHistory, getChatHistory } from '@/repository/ChatRepository.ts';
-import { convertGeminiHistoryToGPT, getSystemPrompt, StreamReplyResponse } from '@/util/ChatConfigUtil.ts';
+import { getSystemPrompt, StreamReplyResponse } from '@/util/ChatConfigUtil.ts';
 import { OpenAI } from 'openai';
 import { pollinationsModels } from '@/config/models.ts';
 
@@ -46,7 +46,7 @@ export default class PollinationsService {
 				role: 'system',
 				content: getSystemPrompt('Pollinations', this.model, this.maxTokens),
 			},
-			...convertGeminiHistoryToGPT(geminiHistory),
+			...geminiHistory,
 			{ role: 'user', content: requestPrompt },
 		];
 
@@ -60,13 +60,7 @@ export default class PollinationsService {
 		const reader = apiResponse.body!.getReader();
 
 		const onComplete = (completedAnswer: string) =>
-			addContentToChatHistory(
-				geminiHistory,
-				quote,
-				requestPrompt,
-				completedAnswer,
-				userKey,
-			);
+			addContentToChatHistory(geminiHistory, requestPrompt, completedAnswer, userKey);
 
 		return { reader, onComplete, responseMap };
 	}

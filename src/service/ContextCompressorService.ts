@@ -1,5 +1,4 @@
 import OpenAi from 'openai';
-import { Content } from '@google/generative-ai';
 import { estimateTokens, shouldCompress } from '@/util/TokenEstimator.ts';
 
 /**
@@ -12,10 +11,10 @@ export class ContextCompressorService {
 	 * Uses an LLM to extract only essential information.
 	 */
 	static async compressHistory(
-		history: Content[],
+		history: OpenAi.ChatCompletionMessageParam[],
 		model: string,
 		openai: OpenAi,
-	): Promise<Content> {
+	): Promise<OpenAi.ChatCompletionMessageParam> {
 		const historyText = this.formatHistory(history);
 		const prompt = `You are an expert context compressor. Your goal is to condense the following conversation history into a concise summary that preserves all critical information for an LLM to resume the conversation seamlessly.
 
@@ -49,17 +48,17 @@ Summary (in Portuguese):`;
 		const summary = response.choices[0]?.message?.content || historyText.substring(0, 4000);
 
 		return {
-			role: 'model',
-			parts: [{ text: `[Resumo do contexto anterior]\n${summary}` }],
+			role: 'assistant',
+			content: `[Resumo do contexto anterior]\n${summary}`,
 		};
 	}
 
 	/**
 	 * Formats the history array into a readable text format for compression.
 	 */
-	private static formatHistory(history: Content[]): string {
+	private static formatHistory(history: OpenAi.ChatCompletionMessageParam[]): string {
 		return history
-			.map((msg) => `${msg.role}: ${msg.parts.map((p) => p.text).join(' ')}`)
+			.map((msg) => `${msg.role}: ${typeof msg.content === 'string' ? msg.content : ''}`)
 			.join('\n\n');
 	}
 
@@ -68,11 +67,11 @@ Summary (in Portuguese):`;
 	 * @returns Object containing the (possibly compressed) history and a boolean indicating if compression occurred.
 	 */
 	static async compressIfNeeded(
-		history: Content[],
+		history: OpenAi.ChatCompletionMessageParam[],
 		maxTokens: number,
 		model: string,
 		openai: OpenAi,
-	): Promise<{ history: Content[]; didCompress: boolean }> {
+	): Promise<{ history: OpenAi.ChatCompletionMessageParam[]; didCompress: boolean }> {
 		const historyTokens = estimateTokens(history);
 		if (!shouldCompress(historyTokens, maxTokens)) {
 			return { history, didCompress: false };

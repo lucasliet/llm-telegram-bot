@@ -1,5 +1,4 @@
 import OpenAi from 'openai';
-import { Content } from '@google/generative-ai';
 
 /**
  * Interface for StreamReplyResponse
@@ -26,39 +25,6 @@ export type ResponsesMessage = {
 	role: 'user' | 'assistant';
 	content: Array<{ type: 'input_text' | 'output_text' | 'text'; text: string }>;
 };
-
-/**
- * Convert Gemini history format to OpenAI/GPT format
- *
- * @param history - History in Gemini format
- * @returns History in OpenAI format
- */
-export function convertGeminiHistoryToGPT(
-	history: Content[],
-): OpenAi.ChatCompletionMessageParam[] {
-	return history.map((content) => {
-		return {
-			role: content.role === 'user' ? 'user' : 'assistant',
-			content: content.parts.map((part) => part.text).join(' '),
-		};
-	});
-}
-
-/**
- * Converts Gemini history format to OpenAI Responses API input format.
- * @param history - History in Gemini format.
- * @returns Array of ResponseInputItem for the Responses API.
- */
-export function convertGeminiHistoryToResponsesInput(
-	history: Content[],
-): OpenAi.Responses.ResponseInputItem[] {
-	return history.map((content) => {
-		return {
-			role: content.role === 'user' ? 'user' : 'assistant',
-			content: content.parts.map((part) => part.text).join(' '),
-		} as OpenAi.Responses.ResponseInputItem;
-	});
-}
 
 /**
  * Maps an array of OpenAI ChatCompletionTool objects to an array of OpenAI.Responses.Tool objects.
