@@ -1,7 +1,8 @@
 import { CoreMessage, streamText } from 'ai';
 import { createGoogleGenerativeAI, GoogleGenerativeAIProvider } from '@ai-sdk/google';
 
-import { ExpirableContent, getChatHistory } from '@/repository/ChatRepository.ts';
+import { Content } from '@google/generative-ai';
+import { getChatHistory } from '@/repository/ChatRepository.ts';
 import { addContentToChatHistory } from '@/repository/ChatRepository.ts';
 import { convertGeminiHistoryToGPT, getSystemPrompt, StreamReplyResponse } from '@/util/ChatConfigUtil.ts';
 import OpenAI from 'openai';
@@ -40,7 +41,7 @@ export default class GeminiService {
 	private _streamResponse(
 		modelName: string,
 		messages: CoreMessage[],
-		geminiHistoryForUpdate: ExpirableContent[],
+		geminiHistoryForUpdate: Content[],
 		originalQuote: string,
 		originalPrompt: string,
 		userKey: string,
@@ -100,7 +101,7 @@ export default class GeminiService {
 	 *          containing the response stream and an onComplete callback.
 	 */
 	async generateText(userKey: string, quote: string = '', prompt: string): Promise<StreamReplyResponse> {
-		const geminiHistory: ExpirableContent[] = await getChatHistory(this.model);
+		const geminiHistory: Content[] = await getChatHistory(this.model);
 		const history: OpenAI.ChatCompletionMessageParam[] = convertGeminiHistoryToGPT(geminiHistory);
 		const requestPrompt = quote ? `quote: "${quote}"\n\n${prompt}` : prompt;
 
@@ -138,7 +139,7 @@ export default class GeminiService {
 		photosUrl: Promise<string>[],
 		prompt: string,
 	): Promise<StreamReplyResponse> {
-		const geminiHistory: ExpirableContent[] = await getChatHistory(this.model);
+		const geminiHistory: Content[] = await getChatHistory(this.model);
 		const historyMessages: OpenAI.ChatCompletionMessageParam[] = convertGeminiHistoryToGPT(geminiHistory);
 
 		const resolvedImageUrls = await Promise.all(photosUrl);

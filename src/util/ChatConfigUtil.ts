@@ -1,5 +1,5 @@
 import OpenAi from 'openai';
-import { ExpirableContent } from '@/repository/ChatRepository.ts';
+import { Content } from '@google/generative-ai';
 
 /**
  * Interface for StreamReplyResponse
@@ -34,7 +34,7 @@ export type ResponsesMessage = {
  * @returns History in OpenAI format
  */
 export function convertGeminiHistoryToGPT(
-	history: ExpirableContent[],
+	history: Content[],
 ): OpenAi.ChatCompletionMessageParam[] {
 	return history.map((content) => {
 		return {
@@ -50,7 +50,7 @@ export function convertGeminiHistoryToGPT(
  * @returns Array of ResponseInputItem for the Responses API.
  */
 export function convertGeminiHistoryToResponsesInput(
-	history: ExpirableContent[],
+	history: Content[],
 ): OpenAi.Responses.ResponseInputItem[] {
 	return history.map((content) => {
 		return {

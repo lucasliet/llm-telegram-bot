@@ -16,8 +16,6 @@ Deno.test('ChatRepository', async (t) => {
 		clearChatHistory,
 		setCurrentModel,
 		getCurrentModel,
-		setVqdHeader,
-		getVqdHeader,
 	} = await import('../../src/repository/ChatRepository.ts');
 
 	/** Resets the mock KV store */
@@ -36,18 +34,6 @@ Deno.test('ChatRepository', async (t) => {
 			assertEquals(history, []);
 		},
 	);
-
-	await t.step('getChatHistory should fill missing createdAt', async () => {
-		resetKv();
-
-		const incomplete = [{ role: 'user', parts: [{ text: 'Hi' }] }];
-		const compressed = compressObject(incomplete);
-		await mockKv.set([userKey, 'chat-history'], compressed);
-
-		const history = await getChatHistory(userKey);
-		const created = history[0].createdAt > 0;
-		assertEquals(created, true);
-	});
 
 	await t.step(
 		'addContentToChatHistory should add messages to history',
@@ -85,25 +71,6 @@ Deno.test('ChatRepository', async (t) => {
 		},
 	);
 
-	await t.step(
-		'addContentToChatHistory should remove expired messages',
-		async () => {
-			resetKv();
-
-			const old = {
-				role: 'user',
-				parts: [{ text: 'old' }],
-				createdAt: Date.now() - 2 * 60 * 60 * 24 * 1000,
-			};
-			let history = [old];
-			await addContentToChatHistory(history, '', 'new', 'reply', userKey);
-
-			history = await getChatHistory(userKey);
-			const hasOld = history.some((m) => m.parts[0].text === 'old');
-			assertEquals(hasOld, false);
-		},
-	);
-
 	await t.step('clearChatHistory should remove all messages', async () => {
 		resetKv();
 
@@ -131,22 +98,6 @@ Deno.test('ChatRepository', async (t) => {
 
 			model = await getCurrentModel(userKey);
 			assertEquals(model, testModel);
-		},
-	);
-
-	await t.step(
-		'setVqdHeader and getVqdHeader should manage VQD header',
-		async () => {
-			resetKv();
-
-			let header = await getVqdHeader();
-			assertEquals(header, null);
-
-			const testHeader = 'test-vqd-header';
-			await setVqdHeader(testHeader);
-
-			header = await getVqdHeader();
-			assertEquals(header, testHeader);
 		},
 	);
 

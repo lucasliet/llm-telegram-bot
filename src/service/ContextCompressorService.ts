@@ -1,5 +1,5 @@
 import OpenAi from 'openai';
-import { ExpirableContent } from '@/repository/ChatRepository.ts';
+import { Content } from '@google/generative-ai';
 import { estimateTokens, shouldCompress } from '@/util/TokenEstimator.ts';
 
 /**
@@ -12,10 +12,10 @@ export class ContextCompressorService {
 	 * Uses an LLM to extract only essential information.
 	 */
 	static async compressHistory(
-		history: ExpirableContent[],
+		history: Content[],
 		model: string,
 		openai: OpenAi,
-	): Promise<ExpirableContent> {
+	): Promise<Content> {
 		const historyText = this.formatHistory(history);
 		const prompt = `You are an expert context compressor. Your goal is to condense the following conversation history into a concise summary that preserves all critical information for an LLM to resume the conversation seamlessly.
 
@@ -51,14 +51,13 @@ Summary (in Portuguese):`;
 		return {
 			role: 'model',
 			parts: [{ text: `[Resumo do contexto anterior]\n${summary}` }],
-			createdAt: Date.now(),
 		};
 	}
 
 	/**
 	 * Formats the history array into a readable text format for compression.
 	 */
-	private static formatHistory(history: ExpirableContent[]): string {
+	private static formatHistory(history: Content[]): string {
 		return history
 			.map((msg) => `${msg.role}: ${msg.parts.map((p) => p.text).join(' ')}`)
 			.join('\n\n');
@@ -69,11 +68,11 @@ Summary (in Portuguese):`;
 	 * @returns Object containing the (possibly compressed) history and a boolean indicating if compression occurred.
 	 */
 	static async compressIfNeeded(
-		history: ExpirableContent[],
+		history: Content[],
 		maxTokens: number,
 		model: string,
 		openai: OpenAi,
-	): Promise<{ history: ExpirableContent[]; didCompress: boolean }> {
+	): Promise<{ history: Content[]; didCompress: boolean }> {
 		const historyTokens = estimateTokens(history);
 		if (!shouldCompress(historyTokens, maxTokens)) {
 			return { history, didCompress: false };

@@ -1,13 +1,13 @@
 import { assertEquals, assertStringIncludes } from "asserts";
 import { ContextCompressorService } from "@/service/ContextCompressorService.ts";
-import { ExpirableContent } from "@/repository/ChatRepository.ts";
+import { Content } from "@google/generative-ai";
 import OpenAi from "openai";
 
 Deno.test("ContextCompressorService.compressHistory should use the correct prompt and return summary", async () => {
-  const history: ExpirableContent[] = [
-    { role: 'user', parts: [{ text: "Oi, meu nome é Lucas." }], createdAt: 123 },
-    { role: 'model', parts: [{ text: "Olá Lucas!" }], createdAt: 124 },
-    { role: 'user', parts: [{ text: "Gosto de TypeScript." }], createdAt: 125 },
+  const history: Content[] = [
+    { role: 'user', parts: [{ text: "Oi, meu nome é Lucas." }] },
+    { role: 'model', parts: [{ text: "Olá Lucas!" }] },
+    { role: 'user', parts: [{ text: "Gosto de TypeScript." }] },
   ];
   const model = "gpt-4o";
   const mockResponseContent = "- Lucas gosta de TypeScript.";
@@ -40,7 +40,7 @@ Deno.test("ContextCompressorService.compressHistory should use the correct promp
 });
 
 Deno.test("ContextCompressorService.compressIfNeeded should return false if tokens are below threshold", async () => {
-  const history: ExpirableContent[] = [{ role: 'user', parts: [{ text: "Short message" }], createdAt: Date.now() }];
+  const history: Content[] = [{ role: 'user', parts: [{ text: "Short message" }] }];
   const maxTokens = 10000; // High limit
   const model = "gpt-4o";
   const mockOpenAi = {} as unknown as OpenAi;
@@ -53,7 +53,7 @@ Deno.test("ContextCompressorService.compressIfNeeded should return false if toke
 
 Deno.test("ContextCompressorService.compressIfNeeded should return true and compressed history if tokens exceed threshold", async () => {
   const longText = "A".repeat(1000); // 1000 chars -> approx 250 tokens (JSON overhead makes it more)
-  const history: ExpirableContent[] = [{ role: 'user', parts: [{ text: longText }], createdAt: Date.now() }];
+  const history: Content[] = [{ role: 'user', parts: [{ text: longText }] }];
   const maxTokens = 100; // Low limit -> 80 tokens threshold. >80 tokens should trigger compression.
   const model = "gpt-4o";
   const mockResponseContent = "Compressed summary";
