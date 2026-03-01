@@ -4,7 +4,7 @@ import { InlineKeyboard } from 'grammy';
  * Helper command buttons for inline keyboard - Admin version (all models)
  */
 const adminCommandButtons = [
-	[['Modelo Atual', '/currentmodel']],
+	[['⚙️ Modelo Atual', '/currentmodel']],
 	[
 		['Pollinations', '/polli'],
 		['Copilot GPT 5 Mini', '/gpt'],
@@ -21,14 +21,14 @@ const adminCommandButtons = [
 		['GLM 4.7', '/glm'],
 		['GLM 4.7 Flash', '/glmflash'],
 	],
-	[['Limpar Histórico', '/clear']],
+	[['🗑️ Limpar Histórico', '/clear'], ['🔔 Notificações', '/notifications']],
 ];
 
 /**
  * Helper command buttons for inline keyboard - Regular user version (whitelisted models only)
  */
 const userCommandButtons = [
-	[['Modelo Atual', '/currentmodel']],
+	[['⚙️ Modelo Atual', '/currentmodel']],
 	[
 		['Pollinations', '/polli'],
 		['Copilot GPT 5 Mini', '/gpt'],
@@ -37,7 +37,16 @@ const userCommandButtons = [
 		['Llama 4 Maverick', '/llama'],
 		['GPT OSS 120b', '/oss'],
 	],
-	[['Limpar Histórico', '/clear']],
+	[['🗑️ Limpar Histórico', '/clear'], ['🔔 Notificações', '/notifications']],
+];
+
+/**
+ * Settings keyboard sections with emoji icons for all items
+ */
+const settingsButtons = [
+	[['⚙️ Modelo Atual', '/currentmodel'], ['🔔 Notificações', '/notifications']],
+	[['🎨 Aparência', '/appearance'], ['ℹ️ Sobre', '/about']],
+	[['🗑️ Limpar Histórico', '/clear']],
 ];
 
 export const adminKeyboard = InlineKeyboard.from(
@@ -46,6 +55,10 @@ export const adminKeyboard = InlineKeyboard.from(
 
 export const userKeyboard = InlineKeyboard.from(
 	userCommandButtons.map((row) => row.map(([label, data]) => InlineKeyboard.text(label, data))),
+);
+
+export const settingsKeyboard = InlineKeyboard.from(
+	settingsButtons.map((row) => row.map(([label, data]) => InlineKeyboard.text(label, data))),
 );
 
 /**
@@ -92,3 +105,12 @@ export const userHelpMessage = `*Comandos inline*:
 \\- \`polli:\` mensagem \\- Faz uma pergunta usando o modelo __Pollinations__
 
 *Seleção de modelos de linguagem*:`;
+
+/**
+ * About message with bot information
+ */
+export const aboutMessage = `ℹ️ *Sobre*
+
+Bot de IA para Telegram com suporte a múltiplos provedores de linguagem\\.
+
+Acesse: [@llm\\_gemini\\_bot](https://t.me/llm_gemini_bot)`;

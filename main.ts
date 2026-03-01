@@ -1,11 +1,11 @@
 import { Application } from 'oak';
 import { oakCors } from 'oak-cors';
-import { Bot, Context, type MiddlewareFn, webhookCallback } from 'grammy';
+import { Bot, Context, InlineKeyboard, type MiddlewareFn, webhookCallback } from 'grammy';
 import { autoChatAction, AutoChatActionFlavor } from 'grammy-auto-chat-action';
 import TelegramService from '@/service/TelegramService.ts';
 import { clearChatHistory } from '@/repository/ChatRepository.ts';
 import { modelCommands } from '@/config/models.ts';
-import { adminHelpMessage, adminKeyboard, userHelpMessage, userKeyboard } from '@/config/KeyboardConfig.ts';
+import { aboutMessage, adminHelpMessage, adminKeyboard, settingsKeyboard, userHelpMessage, userKeyboard } from '@/config/KeyboardConfig.ts';
 
 import '@/prototype/StringExtensionPrototype.ts';
 import '@/prototype/ContextExtensionPrototype.ts';
@@ -54,6 +54,7 @@ function registerBotCommands() {
 	);
 	BOT.command('usage', (ctx) => TelegramService.getUsage(ctx));
 	BOT.command('clear', (ctx) => clearChatHistoryHandler(ctx));
+	BOT.command('settings', (ctx) => ctx.reply('⚙️ Configurações', { reply_markup: settingsKeyboard }));
 
 	BOT.hears(
 		/^(oss|cloudflareImage|image):/gi,
@@ -109,6 +110,35 @@ function registerBotCommands() {
 
 	BOT.callbackQuery('/clear', async (ctx) => {
 		await clearChatHistoryHandler(ctx);
+		ctx.answerCallbackQuery();
+	});
+
+	BOT.callbackQuery('/notifications', async (ctx) => {
+		await ctx.reply('🔔 *Notificações*\n\nFuncionalidade em desenvolvimento\\.', {
+			parse_mode: 'MarkdownV2',
+			reply_markup: new InlineKeyboard().text('↩️ Configurações', '/back_settings'),
+		});
+		ctx.answerCallbackQuery();
+	});
+
+	BOT.callbackQuery('/appearance', async (ctx) => {
+		await ctx.reply('🎨 *Aparência*\n\nFuncionalidade em desenvolvimento\\.', {
+			parse_mode: 'MarkdownV2',
+			reply_markup: new InlineKeyboard().text('↩️ Configurações', '/back_settings'),
+		});
+		ctx.answerCallbackQuery();
+	});
+
+	BOT.callbackQuery('/about', async (ctx) => {
+		await ctx.reply(aboutMessage, {
+			parse_mode: 'MarkdownV2',
+			reply_markup: new InlineKeyboard().text('↩️ Configurações', '/back_settings'),
+		});
+		ctx.answerCallbackQuery();
+	});
+
+	BOT.callbackQuery('/back_settings', async (ctx) => {
+		await ctx.reply('⚙️ Configurações', { reply_markup: settingsKeyboard });
 		ctx.answerCallbackQuery();
 	});
 
