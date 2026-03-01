@@ -26,6 +26,10 @@ const APP = new Application();
 
 APP.use(oakCors());
 
+function replySettings(ctx: MyContext) {
+	return ctx.reply('⚙️ Configurações', { reply_markup: settingsKeyboard });
+}
+
 /**
  * Register bot commands and handlers
  */
@@ -54,7 +58,7 @@ function registerBotCommands() {
 	);
 	BOT.command('usage', (ctx) => TelegramService.getUsage(ctx));
 	BOT.command('clear', (ctx) => clearChatHistoryHandler(ctx));
-	BOT.command('settings', (ctx) => ctx.reply('⚙️ Configurações', { reply_markup: settingsKeyboard }));
+	BOT.command('settings', (ctx) => replySettings(ctx));
 
 	BOT.hears(
 		/^(oss|cloudflareImage|image):/gi,
@@ -113,33 +117,51 @@ function registerBotCommands() {
 		ctx.answerCallbackQuery();
 	});
 
+	const backToSettingsKeyboard = new InlineKeyboard().text('↩️ Configurações', '/back_settings');
+
 	BOT.callbackQuery('/notifications', async (ctx) => {
-		await ctx.reply('🔔 *Notificações*\n\nFuncionalidade em desenvolvimento\\.', {
-			parse_mode: 'MarkdownV2',
-			reply_markup: new InlineKeyboard().text('↩️ Configurações', '/back_settings'),
-		});
-		ctx.answerCallbackQuery();
+		try {
+			await ctx.editMessageText('🔔 *Notificações*\n\nFuncionalidade em desenvolvimento\\.', {
+				parse_mode: 'MarkdownV2',
+				reply_markup: backToSettingsKeyboard,
+			});
+			ctx.answerCallbackQuery();
+		} catch {
+			ctx.answerCallbackQuery('Erro ao exibir notificações');
+		}
 	});
 
 	BOT.callbackQuery('/appearance', async (ctx) => {
-		await ctx.reply('🎨 *Aparência*\n\nFuncionalidade em desenvolvimento\\.', {
-			parse_mode: 'MarkdownV2',
-			reply_markup: new InlineKeyboard().text('↩️ Configurações', '/back_settings'),
-		});
-		ctx.answerCallbackQuery();
+		try {
+			await ctx.editMessageText('🎨 *Aparência*\n\nFuncionalidade em desenvolvimento\\.', {
+				parse_mode: 'MarkdownV2',
+				reply_markup: backToSettingsKeyboard,
+			});
+			ctx.answerCallbackQuery();
+		} catch {
+			ctx.answerCallbackQuery('Erro ao exibir aparência');
+		}
 	});
 
 	BOT.callbackQuery('/about', async (ctx) => {
-		await ctx.reply(aboutMessage, {
-			parse_mode: 'MarkdownV2',
-			reply_markup: new InlineKeyboard().text('↩️ Configurações', '/back_settings'),
-		});
-		ctx.answerCallbackQuery();
+		try {
+			await ctx.editMessageText(aboutMessage, {
+				parse_mode: 'MarkdownV2',
+				reply_markup: backToSettingsKeyboard,
+			});
+			ctx.answerCallbackQuery();
+		} catch {
+			ctx.answerCallbackQuery('Erro ao exibir informações');
+		}
 	});
 
 	BOT.callbackQuery('/back_settings', async (ctx) => {
-		await ctx.reply('⚙️ Configurações', { reply_markup: settingsKeyboard });
-		ctx.answerCallbackQuery();
+		try {
+			await ctx.editMessageText('⚙️ Configurações', { reply_markup: settingsKeyboard });
+			ctx.answerCallbackQuery();
+		} catch {
+			ctx.answerCallbackQuery('Erro ao voltar às configurações');
+		}
 	});
 
 	BOT.callbackQuery('/currentmodel', async (ctx) => {
