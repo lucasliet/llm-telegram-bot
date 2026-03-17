@@ -55,6 +55,11 @@ export const zaiModels = {
 	standard: 'glm-4.7',
 };
 
+export const groqModels = {
+	llama: 'meta-llama/llama-4-scout-17b-16e-instruct',
+	oss: 'openai/gpt-oss-120b',
+};
+
 /**
  * Type definitions
  */

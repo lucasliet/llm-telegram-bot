@@ -13,6 +13,7 @@ import {
 	handleFala,
 	handleGemini,
 	handleGithubCopilot,
+	handleGroq,
 	handleOpenAI,
 	handleOpenRouter,
 	handleOpenWebUI,
@@ -215,8 +216,8 @@ Interações Premium:
 		const modelHandlers: Record<ModelCommand, () => Promise<void>> = {
 			'/polli': () => handlePollinations(ctx, `polli: ${message}`),
 			'/gpt': () => handleGithubCopilot(ctx, `gpt: ${message}`),
-			'/oss': () => handleCloudflare(ctx, `oss: ${message}`),
-			'/llama': () => handleOpenRouter(ctx, `llama: ${message!}`),
+			'/oss': () => handleGroq(ctx, `oss: ${message}`),
+			'/llama': () => handleGroq(ctx, `llama: ${message!}`),
 			'/gemini': () => handleVertex(ctx, `gemini: ${message}`),
 			'/geminiPro': () => handleVertex(ctx, `geminiPro: ${message}`),
 			'/antigravity': () => handleAntigravity(ctx, `antigravity: ${message}`),
@@ -275,6 +276,9 @@ Interações Premium:
 	},
 	callZaiModel(ctx: Context, commandMessage?: string): Promise<void> {
 		return handleZai(ctx, commandMessage);
+	},
+	callGroqModel(ctx: Context, commandMessage?: string): Promise<void> {
+		return handleGroq(ctx, commandMessage);
 	},
 };
 
