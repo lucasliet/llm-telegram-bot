@@ -1,11 +1,11 @@
 export const geminiModels = {
-	geminiPro: 'gemini-2.5-pro',
-	geminiFlash: 'gemini-2.5-flash-lite',
+	geminiPro: 'gemini-3.1-pro-preview',
+	geminiFlash: 'gemini-3.1-flash-lite-preview',
 };
 
 export const antigravityModels = {
 	geminiFlash: 'gemini-3-flash',
-	geminiPro: 'gemini-3-pro-preview',
+	geminiPro: 'gemini-3.1-pro-preview',
 };
 
 export const perplexityModels = {
