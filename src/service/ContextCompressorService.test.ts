@@ -8,28 +8,37 @@ Deno.test("ContextCompressorService.compressHistory should use the correct promp
     { role: 'assistant', content: "Olá Lucas!" },
     { role: 'user', content: "Gosto de TypeScript." },
   ];
-  const model = "gpt-4o";
   const mockResponseContent = "- Lucas gosta de TypeScript.";
 
-  const mockOpenAi = {
-    chat: {
-      completions: {
-        create: (params: any) => {
-          assertEquals(params.model, model);
-          const content = params.messages[0].content;
-          assertStringIncludes(content, "You are an expert context compressor");
-          assertStringIncludes(content, "Output the summary in Portuguese (pt-BR)");
-          assertStringIncludes(content, "Oi, meu nome é Lucas.");
+  const mockService = {
+    generateText: async (_userKey: string, _quote: string, prompt: string) => {
+      assertStringIncludes(prompt, "You are an expert context compressor");
+      assertStringIncludes(prompt, "Output the summary in Portuguese (pt-BR)");
+      assertStringIncludes(prompt, "Oi, meu nome é Lucas.");
 
-          return Promise.resolve({
-            choices: [{ message: { content: mockResponseContent } }]
-          });
-        }
-      }
-    }
-  } as unknown as OpenAi;
+      const encoder = new TextEncoder();
+      const chunk = JSON.stringify({ choices: [{ delta: { content: mockResponseContent } }] });
+      const stream = new ReadableStream<Uint8Array>({
+        start(controller) {
+          controller.enqueue(encoder.encode(chunk + "\n"));
+          controller.close();
+        },
+      });
 
-  const result = await ContextCompressorService.compressHistory(history, model, mockOpenAi);
+      return {
+        reader: stream.getReader(),
+        responseMap: (body: string) => {
+          try {
+            return JSON.parse(body).choices[0]?.delta?.content || "";
+          } catch {
+            return "";
+          }
+        },
+      };
+    },
+  };
+
+  const result = await ContextCompressorService.compressHistory(history, mockService as any, 'test-user-key');
 
   assertEquals(result.role, 'assistant');
   assertEquals((result as any).content, `[Resumo do contexto anterior]\n${mockResponseContent}`);

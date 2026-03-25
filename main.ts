@@ -4,6 +4,7 @@ import { Bot, Context, type MiddlewareFn, webhookCallback } from 'grammy';
 import { autoChatAction, AutoChatActionFlavor } from 'grammy-auto-chat-action';
 import TelegramService from '@/service/TelegramService.ts';
 import { clearChatHistory } from '@/repository/ChatRepository.ts';
+import { handleCompress } from '@/handlers/CompressHandler.ts';
 import { modelCommands } from '@/config/models.ts';
 import { adminHelpMessage, adminKeyboard, userHelpMessage, userKeyboard } from '@/config/KeyboardConfig.ts';
 
@@ -54,6 +55,7 @@ function registerBotCommands() {
 	);
 	BOT.command('usage', (ctx) => TelegramService.getUsage(ctx));
 	BOT.command('clear', (ctx) => clearChatHistoryHandler(ctx));
+	BOT.command('compress', (ctx) => handleCompress(ctx));
 
 	BOT.hears(
 		/^(oss|llama):/gi,
