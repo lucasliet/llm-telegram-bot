@@ -217,8 +217,8 @@ export default {
 
 		for (const fileData of fileDataList) {
 			try {
-				const fileContent = await fileData.content;
-				const file = new File([fileContent], fileData.fileName, {
+			const fileContent = new Uint8Array(await fileData.content);
+			const file = new File([fileContent], fileData.fileName, {
 					type: 'application/octet-stream',
 				});
 				formData.append('files', file);

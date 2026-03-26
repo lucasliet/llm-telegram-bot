@@ -9,7 +9,7 @@ export default {
 	 * @returns Transcribed text
 	 */
 	async transcribeAudio(audioFile: Promise<Uint8Array>): Promise<string> {
-		const audioData = await audioFile;
+		const audioData = new Uint8Array(await audioFile);
 		const formData = new FormData();
 
 		const file = new Blob([audioData], { type: 'audio/mpeg' });
