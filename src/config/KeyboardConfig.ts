@@ -18,8 +18,8 @@ const adminCommandButtons = [
 		['Gemini 3 Pro', '/antigeminipro'],
 	],
 	[
-		['GLM 4.7', '/glm'],
-		['GLM 4.7 Flash', '/glmflash'],
+		['GLM 5 Turbo', '/glm'],
+		['GLM 4.7 Flash X', '/glmflash'],
 	],
 	[['Limpar Histórico', '/clear']],
 ];
