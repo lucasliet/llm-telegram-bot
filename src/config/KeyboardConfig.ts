@@ -19,7 +19,7 @@ const adminCommandButtons = [
 	],
 	[
 		['GLM 5 Turbo', '/glm'],
-		['GLM 4.7 Flash X', '/glmflash'],
+		['GLM 4.7 Flash', '/glmflash'],
 	],
 	[['Limpar Histórico', '/clear']],
 ];

@@ -55,7 +55,10 @@ function registerBotCommands() {
 	);
 	BOT.command('usage', (ctx) => TelegramService.getUsage(ctx));
 	BOT.command('clear', (ctx) => clearChatHistoryHandler(ctx));
-	BOT.command('compress', (ctx) => handleCompress(ctx));
+	BOT.command('compress', (ctx) => {
+	  console.log('Compress command received');
+	  new Promise((resolve) => handleCompress(ctx).then(resolve))
+	});
 
 	BOT.hears(
 		/^(oss|llama):/gi,
