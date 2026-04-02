@@ -51,8 +51,8 @@ export const openWebUiModels = {
 };
 
 export const zaiModels = {
-	flash: 'glm-4.7-flash',
-	standard: 'glm-5-turbo',
+	flash: 'glm-5-turbo',
+	standard: 'glm-5.1',
 };
 
 export const groqModels = {
