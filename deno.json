@@ -41,6 +41,8 @@
 		"strict": true
 	},
 	"deploy": {
+		"org": "lucasliet",
+		"app": "llm-telegram-bot",
 		"runtime": {
 			"type": "dynamic",
 			"entrypoint": "./main.ts"
