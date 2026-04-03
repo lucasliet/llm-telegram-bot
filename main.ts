@@ -218,7 +218,7 @@ async function initializeApp() {
 		});
 
 		APP.use(webhookCallback(BOT, 'oak'));
-		APP.listen({ port: getPort() });
+		await APP.listen({ port: getPort() });
 	} else {
 		BOT.start();
 	}
