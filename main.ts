@@ -14,15 +14,14 @@ import '@/prototype/ReadableStreamDefaultReaderPrototype.ts';
 import { AntigravityAuth } from '@/scripts/AntigravityAuth.ts';
 import { CopilotAuth } from '@/scripts/CopilotAuth.ts';
 
-const TOKEN: string = Deno.env.get('BOT_TOKEN') as string;
-const PORT: number = parseInt(Deno.env.get('PORT') as string) || 3333;
-const ADMIN_USER_IDS: number[] = (Deno.env.get('ADMIN_USER_IDS') as string)
+const getToken = () => Deno.env.get('BOT_TOKEN') as string;
+const getPort = () => parseInt(Deno.env.get('PORT') as string) || 3333;
+const getAdminUserIds = () => (Deno.env.get('ADMIN_USER_IDS') as string)
 	.split('|').map((id) => parseInt(id));
 
 type MyContext = Context & AutoChatActionFlavor;
 
-const BOT = new Bot<MyContext>(TOKEN);
-BOT.use(autoChatAction() as unknown as MiddlewareFn<MyContext>);
+let BOT: Bot<MyContext>;
 const APP = new Application();
 
 APP.use(oakCors());
@@ -37,7 +36,7 @@ function registerBotCommands() {
 	);
 	BOT.command('help', (ctx) => {
 		const userId = ctx.from?.id;
-		const isAdmin = ADMIN_USER_IDS.includes(userId!);
+		const isAdmin = getAdminUserIds().includes(userId!);
 
 		const keyboard = isAdmin ? adminKeyboard : userKeyboard;
 		const message = isAdmin ? adminHelpMessage : userHelpMessage;
@@ -51,7 +50,7 @@ function registerBotCommands() {
 	);
 	BOT.command(
 		'adminIds',
-		async (ctx) => ADMIN_USER_IDS.includes(ctx.from?.id!) && ctx.reply((await TelegramService.getAdminIds(ctx)).join('|')),
+		async (ctx) => getAdminUserIds().includes(ctx.from?.id!) && ctx.reply((await TelegramService.getAdminIds(ctx)).join('|')),
 	);
 	BOT.command('usage', (ctx) => TelegramService.getUsage(ctx));
 	BOT.command('clear', (ctx) => clearChatHistoryHandler(ctx));
@@ -207,6 +206,9 @@ async function initializeApp() {
 		return;
 	}
 
+	BOT = new Bot<MyContext>(getToken());
+	BOT.use(autoChatAction() as unknown as MiddlewareFn<MyContext>);
+
 	registerBotCommands();
 	configureMiddleware();
 
@@ -216,7 +218,7 @@ async function initializeApp() {
 		});
 
 		APP.use(webhookCallback(BOT, 'oak'));
-		APP.listen({ port: PORT });
+		APP.listen({ port: getPort() });
 	} else {
 		BOT.start();
 	}

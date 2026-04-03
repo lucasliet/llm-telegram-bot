@@ -5,7 +5,7 @@ import OpenAI from 'openai';
 import { getChatHistory, addContentToChatHistory } from '@/repository/ChatRepository.ts';
 import { getSystemPrompt, StreamReplyResponse } from '@/util/ChatConfigUtil.ts';
 
-const GEMINI_API_KEY = Deno.env.get('GEMINI_API_KEY') as string;
+const getGeminiApiKey = () => Deno.env.get('GEMINI_API_KEY') as string;
 
 /**
  * GeminiService - Provides text and image generation using Gemini models
@@ -21,7 +21,7 @@ export default class GeminiService {
 	constructor(model: string) {
 		this.model = model;
 		this.googleAI = createGoogleGenerativeAI({
-			apiKey: GEMINI_API_KEY,
+			apiKey: getGeminiApiKey(),
 		});
 	}
 

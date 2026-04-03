@@ -3,9 +3,9 @@ import OpenAiService from './OpenAIService.ts';
 import { StreamReplyResponse } from '@/util/ChatConfigUtil.ts';
 import { decodeBase64 } from 'base64';
 
-const VERTEX_CREDENTIALS_BASE64 = Deno.env.get('VERTEX_CREDENTIALS_BASE64') as string;
-const VERTEX_PROJECT_ID = Deno.env.get('VERTEX_PROJECT_ID') as string;
-const VERTEX_LOCATION = Deno.env.get('VERTEX_LOCATION') || 'us-central1';
+const getVertexCredentialsBase64 = () => Deno.env.get('VERTEX_CREDENTIALS_BASE64') as string;
+const getVertexProjectId = () => Deno.env.get('VERTEX_PROJECT_ID') as string;
+const getVertexLocation = () => Deno.env.get('VERTEX_LOCATION') || 'us-central1';
 
 /**
  * Gets access token using refresh token (ADC credentials from gcloud CLI)
@@ -91,7 +91,7 @@ async function getAccessTokenFromServiceAccount(credentials: {
  * Supports both ADC (refresh token) and service account (private key) formats.
  */
 function getAccessToken(): Promise<string> {
-	const credentials = JSON.parse(new TextDecoder().decode(decodeBase64(VERTEX_CREDENTIALS_BASE64)));
+	const credentials = JSON.parse(new TextDecoder().decode(decodeBase64(getVertexCredentialsBase64())));
 
 	if (credentials.refresh_token) {
 		return getAccessTokenFromRefreshToken(credentials);
@@ -105,7 +105,7 @@ function getAccessToken(): Promise<string> {
 }
 
 function getBaseUrl(): string {
-	return `https://aiplatform.googleapis.com/v1/projects/${VERTEX_PROJECT_ID}/locations/${VERTEX_LOCATION}/endpoints/openapi`;
+	return `https://aiplatform.googleapis.com/v1/projects/${getVertexProjectId()}/locations/${getVertexLocation()}/endpoints/openapi`;
 }
 
 export default class VertexAiService extends OpenAiService {

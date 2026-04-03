@@ -1,7 +1,7 @@
 import { ANTIGRAVITY_CLIENT_ID, ANTIGRAVITY_CLIENT_SECRET, ANTIGRAVITY_ENDPOINTS, type AntigravityConfig } from './AntigravityTypes.ts';
 
-const ANTIGRAVITY_REFRESH_TOKEN = Deno.env.get('ANTIGRAVITY_REFRESH_TOKEN') as string;
-const ANTIGRAVITY_PROJECT_ID = Deno.env.get('ANTIGRAVITY_PROJECT_ID') || '';
+const getAntigravityRefreshToken = () => Deno.env.get('ANTIGRAVITY_REFRESH_TOKEN') as string;
+const getAntigravityProjectId = () => Deno.env.get('ANTIGRAVITY_PROJECT_ID') || '';
 
 /**
  * Manages OAuth2 token lifecycle for Antigravity API access.
@@ -13,9 +13,9 @@ export class AntigravityTokenManager {
 
 	private constructor() {
 		this.config = {
-			refreshToken: ANTIGRAVITY_REFRESH_TOKEN,
+			refreshToken: getAntigravityRefreshToken(),
 			accessToken: '',
-			projectId: ANTIGRAVITY_PROJECT_ID,
+			projectId: getAntigravityProjectId(),
 			expiresAt: 0,
 		};
 	}

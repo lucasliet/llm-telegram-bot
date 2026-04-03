@@ -7,10 +7,10 @@ import { downloadTelegramFile } from './TelegramService.ts';
 import ToolUsageAdapter from '../adapter/ToolUsageAdapter.ts';
 import { encodeBase64 } from 'base64';
 
-const CLOUDFLARE_ACCOUNT_ID: string = Deno.env.get(
+const getCloudflareAccountId = () => Deno.env.get(
 	'CLOUDFLARE_ACCOUNT_ID',
 ) as string;
-const CLOUDFLARE_API_KEY: string = Deno.env.get('CLOUDFLARE_API_KEY') as string;
+const getCloudflareApiKey = () => Deno.env.get('CLOUDFLARE_API_KEY') as string;
 
 const {
 	imageModel,
@@ -25,7 +25,7 @@ const REQUEST_OPTIONS = {
 	method: 'POST',
 	headers: {
 		'Content-Type': 'application/json',
-		'Authorization': `Bearer ${CLOUDFLARE_API_KEY}`,
+		'Authorization': `Bearer ${getCloudflareApiKey()}`,
 	},
 };
 
@@ -54,7 +54,7 @@ export default {
 		const photoBinaryArray = await downloadTelegramFile(await photoUrl);
 
 		const apiResponse = await fetch(
-			`https://api.cloudflare.com/client/v4/accounts/${CLOUDFLARE_ACCOUNT_ID}/ai/run/${visionTextModel}`,
+			`https://api.cloudflare.com/client/v4/accounts/${getCloudflareAccountId()}/ai/run/${visionTextModel}`,
 			{
 				...REQUEST_OPTIONS,
 				body: JSON.stringify({
@@ -110,7 +110,7 @@ export default {
 		const tools = mapChatToolsToResponsesTools(ToolService.schemas);
 
 		const apiResponse = await fetch(
-			`https://api.cloudflare.com/client/v4/accounts/${CLOUDFLARE_ACCOUNT_ID}/ai/v1/responses`,
+			`https://api.cloudflare.com/client/v4/accounts/${getCloudflareAccountId()}/ai/v1/responses`,
 			{
 				...REQUEST_OPTIONS,
 				body: JSON.stringify({
@@ -150,7 +150,7 @@ export default {
 	 */
 	async generateImage(prompt: string): Promise<Uint8Array> {
 		const response = await fetch(
-			`https://api.cloudflare.com/client/v4/accounts/${CLOUDFLARE_ACCOUNT_ID}/ai/run/${imageModel}`,
+			`https://api.cloudflare.com/client/v4/accounts/${getCloudflareAccountId()}/ai/run/${imageModel}`,
 			{
 				...REQUEST_OPTIONS,
 				body: `{"prompt": "${escapeMessageQuotes(prompt)}"}`,
@@ -159,7 +159,7 @@ export default {
 
 		if (!response.ok) {
 			console.error(
-				`https://api.cloudflare.com/client/v4/accounts/${CLOUDFLARE_ACCOUNT_ID}/ai/run/${imageModel}`,
+				`https://api.cloudflare.com/client/v4/accounts/${getCloudflareAccountId()}/ai/run/${imageModel}`,
 				{
 					...REQUEST_OPTIONS,
 					body: `{"prompt": "${escapeMessageQuotes(prompt)}"}`,
@@ -184,11 +184,11 @@ export default {
 		const base64Audio = encodeBase64(audioData);
 
 		const response = await fetch(
-			`https://api.cloudflare.com/client/v4/accounts/${CLOUDFLARE_ACCOUNT_ID}/ai/run/${sttModel}`,
+			`https://api.cloudflare.com/client/v4/accounts/${getCloudflareAccountId()}/ai/run/${sttModel}`,
 			{
 				method: 'POST',
 				headers: {
-					'Authorization': `Bearer ${CLOUDFLARE_API_KEY}`,
+					'Authorization': `Bearer ${getCloudflareApiKey()}`,
 					'Content-Type': 'application/json',
 				},
 				body: JSON.stringify({ audio: base64Audio }),
@@ -229,11 +229,11 @@ export default {
 		}
 
 		const response = await fetch(
-			`https://api.cloudflare.com/client/v4/accounts/${CLOUDFLARE_ACCOUNT_ID}/ai/tomarkdown`,
+			`https://api.cloudflare.com/client/v4/accounts/${getCloudflareAccountId()}/ai/tomarkdown`,
 			{
 				method: 'POST',
 				headers: {
-					Authorization: `Bearer ${CLOUDFLARE_API_KEY}`,
+					Authorization: `Bearer ${getCloudflareApiKey()}`,
 				},
 				body: formData,
 			},
@@ -300,7 +300,7 @@ function responseMap(responseBody: string): string {
 async function generateFollowup(messages: any[], model: string): Promise<ReadableStreamDefaultReader<Uint8Array>> {
 	const modifiedMessages = ToolUsageAdapter.modifyMessagesWithToolInfo(messages);
 	const followResp = await fetch(
-		`https://api.cloudflare.com/client/v4/accounts/${CLOUDFLARE_ACCOUNT_ID}/ai/v1/responses`,
+		`https://api.cloudflare.com/client/v4/accounts/${getCloudflareAccountId()}/ai/v1/responses`,
 		{
 			...REQUEST_OPTIONS,
 			body: JSON.stringify({

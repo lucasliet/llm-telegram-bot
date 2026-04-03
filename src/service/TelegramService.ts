@@ -26,8 +26,8 @@ import {
 import { FileUtils } from '@/util/FileUtils.ts';
 import GithubCopilotService from './openai/GithubCopilotService.ts';
 
-const TOKEN = Deno.env.get('BOT_TOKEN') as string;
-const ADMIN_USER_IDS: number[] = (Deno.env.get('ADMIN_USER_IDS') as string)
+const getToken = () => Deno.env.get('BOT_TOKEN') as string;
+const getAdminUserIds = () => (Deno.env.get('ADMIN_USER_IDS') as string)
 	.split('|')
 	.map((id) => parseInt(id));
 
@@ -49,7 +49,7 @@ export default {
 	 */
 	setWebhook(): Promise<Response> {
 		console.log('Setting webhook...');
-		return fetch(`https://api.telegram.org/bot${TOKEN}/setWebhook`, {
+		return fetch(`https://api.telegram.org/bot${getToken()}/setWebhook`, {
 			method: 'POST',
 			headers: {
 				'Content-Type': 'application/json',
@@ -70,7 +70,7 @@ export default {
 		modelCallFunction: (ctx: Context) => Promise<void>,
 	): void {
 		const userId = ctx.from?.id;
-		if (userId && ADMIN_USER_IDS.includes(userId)) {
+		if (userId && getAdminUserIds().includes(userId)) {
 			this.callModel(ctx, modelCallFunction);
 		} else {
 			this.callModel(ctx, this.replyTextContent);
@@ -117,7 +117,7 @@ export default {
 	 */
 	async getUsage(ctx: Context): Promise<any> {
 		const { userId } = await ctx.extractContextKeys();
-		if (!userId || !ADMIN_USER_IDS.includes(userId)) return;
+		if (!userId || !getAdminUserIds().includes(userId)) return;
 
 		const data = await getUsage();
 
@@ -168,7 +168,7 @@ Interações Premium:
 	 */
 	async getAdminIds(ctx: Context): Promise<number[]> {
 		const { userId } = await ctx.extractContextKeys();
-		if (userId && ADMIN_USER_IDS.includes(userId)) return ADMIN_USER_IDS;
+		if (userId && getAdminUserIds().includes(userId)) return getAdminUserIds();
 		return [];
 	},
 
@@ -197,7 +197,7 @@ Interações Premium:
 		const command = (message || ctx.callbackQuery?.data) as ModelCommand;
 
 		const isValidCommand = modelCommands.includes(command);
-		const isAuthorizedUser = (userId && ADMIN_USER_IDS.includes(userId)) || WHITELISTED_MODELS.includes(command);
+		const isAuthorizedUser = (userId && getAdminUserIds().includes(userId)) || WHITELISTED_MODELS.includes(command);
 
 		if (!isValidCommand || !isAuthorizedUser) return;
 
