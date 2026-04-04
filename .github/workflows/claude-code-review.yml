@@ -19,6 +19,10 @@ jobs:
       issues: read
       id-token: write
 
+    env:
+      ANTHROPIC_BASE_URL: https://api.z.ai/api/anthropic
+      API_TIMEOUT_MS: "3000000"
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -50,11 +54,11 @@ jobs:
         id: set-model
         run: |
           if [ "${{ steps.check-previous-review.outcome }}" == "success" ]; then
-            echo "AI_MODEL=claude-haiku-4-5" >> $GITHUB_OUTPUT
-            echo "Usando claude-haiku-4-5 (review de acompanhamento)"
+            echo "AI_MODEL=glm-5-turbo" >> $GITHUB_OUTPUT
+            echo "Usando glm-5-turbo (review de acompanhamento)"
           else
-            echo "AI_MODEL=claude-sonnet-4-5" >> $GITHUB_OUTPUT
-            echo "Usando claude-sonnet-4-5 (primeira review ou fallback)"
+            echo "AI_MODEL=glm-5.1" >> $GITHUB_OUTPUT
+            echo "Usando glm-5.1 (primeira review ou fallback)"
           fi
 
       - name: Run Claude Code Review
@@ -63,7 +67,7 @@ jobs:
         with:
           plugin_marketplaces: 'https://github.com/anthropics/claude-code.git'
           plugins: 'code-review@claude-code-plugins'
-          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          anthropic_api_key: ${{ secrets.ZAI_API_KEY }}
           prompt: |
             REPO: ${{ github.repository }}
             PR NUMBER: ${{ github.event.pull_request.number }}
