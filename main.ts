@@ -218,7 +218,11 @@ async function initializeApp() {
 		});
 
 		APP.use(webhookCallback(BOT, 'oak'));
-		APP.listen({ port: getPort() });
+		
+		Deno.serve(async (req) => {
+			const response = await APP.handle(req);
+			return response ?? new Response('Not Found', { status: 404 });
+		});
 	} else {
 		BOT.start();
 	}
