@@ -49,13 +49,14 @@ export default {
 	 */
 	setWebhook(): Promise<Response> {
 		console.log('Setting webhook...');
+		const serverUrl = Deno.env.get('SERVER_URL') || 'https://llm-telegram-bot.lucasliet.deno.net/webhook';
 		return fetch(`https://api.telegram.org/bot${getToken()}/setWebhook`, {
 			method: 'POST',
 			headers: {
 				'Content-Type': 'application/json',
 			},
 			body: JSON.stringify({
-				url: 'https://llm-telegram-bot.deno.dev/webhook',
+				url: serverUrl,
 			}),
 		});
 	},

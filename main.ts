@@ -1,6 +1,6 @@
-import { Application } from 'oak';
-import { oakCors } from 'oak-cors';
-import { Bot, Context, type MiddlewareFn, webhookCallback } from 'grammy';
+import { Hono } from 'hono';
+import { cors } from 'hono/cors';
+import { Bot, Context, type MiddlewareFn } from 'grammy';
 import { autoChatAction, AutoChatActionFlavor } from 'grammy-auto-chat-action';
 import TelegramService from '@/service/TelegramService.ts';
 import { clearChatHistory } from '@/repository/ChatRepository.ts';
@@ -22,9 +22,9 @@ const getAdminUserIds = () => (Deno.env.get('ADMIN_USER_IDS') as string)
 type MyContext = Context & AutoChatActionFlavor;
 
 let BOT: Bot<MyContext>;
-const APP = new Application();
+const APP = new Hono();
 
-APP.use(oakCors());
+APP.use('*', cors());
 
 /**
  * Register bot commands and handlers
@@ -140,44 +140,25 @@ function registerBotCommands() {
  * Configure application middleware
  */
 function configureMiddleware() {
-	APP.use(async (ctx, next) => {
+	APP.use('*', async (c, next) => {
 		const start = Date.now();
 		await next();
 		const ms = Date.now() - start;
-		console.log(`${ctx.request.method} ${ctx.request.url} - ${ms}ms`);
+		console.log(`${c.req.method} ${c.req.url} - ${ms}ms`);
 	});
 
-	APP.use(async (ctx, next) => {
-		if (ctx.request.url.pathname === '/robots.txt') {
-			try {
-				const robotsTxt = await Deno.readTextFile('./static/robots.txt');
-				ctx.response.headers.set('Content-Type', 'text/plain');
-				ctx.response.body = robotsTxt;
-			} catch {
-				ctx.response.status = 200;
-				ctx.response.headers.set('Content-Type', 'text/plain');
-				ctx.response.body = 'User-agent: *\nDisallow: /';
-			}
-			return;
-		}
-		await next();
-	});
-
-	APP.use(async (ctx, next) => {
+	APP.get('/robots.txt', async (c) => {
 		try {
-			if (ctx.request.url.pathname !== '/webhook') {
-				ctx.response.status = 200;
-				ctx.response.body = 'Use with https://t.me/llm_gemini_bot';
-				TelegramService.setWebhook();
-				return;
-			}
-			await next();
-		} catch (err) {
-			ctx.response.status = 500;
-			ctx.response.body = {
-				message: err instanceof Error ? err.message : 'Unknown error occurred',
-			};
+			const robotsTxt = await Deno.readTextFile('./static/robots.txt');
+			return c.text(robotsTxt, 200, { 'Content-Type': 'text/plain' });
+		} catch {
+			return c.text('User-agent: *\nDisallow: /', 200, { 'Content-Type': 'text/plain' });
 		}
+	});
+
+	APP.get('*', (c) => {
+		TelegramService.setWebhook();
+		return c.text('Use with https://t.me/llm_gemini_bot');
 	});
 }
 
@@ -208,6 +189,7 @@ async function initializeApp() {
 
 	BOT = new Bot<MyContext>(getToken());
 	BOT.use(autoChatAction() as unknown as MiddlewareFn<MyContext>);
+	await BOT.init();
 
 	registerBotCommands();
 	configureMiddleware();
@@ -217,12 +199,24 @@ async function initializeApp() {
 			await TelegramService.setWebhook();
 		});
 
-		APP.use(webhookCallback(BOT, 'oak'));
-		
-		Deno.serve(async (req) => {
-			const response = await APP.handle(req);
-			return response ?? new Response('Not Found', { status: 404 });
+		APP.post('/webhook', async (c) => {
+			let update;
+			try {
+				update = await c.req.json();
+			} catch (err) {
+				console.error('[WEBHOOK] Failed to parse body:', err);
+				return c.json({ ok: false, error: 'invalid body' }, 400);
+			}
+
+			try {
+				await BOT.handleUpdate(update);
+			} catch (err) {
+				console.error('[WEBHOOK] BOT.handleUpdate error:', err);
+			}
+			return c.json({ ok: true });
 		});
+
+		Deno.serve(APP.fetch);
 	} else {
 		BOT.start();
 	}

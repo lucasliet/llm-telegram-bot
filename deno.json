@@ -17,8 +17,8 @@
 		"grammy-auto-chat-action": "https://deno.land/x/grammy_auto_chat_action@v0.1.1/mod.ts",
 		"grammy-auto-chat-action-types": "https://deno.land/x/grammy_auto_chat_action@v0.1.1/types.ts",
 		"grammy-types": "https://deno.land/x/grammy@v1.17.2/types.deno.ts",
-		"oak": "jsr:@oak/oak",
-		"oak-cors": "https://deno.land/x/cors@v1.2.2/mod.ts",
+		"hono": "jsr:@hono/hono",
+		"hono/cors": "jsr:@hono/hono/cors",
 		"textcompress": "jsr:@lucasliet/textcompress",
 		"openai": "npm:openai@5.16.0",
 		"base64": "jsr:@std/encoding/base64",
@@ -42,10 +42,6 @@
 	},
 	"deploy": {
 		"org": "lucasliet",
-		"app": "llm-telegram-bot",
-		"runtime": {
-			"type": "dynamic",
-			"entrypoint": "./main.ts"
-		}
+		"app": "llm-telegram-bot"
 	}
 }
