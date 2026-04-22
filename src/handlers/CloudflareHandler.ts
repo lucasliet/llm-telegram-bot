@@ -30,16 +30,19 @@ export async function handleCloudflare(
 	const message = commandMessage || contextMessage;
 	const cloudflareCommand = message!.split(':')[0].toLowerCase();
 
-	if (cloudflareCommand === 'oss') {
-		const response = await CloudFlareService
-			.generateText(
-				userKey,
-				quote,
-				message!.replace('oss:', ''),
-			);
+	if (cloudflareCommand === 'kimi') {
+		const prompt = message!.replace(/^kimi:\s*/i, '');
+		const response = await CloudFlareService.generateText(
+			userKey,
+			quote,
+			prompt,
+		);
 
 		ctx.streamReply(response);
-	} else if (cloudflareCommand === 'cloudflareimage' || cloudflareCommand === 'image') {
+		return;
+	}
+
+	if (cloudflareCommand === 'cloudflareimage' || cloudflareCommand === 'image') {
 		ctx.chatAction = 'upload_photo';
 		ctx.replyWithPhoto(
 			new InputFile(

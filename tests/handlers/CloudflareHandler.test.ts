@@ -11,9 +11,9 @@ function createCtx(msg: string) {
 	};
 }
 
-Deno.test('CloudflareHandler routes to text generation', async () => {
+Deno.test('CloudflareHandler routes kimi text command to generateText', async () => {
 	const restore = setupKvStub();
-	const ctx: any = createCtx('oss: hello');
+	const ctx: any = createCtx('kimi: hello');
 	await import('../../src/service/TelegramService.ts');
 	const mod = await import('../../src/handlers/CloudflareHandler.ts');
 	const svc = await import('../../src/service/CloudFlareService.ts');
@@ -22,6 +22,7 @@ Deno.test('CloudflareHandler routes to text generation', async () => {
 	);
 	await mod.handleCloudflare(ctx);
 	assertEquals(ctx.streamReply.calls.length, 1);
+	assertEquals((svc.default as any).generateText.calls.length, 1);
 	restore();
 });
 

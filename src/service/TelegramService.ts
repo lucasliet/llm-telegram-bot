@@ -218,6 +218,7 @@ Interações Premium:
 			'/polli': () => handlePollinations(ctx, `polli: ${message}`),
 			'/gpt': () => handleGithubCopilot(ctx, `gpt: ${message}`),
 			'/oss': () => handleGroq(ctx, `oss: ${message}`),
+			'/kimi': () => handleCloudflare(ctx, `kimi: ${message}`),
 			'/llama': () => handleGroq(ctx, `llama: ${message!}`),
 			'/gemini': () => handleVertex(ctx, `gemini: ${message}`),
 			'/geminiPro': () => handleVertex(ctx, `geminiPro: ${message}`),

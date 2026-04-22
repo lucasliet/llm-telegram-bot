@@ -6,7 +6,7 @@ import { InlineKeyboard } from 'grammy';
 const adminCommandButtons = [
 	[['Modelo Atual', '/currentmodel']],
 	[
-		['Pollinations', '/polli'],
+		['Kimi K2.5', '/kimi'],
 		['Copilot GPT 5 Mini', '/gpt'],
 	],
 	[
@@ -57,6 +57,7 @@ export const adminHelpMessage = `*Comandos inline*:
 \\- \`polliImage:\` mensagem \\- Gera imagens com __Pollinations__
 \\- \`artaImage:\` mensagem \\- Gera imagens com __Arta__
 \\- \`oss:\` mensagem \\- Faz uma pergunta usando o modelo __GPT OSS 120b__
+\\- \`kimi:\` mensagem \\- Faz uma pergunta usando o modelo __Kimi K2\.5__ pela __Cloudflare__
 \\- \`gpt:\` mensagem \\- Gera texto com __GPT 5 mini__ pelo __Copilot__
 \\- \`gpt5:\` mensagem \\- Gera texto com __GPT 5\\.2__ pelo __Copilot__
 \\- \`claude:\` mensagem \\- Faz uma pergunta usando o __Claude Sonnet 4\\.5__ pelo __Copilot__

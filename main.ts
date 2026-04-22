@@ -64,7 +64,7 @@ function registerBotCommands() {
 		(ctx) => TelegramService.callAdminModel(ctx, TelegramService.callGroqModel),
 	);
 	BOT.hears(
-		/^(cloudflareImage|image):/gi,
+		/^(kimi|cloudflareImage|image):/gi,
 		(ctx) => TelegramService.callAdminModel(ctx, TelegramService.callCloudflareModel),
 	);
 	BOT.hears(

@@ -26,7 +26,7 @@ export const openRouterModels = {
 
 export const cloudflareModels = {
 	imageModel: '@cf/black-forest-labs/flux-1-schnell',
-	textModel: '@cf/openai/gpt-oss-120b',
+	textModel: '@cf/moonshotai/kimi-k2.5',
 	visionTextModel: '@cf/llava-hf/llava-1.5-7b-hf',
 	sttModel: '@cf/openai/whisper-large-v3-turbo',
 };
@@ -68,6 +68,7 @@ export const MODEL_COMMANDS = [
 	'/gpt',
 	'/llama',
 	'/oss',
+	'/kimi',
 	'/gemini',
 	'/geminiPro',
 	'/antigravity',
@@ -97,4 +98,6 @@ export const MODELS_USING_RESPONSES_API: string[] = [
 	'gpt-5.1-codex-mini',
 	'gpt-5.1-codex-max',
 	'gpt-5.2-codex',
+	'gpt-5.4',
+	'gpt-5.4-mini',
 ];
