@@ -1,23 +1,23 @@
 #!/usr/bin/env bash
-# Setup completo do ambiente de desenvolvimento Deno para o llm-telegram-bot.
+# Setup genérico do Deno para qualquer projeto rodando no Claude Code Web.
 #
 # Uso:
-#   ./scripts/setup-deno-env.sh           # instala Deno e popula o cache de deps
-#   ./scripts/setup-deno-env.sh --test    # também roda a suíte de testes ao final
+#   ./setup-deno-env.sh
 #
-# Foi pensado para o Claude Code Web (CLAUDE_CODE_ENTRYPOINT=remote), onde:
-#   - não há Deno pré-instalado;
-#   - a saída TLS passa por um proxy de inspeção que apresenta um certificado
-#     emitido por uma CA interna (precisamos apontar DENO_CERT para o bundle
-#     /etc/ssl/certs/ca-certificates.crt para validar deno.land, jsr.io e
-#     registry.npmjs.org);
-#   - downloads transitórios (ex.: cdn.skypack.dev) podem retornar 503 em cold
-#     start — o script faz cache antecipado com retry.
+# O que faz:
+#   - baixa e instala o Deno (release latest, x86_64-unknown-linux-gnu) em
+#     /usr/local/bin (sobrescreve override via DENO_INSTALL_DIR);
+#   - exporta DENO_CERT apontando para o bundle do sistema, necessário no
+#     Claude Code Web porque a saída TLS passa por um proxy de inspeção que
+#     apresenta um certificado emitido por uma CA interna — sem isso, fetchs
+#     para deno.land, jsr.io, registry.npmjs.org etc. falham com
+#     "invalid peer certificate: UnknownIssuer".
+#
+# Para que DENO_CERT persista em shells futuros desta sessão, faça:
+#   source ./setup-deno-env.sh
+# (assim o export afeta o shell atual; executando direto, vale só pelo script).
 
 set -euo pipefail
-
-REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-cd "$REPO_ROOT"
 
 DENO_INSTALL_DIR="${DENO_INSTALL_DIR:-/usr/local/bin}"
 DENO_RELEASE_URL="https://github.com/denoland/deno/releases/latest/download/deno-x86_64-unknown-linux-gnu.zip"
@@ -59,41 +59,14 @@ install_deno() {
 
 configure_cert() {
 	if [ ! -f "$CA_BUNDLE" ]; then
-		err "CA bundle $CA_BUNDLE não encontrado — TLS interceptado pode falhar"
+		err "CA bundle $CA_BUNDLE não encontrado — fetchs Deno podem falhar com UnknownIssuer"
 		return 0
 	fi
 	export DENO_CERT="$CA_BUNDLE"
-	log "DENO_CERT=$DENO_CERT (necessário para o proxy TLS deste ambiente)"
+	log "DENO_CERT=$DENO_CERT"
+	log "para shells futuros: export DENO_CERT=$CA_BUNDLE"
 }
 
-warm_cache() {
-	log "populando cache de dependências (deno cache main.ts)"
-	retry 4 deno cache --allow-import main.ts
-	log "populando cache de testes"
-	retry 4 deno cache --allow-import tests/basic/sanity.test.ts
-}
-
-run_tests() {
-	log "executando suíte de testes via ./run_tests.sh"
-	# Defaults seguros para ambiente offline; sobrescreva exportando antes de rodar.
-	export OPENAI_API_KEY="${OPENAI_API_KEY:-sk-test}"
-	export TELEGRAM_CHAT_BOT_TOKEN="${TELEGRAM_CHAT_BOT_TOKEN:-test}"
-	export ADMIN_USER_IDS="${ADMIN_USER_IDS:-1}"
-	export CLOUDFLARE_AI_API_KEY="${CLOUDFLARE_AI_API_KEY:-x}"
-	export CLOUDFLARE_AI_ACCOUNT_ID="${CLOUDFLARE_AI_ACCOUNT_ID:-x}"
-	./run_tests.sh
-}
-
-main() {
-	install_deno
-	configure_cert
-	warm_cache
-	if [ "${1:-}" = "--test" ]; then
-		run_tests
-	else
-		log "ambiente pronto. Rode com '--test' para executar os testes."
-		log "para shells futuros, exporte: export DENO_CERT=$CA_BUNDLE"
-	fi
-}
-
-main "$@"
+install_deno
+configure_cert
+log "ambiente Deno pronto."
