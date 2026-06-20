@@ -9,6 +9,8 @@ Deno.test('TelegramService', async (t) => {
 	mockDenoEnv({
 		'BOT_TOKEN': 'test_token',
 		'ADMIN_USER_IDS': '12345|67890',
+		'SERVER_URL': 'https://llm-telegram-bot.deno.dev/webhook',
+		'OPENAI_API_KEY': 'test_openai_key',
 	});
 
 	const originalFetch = globalThis.fetch;

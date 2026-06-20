@@ -2,7 +2,7 @@ import { Context } from 'grammy';
 import { Audio, InputFile, PhotoSize, Voice } from 'grammy-types';
 import { getCurrentModel } from '@/repository/ChatRepository.ts';
 import OpenAiService from '@/service/openai/OpenAIService.ts';
-import CloudFlareService from '@/service/CloudFlareService.ts';
+import CloudFlareService from '@/service/openai/CloudFlareService.ts';
 import ElevenLabsService from '@/service/ElevenLabsService.ts';
 const getToken = () => Deno.env.get('BOT_TOKEN') as string;
 
@@ -65,7 +65,7 @@ export const FileUtils = {
 			// 		audioUrl,
 			// 	);
 			// } else {
-			return await CloudFlareService.transcribeAudio(audioFile);
+			return await new CloudFlareService().transcribeAudio(audioFile);
 			// }
 		}
 	},

@@ -75,25 +75,6 @@ Deno.test(
 	},
 );
 
-Deno.test('ToolService copilot_usage throws without token', async () => {
-	const original = Deno.env.get;
-	try {
-		Deno.env.get = (_k: string) => undefined as any;
-		const fn = (ToolService as any).tools.get('copilot_usage').fn as (
-			args: Record<string, never>,
-		) => Promise<any>;
-		let threw = false;
-		try {
-			await fn({} as never);
-		} catch {
-			threw = true;
-		}
-		assertEquals(threw, true);
-	} finally {
-		Deno.env.get = original;
-	}
-});
-
 Deno.test(
 	'ToolService transcript_yt parses captions and returns segments',
 	async () => {
@@ -207,24 +188,6 @@ Deno.test('ToolService transcript_yt honors preferredLanguages', async () => {
 	}
 });
 
-Deno.test('ToolService copilot_usage returns JSON on success', async () => {
-	const fn = (ToolService as any).tools.get('copilot_usage').fn as (
-		args: Record<string, never>,
-	) => Promise<any>;
-	const originalGet = Deno.env.get;
-	const originalFetch = globalThis.fetch;
-	try {
-		Deno.env.get = (k: string) => (k === 'COPILOT_GITHUB_TOKEN' ? 'tok' : originalGet(k)) as any;
-		globalThis.fetch = mockFetchSequence([
-			new Response(JSON.stringify({ ok: true }), { status: 200 }),
-		]) as any;
-		const out = await fn({} as never);
-		assertEquals(out.ok, true);
-	} finally {
-		Deno.env.get = originalGet;
-		globalThis.fetch = originalFetch;
-	}
-});
 
 Deno.test('ToolService search_tavily returns mapped results', async () => {
 	const json = {

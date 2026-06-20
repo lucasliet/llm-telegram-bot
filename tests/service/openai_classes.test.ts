@@ -13,6 +13,8 @@ Deno.test(
 				OPENROUTER_API_KEY: 'r',
 				PERPLEXITY_API_KEY: 'p',
 				COPILOT_GITHUB_TOKEN: 'c',
+				CLOUDFLARE_API_KEY: 'k',
+				CLOUDFLARE_ACCOUNT_ID: 'acc',
 			})[k] || env(k)) as any;
 		try {
 			const Gemini = (await import('../../src/service/openai/GeminiService.ts'))
@@ -29,18 +31,23 @@ Deno.test(
 			const GithubCopilot = (
 				await import('../../src/service/openai/GithubCopilotService.ts')
 			).default;
+			const Cloudflare = (
+				await import('../../src/service/openai/CloudFlareService.ts')
+			).default;
 
 			const g = new (Gemini as any)();
 			const w = new (OpenWebUI as any)();
 			const r = new (Openrouter as any)();
 			const p = new (Perplexity as any)('/perplexity');
 			const c = new (GithubCopilot as any)();
+			const cf = new (Cloudflare as any)();
 
 			assertEquals(typeof g, 'object');
 			assertEquals(typeof w, 'object');
 			assertEquals(typeof r, 'object');
 			assertEquals(typeof p, 'object');
 			assertEquals(typeof c, 'object');
+			assertEquals(typeof cf, 'object');
 		} finally {
 			Deno.env.get = env;
 			kvCleanup();

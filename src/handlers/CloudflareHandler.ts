@@ -1,6 +1,6 @@
 import { Context } from 'grammy';
 import { InputFile } from 'grammy-types';
-import CloudFlareService from '@/service/CloudFlareService.ts';
+import CloudFlareService from '@/service/openai/CloudFlareService.ts';
 import { FileUtils } from '@/util/FileUtils.ts';
 
 /**
@@ -15,9 +15,11 @@ export async function handleCloudflare(
 	const { userKey, contextMessage, photos, caption, quote } = await ctx
 		.extractContextKeys();
 
+	const service = new CloudFlareService();
+
 	if (photos && caption) {
 		const photoUrl = FileUtils.getTelegramFilesUrl(ctx, photos)[0];
-		const output = await CloudFlareService.generateTextFromImage(
+		const output = await service.generateVisionText(
 			userKey,
 			quote,
 			photoUrl,
@@ -32,7 +34,7 @@ export async function handleCloudflare(
 
 	if (cloudflareCommand === 'kimi') {
 		const prompt = message!.replace(/^kimi:\s*/i, '');
-		const response = await CloudFlareService.generateText(
+		const response = await service.generateText(
 			userKey,
 			quote,
 			prompt,
@@ -46,7 +48,7 @@ export async function handleCloudflare(
 		ctx.chatAction = 'upload_photo';
 		ctx.replyWithPhoto(
 			new InputFile(
-				await CloudFlareService.generateImage(message!),
+				await service.generateImageBinary(message!),
 				'image/png',
 			),
 			{ reply_to_message_id: ctx.message?.message_id },

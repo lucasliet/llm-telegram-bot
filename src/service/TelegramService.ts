@@ -7,18 +7,15 @@ import { ModelCommand, modelCommands, WHITELISTED_MODELS } from '@/config/models
 import { escapeMarkdownV1 } from '@/util/MarkdownUtils.ts';
 
 import {
-	handleAntigravity,
 	handleArta,
 	handleCloudflare,
 	handleFala,
 	handleGemini,
 	handleGithubCopilot,
-	handleGroq,
 	handleOpenAI,
 	handleOpenRouter,
 	handleOpenWebUI,
 	handlePerplexity,
-	handlePollinations,
 	handleVertex,
 	handleZai,
 } from '@/handlers/index.ts';
@@ -27,9 +24,10 @@ import { FileUtils } from '@/util/FileUtils.ts';
 import GithubCopilotService from './openai/GithubCopilotService.ts';
 
 const getToken = () => Deno.env.get('BOT_TOKEN') as string;
-const getAdminUserIds = () => (Deno.env.get('ADMIN_USER_IDS') as string)
-	.split('|')
-	.map((id) => parseInt(id));
+const getAdminUserIds = () =>
+	(Deno.env.get('ADMIN_USER_IDS') as string)
+		.split('|')
+		.map((id) => parseInt(id));
 
 /**
  * Helper to keep Deno job alive during long-running requests
@@ -215,18 +213,14 @@ Interações Premium:
 		const currentModel = await getCurrentModel(userKey);
 
 		const modelHandlers: Record<ModelCommand, () => Promise<void>> = {
-			'/polli': () => handlePollinations(ctx, `polli: ${message}`),
 			'/gpt': () => handleGithubCopilot(ctx, `gpt: ${message}`),
-			'/oss': () => handleGroq(ctx, `oss: ${message}`),
 			'/kimi': () => handleCloudflare(ctx, `kimi: ${message}`),
-			'/llama': () => handleGroq(ctx, `llama: ${message!}`),
 			'/gemini': () => handleVertex(ctx, `gemini: ${message}`),
 			'/geminiPro': () => handleVertex(ctx, `geminiPro: ${message}`),
-			'/antigravity': () => handleAntigravity(ctx, `antigravity: ${message}`),
-			'/antigeminipro': () => handleAntigravity(ctx, `antigeminipro: ${message}`),
 			'/zai': () => handleZai(ctx, `zai: ${message}`),
 			'/glm': () => handleZai(ctx, `glm: ${message}`),
 			'/glmflash': () => handleZai(ctx, `glmflash: ${message}`),
+			'/free': () => handleOpenRouter(ctx, `free: ${message}`),
 		};
 
 		const handler = modelHandlers[currentModel];
@@ -261,26 +255,14 @@ Interações Premium:
 	callGeminiModel(ctx: Context, commandMessage?: string): Promise<void> {
 		return handleGemini(ctx, commandMessage);
 	},
-	callPollinationsModel(ctx: Context, commandMessage?: string): Promise<void> {
-		return handlePollinations(ctx, commandMessage);
-	},
-	callVertexModel(ctx: Context, commandMessage?: string): Promise<void> {
-		return handleVertex(ctx, commandMessage);
-	},
 	callArtaModel(ctx: Context, commandMessage?: string): Promise<void> {
 		return handleArta(ctx, commandMessage);
 	},
 	callFala(ctx: Context, commandMessage?: string): Promise<void> {
 		return handleFala(ctx, new GithubCopilotService(), commandMessage);
 	},
-	callAntigravityModel(ctx: Context, commandMessage?: string): Promise<void> {
-		return handleAntigravity(ctx, commandMessage);
-	},
 	callZaiModel(ctx: Context, commandMessage?: string): Promise<void> {
 		return handleZai(ctx, commandMessage);
-	},
-	callGroqModel(ctx: Context, commandMessage?: string): Promise<void> {
-		return handleGroq(ctx, commandMessage);
 	},
 };
 

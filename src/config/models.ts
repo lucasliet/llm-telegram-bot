@@ -3,11 +3,6 @@ export const geminiModels = {
 	geminiFlash: 'gemini-3.1-flash-lite-preview',
 };
 
-export const antigravityModels = {
-	geminiFlash: 'gemini-3-flash',
-	geminiPro: 'gemini-3.1-pro-preview',
-};
-
 export const perplexityModels = {
 	textModel: 'sonar',
 	reasoningModel: 'sonar-reasoning-pro',
@@ -20,62 +15,39 @@ export const openAIModels = {
 };
 
 export const openRouterModels = {
-	llamaModel: 'meta-llama/llama-4-maverick:free',
-	deepseekModel: 'deepseek/deepseek-r1-zero:free',
+	freeModel: 'openrouter/free',
 };
 
 export const cloudflareModels = {
 	imageModel: '@cf/black-forest-labs/flux-1-schnell',
-	textModel: '@cf/moonshotai/kimi-k2.5',
+	textModel: '@cf/moonshotai/kimi-k2.7-code',
 	visionTextModel: '@cf/llava-hf/llava-1.5-7b-hf',
 	sttModel: '@cf/openai/whisper-large-v3-turbo',
 };
 
 export const copilotModels = {
-	gemini: 'gemini-3-pro-preview',
 	gpt5mini: 'gpt-5-mini',
-	gpt5: 'gpt-5.2',
-	claude: 'claude-sonnet-4.5',
-	sonnetThinking: 'claude-opus-4.5',
 };
 
-export const pollinationsModels = {
-	openai: 'openai',
-};
-
-export const openWebUiModels = {
-	gpt5: 'pplx.gpt-5-search',
-	grok: 'pplx.grok-4-search',
-	o3: 'pplx.o3-search',
-	sonnetThinking: 'pplx.claude-4.0-sonnet-think-search',
-};
+export const openWebUiModels = {};
 
 export const zaiModels = {
 	flash: 'glm-5-turbo',
-	standard: 'glm-5.1',
-};
-
-export const groqModels = {
-	llama: 'meta-llama/llama-4-scout-17b-16e-instruct',
-	oss: 'openai/gpt-oss-120b',
+	standard: 'glm-5.2',
 };
 
 /**
  * Type definitions
  */
 export const MODEL_COMMANDS = [
-	'/polli',
 	'/gpt',
-	'/llama',
-	'/oss',
 	'/kimi',
-	'/gemini',
-	'/geminiPro',
-	'/antigravity',
-	'/antigeminipro',
 	'/zai',
 	'/glm',
 	'/glmflash',
+	'/free',
+	'/gemini',
+	'/geminiPro'
 ] as const;
 
 /**
@@ -85,11 +57,7 @@ export type ModelCommand = typeof MODEL_COMMANDS[number];
 export const modelCommands = [...MODEL_COMMANDS] as ModelCommand[];
 
 export const WHITELISTED_MODELS: ModelCommand[] = [
-	'/polli',
-	'/llama',
-	'/oss',
-	'/gpt',
-	'/zai',
+  '/free'
 ];
 
 export const MODELS_USING_RESPONSES_API: string[] = [
@@ -100,4 +68,5 @@ export const MODELS_USING_RESPONSES_API: string[] = [
 	'gpt-5.2-codex',
 	'gpt-5.4',
 	'gpt-5.4-mini',
+	'gpt-5.5'
 ];

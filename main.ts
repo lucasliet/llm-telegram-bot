@@ -11,13 +11,12 @@ import { adminHelpMessage, adminKeyboard, userHelpMessage, userKeyboard } from '
 import '@/prototype/StringExtensionPrototype.ts';
 import '@/prototype/ContextExtensionPrototype.ts';
 import '@/prototype/ReadableStreamDefaultReaderPrototype.ts';
-import { AntigravityAuth } from '@/scripts/AntigravityAuth.ts';
 import { CopilotAuth } from '@/scripts/CopilotAuth.ts';
 
 const getToken = () => Deno.env.get('BOT_TOKEN') as string;
-const getPort = () => parseInt(Deno.env.get('PORT') as string) || 3333;
-const getAdminUserIds = () => (Deno.env.get('ADMIN_USER_IDS') as string)
-	.split('|').map((id) => parseInt(id));
+const getAdminUserIds = () =>
+	(Deno.env.get('ADMIN_USER_IDS') as string)
+		.split('|').map((id) => parseInt(id));
 
 type MyContext = Context & AutoChatActionFlavor;
 
@@ -55,14 +54,10 @@ function registerBotCommands() {
 	BOT.command('usage', (ctx) => TelegramService.getUsage(ctx));
 	BOT.command('clear', (ctx) => clearChatHistoryHandler(ctx));
 	BOT.command('compress', (ctx) => {
-	  console.log('Compress command received');
-	  new Promise((resolve) => handleCompress(ctx).then(resolve))
+		console.log('Compress command received');
+		new Promise((resolve) => handleCompress(ctx).then(resolve));
 	});
 
-	BOT.hears(
-		/^(oss|llama):/gi,
-		(ctx) => TelegramService.callAdminModel(ctx, TelegramService.callGroqModel),
-	);
 	BOT.hears(
 		/^(kimi|cloudflareImage|image):/gi,
 		(ctx) => TelegramService.callAdminModel(ctx, TelegramService.callCloudflareModel),
@@ -93,18 +88,9 @@ function registerBotCommands() {
 	);
 
 	BOT.hears(
-		/^(polli|polliReasoning|polliImage):/gi,
-		(ctx) => TelegramService.callAdminModel(ctx, TelegramService.callPollinationsModel),
-	);
-	BOT.hears(
 		/^(artaImage):/gi,
 		(ctx) => TelegramService.callAdminModel(ctx, TelegramService.callArtaModel),
 	);
-	BOT.hears(
-		/^(antigravity|antigemini|antigeminipro):/gi,
-		(ctx) => TelegramService.callAdminModel(ctx, TelegramService.callAntigravityModel),
-	);
-
 	BOT.hears(
 		/^(zai|glm|glmflash):/gi,
 		(ctx) => TelegramService.callAdminModel(ctx, TelegramService.callZaiModel),
@@ -177,11 +163,6 @@ async function clearChatHistoryHandler(ctx: MyContext) {
  * Initialize and start the application
  */
 async function initializeApp() {
-	if (Deno.args.includes('antigravity-login')) {
-		await new AntigravityAuth().run();
-		return;
-	}
-
 	if (Deno.args.includes('copilot-login')) {
 		await new CopilotAuth().run();
 		return;
