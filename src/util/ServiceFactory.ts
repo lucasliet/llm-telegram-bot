@@ -12,7 +12,8 @@ type AnyService =
 	| VertexAiService
 	| GithubCopilotService
 	| CloudFlareService
-	| ZaiService;
+	| ZaiService
+	| OpenrouterService;
 
 export interface ServiceInfo {
 	service: AnyService;

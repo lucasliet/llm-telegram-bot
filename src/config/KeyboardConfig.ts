@@ -45,6 +45,7 @@ export const adminHelpMessage = `*Comandos inline*:
 \\- \`gptImage:\` mensagem \\- Gera imagens com __DALL\\-e__
 \\- \`kimi:\` mensagem \\- Faz uma pergunta usando o modelo __Kimi K2\\.7 Code__ pela __Cloudflare__
 \\- \`gpt:\` mensagem \\- Gera texto com __GPT 5 mini__ pelo __Copilot__
+\\- \`free:\` mensagem \\- Faz uma pergunta usando o modelo gratuito do *OpenRouter*
 \\- \`gemini:\` mensagem \\- Faz uma pergunta usando o __Gemini 2\\.5 Flash__ pelo __Vertex AI__
 \\- \`geminiPro:\` mensagem \\- Faz uma pergunta usando o __Gemini 2\\.5 Pro__ pelo __Vertex AI__
 \\- \`search:\` mensagem \\- Faz uma pergunta usando o __Sonar__ pela __Perplexity__
@@ -59,4 +60,7 @@ export const adminHelpMessage = `*Comandos inline*:
 /**
  * Help message for regular users (limited commands)
  */
-export const userHelpMessage = `*Seleção de modelos de linguagem*:`;
+export const userHelpMessage = `*Comandos inline*:
+\\- \`free:\` mensagem \\- Faz uma pergunta usando o modelo gratuito do *OpenRouter*
+
+*Seleção de modelos de linguagem*:`;

@@ -4,9 +4,9 @@
 
 acesse o bot via telegram [@llm_gemini_bot](https://t.me/llm_gemini_bot)
 
-esse bot utiliza o modelo gratuito [Pollinations](https://pollinations.ai/) para responder as mensagens por padrão, para uso dos outros modelos é necessário
+esse bot utiliza o modelo gratuito do OpenRouter para responder as mensagens por padrão, para uso de outros modelos é necessário
 implantar código no seu [próprio bot](https://core.telegram.org/bots/tutorial), rodando localmente ou em um servidor, e configurando o seu ID do telegram como a
-variavel ambiente `ADMIN_USER_IDS`
+variável ambiente `ADMIN_USER_IDS`
 
 um histórico da conversa é mantido para mensagens encadiadas, porém com expiração de 1 dia após a ultima mensagem, também pode ser apagado manualmente com o
 commando `/clear`
@@ -17,23 +17,16 @@ esse projeto utiliza o [Deno deploy](https://deno.com/deploy) e [Deno kv](https:
 
 | Provedor       | Comando Inline                           | Modelo                | Ferramentas |
 | -------------- | ---------------------------------------- | --------------------- | ----------- |
-| Pollinations   | `polli:`                                 | OpenAI                | Sim         |
-| GitHub Copilot | `gpt:`                                   | GPT 5 mini            | Sim         |
-| GitHub Copilot | `gpt5:`                                  | GPT 5.2               | Sim         |
-| GitHub Copilot | `claude:`                                | Claude Sonnet 4.5     | Sim         |
-| GitHub Copilot | `geminiPro:`                             | Gemini 3 Pro Preview  | Sim         |
-| Cloudflare     | `oss:`                                   | GPT OSS 120b          | Nao         |
-| OpenRouter     | `llama:`                                 | Llama 4 Maverick      | Sim         |
-| Vertex AI      | `gemini:`                                | Gemini 2.5 Flash Lite | Sim         |
-| Vertex AI      | `geminiPro:`                             | Gemini 2.5 Pro        | Sim         |
+| OpenRouter     | `free:`                                  | Gratuito (varia)      | Sim         |
+| GitHub Copilot | `gpt:` / `gpt5:` / `claude:`             | GPT 5 mini / GPT 5.2 / Claude Sonnet 4.5 | Sim         |
+| Cloudflare     | `kimi:`                                  | Kimi K2.7 Code                              | Nao         |
+| Vertex AI      | `gemini:` / `geminiPro:`                 | Gemini 3.1 Flash Lite / Gemini 3.1 Pro | Sim         |
 | Perplexity     | `perplexity:` / `search:`                | Sonar                 | Nao         |
 | Perplexity     | `reasonSearch:`                          | Sonar Reasoning Pro   | Nao         |
 | OpenWebUI      | `pgpt:` / `pgrok:` / `po3:` / `pclaude:` | PPLX models           | Nao         |
-| Antigravity    | `antigravity:` / `antigemini:`           | Gemini 3 Flash        | Sim         |
-| Antigravity    | `antigeminipro:`                         | Gemini 3 Pro          | Sim         |
+| Zai            | `zai:` / `glmflash:` / `glm:`            | GLM 5 Turbo / GLM 5.2                  | Sim         |
 | DALL-E         | `gptImage:`                              | DALL-E 3              | -           |
 | Cloudflare     | `cloudflareImage:`                       | Stable Diffusion      | -           |
-| Pollinations   | `polliImage:`                            | Pollinations          | -           |
 | Arta           | `artaImage:`                             | Arta                  | -           |
 | ElevenLabs     | `fala:`                                  | TTS                   | -           |
 
@@ -63,40 +56,11 @@ esse projeto utiliza o [Deno deploy](https://deno.com/deploy) e [Deno kv](https:
   - `VERTEX_PROJECT_ID` - ID do projeto GCP para o Vertex AI
   - `VERTEX_LOCATION` - região do Vertex AI (padrão: `us-central1`)
   - `OPENWEBUI_API_KEY` - api key do [OpenWebUI](https://openwebui.com/)
-  - `ANTIGRAVITY_REFRESH_TOKEN` - refresh token OAuth2 para o provider Antigravity (ver seção abaixo)
 
 - crie um arquivo .env na raiz do projeto e configure as variaveis de ambiente nele, no formato `VARIAVEL=valor`
   ```bash
   ./devrun.sh
   ```
-
-## Configuração do Provider Antigravity
-
-O provider Antigravity permite acesso aos modelos Gemini 3 Flash e Claude Sonnet 4.5 via a API Cloud Code. Para configurar:
-
-### 1. Obter o Refresh Token
-
-Execute o comando abaixo para iniciar o fluxo de autenticação automatizado:
-
-```bash
-./devrun.sh antigravity-login
-```
-
-Siga as instruções no terminal para autorizar o acesso e obter o `ANTIGRAVITY_REFRESH_TOKEN`.
-
-### 2. Configurar variáveis de ambiente
-
-```bash
-# Adicione ao .env ou configure no Deno Deploy:
-ANTIGRAVITY_REFRESH_TOKEN=1//SEU_REFRESH_TOKEN_AQUI
-# Opcional - será descoberto automaticamente:
-ANTIGRAVITY_PROJECT_ID=seu-project-id
-```
-
-O access token é renovado automaticamente (válido por ~1h). O project ID é descoberto via API se não configurado.
-
-Para detalhes sobre a arquitetura, thought signatures e o ciclo de tool calls do Antigravity, consulte o arquivo [ANTIGRAVITY.md](./.github/ANTIGRAVITY.md).
-
 
 ## Mudando a Fonte de um Modelo para Outro Provedor
 

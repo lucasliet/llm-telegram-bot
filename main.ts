@@ -88,6 +88,11 @@ function registerBotCommands() {
 	);
 
 	BOT.hears(
+		/^(free):/gi,
+		(ctx) => TelegramService.callAdminModel(ctx, TelegramService.callOpenRouterModel),
+	);
+
+	BOT.hears(
 		/^(artaImage):/gi,
 		(ctx) => TelegramService.callAdminModel(ctx, TelegramService.callArtaModel),
 	);

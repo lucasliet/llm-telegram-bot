@@ -33,7 +33,7 @@ async function requestGeneration(prompt: string, token: string): Promise<StatusR
 	const form = new FormData();
 	form.append('prompt', prompt);
 	form.append('negative_prompt', '');
-	form.append('style', 'SDXL 1.0');
+	form.append('style', 'Flux');
 	form.append('images_num', '1');
 	form.append('cfg_scale', '7');
 	form.append('steps', '40');

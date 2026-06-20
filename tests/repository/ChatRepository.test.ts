@@ -89,7 +89,7 @@ Deno.test('ChatRepository', async (t) => {
 			resetKv();
 
 			let model = await getCurrentModel(userKey);
-			assertEquals(model, '/polli');
+			assertEquals(model, '/free');
 
 			await setCurrentModel(userKey, testModel);
 
