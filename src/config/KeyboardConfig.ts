@@ -7,7 +7,7 @@ const adminCommandButtons = [
 	[['Modelo Atual', '/currentmodel']],
 	[
 		['Kimi K2.7 Code', '/kimi'],
-		['Copilot GPT 5 Mini', '/gpt'],
+		['Openrouter Free', '/free'],
 	],
 	[
 		['Gemini 3 Flash', '/antigravity'],
