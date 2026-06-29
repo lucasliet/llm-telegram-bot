@@ -4,9 +4,9 @@
 
 acesse o bot via telegram [@llm_gemini_bot](https://t.me/llm_gemini_bot)
 
-esse bot utiliza o modelo gratuito do OpenRouter para responder as mensagens por padrão, para uso de outros modelos é necessário
-implantar código no seu [próprio bot](https://core.telegram.org/bots/tutorial), rodando localmente ou em um servidor, e configurando o seu ID do telegram como a
-variável ambiente `ADMIN_USER_IDS`
+esse bot utiliza o modelo gratuito do OpenRouter para responder as mensagens por padrão, para uso de outros modelos é necessário implantar código no seu
+[próprio bot](https://core.telegram.org/bots/tutorial), rodando localmente ou em um servidor, e configurando o seu ID do telegram como a variável ambiente
+`ADMIN_USER_IDS`
 
 um histórico da conversa é mantido para mensagens encadiadas, porém com expiração de 1 dia após a ultima mensagem, também pode ser apagado manualmente com o
 commando `/clear`
@@ -15,20 +15,20 @@ esse projeto utiliza o [Deno deploy](https://deno.com/deploy) e [Deno kv](https:
 
 ## Provedores e Modelos Disponíveis
 
-| Provedor       | Comando Inline                           | Modelo                | Ferramentas |
-| -------------- | ---------------------------------------- | --------------------- | ----------- |
-| OpenRouter     | `free:`                                  | Gratuito (varia)      | Sim         |
+| Provedor       | Comando Inline                           | Modelo                                   | Ferramentas |
+| -------------- | ---------------------------------------- | ---------------------------------------- | ----------- |
+| OpenRouter     | `free:`                                  | Gratuito (varia)                         | Sim         |
 | GitHub Copilot | `gpt:` / `gpt5:` / `claude:`             | GPT 5 mini / GPT 5.2 / Claude Sonnet 4.5 | Sim         |
-| Cloudflare     | `kimi:`                                  | Kimi K2.7 Code                              | Nao         |
-| Vertex AI      | `gemini:` / `geminiPro:`                 | Gemini 3.1 Flash Lite / Gemini 3.1 Pro | Sim         |
-| Perplexity     | `perplexity:` / `search:`                | Sonar                 | Nao         |
-| Perplexity     | `reasonSearch:`                          | Sonar Reasoning Pro   | Nao         |
-| OpenWebUI      | `pgpt:` / `pgrok:` / `po3:` / `pclaude:` | PPLX models           | Nao         |
-| Zai            | `zai:` / `glmflash:` / `glm:`            | GLM 5 Turbo / GLM 5.2                  | Sim         |
-| DALL-E         | `gptImage:`                              | DALL-E 3              | -           |
-| Cloudflare     | `cloudflareImage:`                       | Stable Diffusion      | -           |
-| Arta           | `artaImage:`                             | Arta                  | -           |
-| ElevenLabs     | `fala:`                                  | TTS                   | -           |
+| Cloudflare     | `kimi:`                                  | Kimi K2.7 Code                           | Nao         |
+| Vertex AI      | `gemini:` / `geminiPro:`                 | Gemini 3.1 Flash Lite / Gemini 3.1 Pro   | Sim         |
+| Perplexity     | `perplexity:` / `search:`                | Sonar                                    | Nao         |
+| Perplexity     | `reasonSearch:`                          | Sonar Reasoning Pro                      | Nao         |
+| OpenWebUI      | `pgpt:` / `pgrok:` / `po3:` / `pclaude:` | PPLX models                              | Nao         |
+| Zai            | `zai:` / `glmflash:` / `glm:`            | GLM 5 Turbo / GLM 5.2                    | Sim         |
+| DALL-E         | `gptImage:`                              | DALL-E 3                                 | -           |
+| Cloudflare     | `cloudflareImage:`                       | Stable Diffusion                         | -           |
+| Arta           | `artaImage:`                             | Arta                                     | -           |
+| ElevenLabs     | `fala:`                                  | TTS                                      | -           |
 
 ## Uso Local
 

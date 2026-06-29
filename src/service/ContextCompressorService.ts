@@ -13,7 +13,8 @@ interface TextGenerationService {
  * when it approaches the context window limit.
  */
 export class ContextCompressorService {
-	private static readonly COMPRESSION_PROMPT = `You are an expert context compressor. Your goal is to condense the following conversation history into a concise summary that preserves all critical information for an LLM to resume the conversation seamlessly.
+	private static readonly COMPRESSION_PROMPT =
+		`You are an expert context compressor. Your goal is to condense the following conversation history into a concise summary that preserves all critical information for an LLM to resume the conversation seamlessly.
 
 Instructions:
 1. Analyze the conversation history below.

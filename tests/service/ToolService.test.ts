@@ -188,7 +188,6 @@ Deno.test('ToolService transcript_yt honors preferredLanguages', async () => {
 	}
 });
 
-
 Deno.test('ToolService search_tavily returns mapped results', async () => {
 	const json = {
 		results: [

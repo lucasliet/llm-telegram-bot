@@ -42,10 +42,10 @@ export async function handleCompress(ctx: Context): Promise<void> {
 
 		await ctx.reply(
 			`✅ Histórico comprimido com sucesso!\n\n` +
-			`📊 **Antes:** ${result.tokensBefore.toLocaleString()} tokens\n` +
-			`📊 **Depois:** ${result.tokensAfter.toLocaleString()} tokens\n` +
-			`${sizeMessage}\n` +
-			`🤖 **Modelo usado:** ${currentModel}`,
+				`📊 **Antes:** ${result.tokensBefore.toLocaleString()} tokens\n` +
+				`📊 **Depois:** ${result.tokensAfter.toLocaleString()} tokens\n` +
+				`${sizeMessage}\n` +
+				`🤖 **Modelo usado:** ${currentModel}`,
 			{ parse_mode: 'Markdown' },
 		);
 	} catch (error) {

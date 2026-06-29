@@ -1,4 +1,3 @@
-import { assertEquals } from 'asserts';
 import { spy } from 'mock';
 import { assertSpyCalls } from '../test_helpers.ts';
 import OpenAiService from '../../src/service/openai/OpenAIService.ts';

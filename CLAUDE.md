@@ -27,12 +27,14 @@ chmod +x /usr/local/bin/deno
 deno --version
 ```
 
-> **Nota:** O ambiente não tem acesso DNS externo direto, então `deno test` e `deno run` podem falhar ao tentar baixar dependências remotas (deno.land, jsr.io, npmjs.org). O `deno fmt` e `deno lint` funcionam normalmente pois não precisam de rede.
+> **Nota:** O ambiente não tem acesso DNS externo direto, então `deno test` e `deno run` podem falhar ao tentar baixar dependências remotas (deno.land, jsr.io,
+> npmjs.org). O `deno fmt` e `deno lint` funcionam normalmente pois não precisam de rede.
 
 ## Formatação
 
 - **Rode `deno fmt` apenas em arquivos TypeScript/JavaScript** (`*.ts`, `*.tsx`, `*.js`, `*.jsx`)
-- **NÃO rode `deno fmt` em arquivos Markdown** (`.md`), JSON (`.json`), YAML (`.yml`/`.yaml`) ou outros arquivos de configuração — o formatter do Deno reformata esses arquivos de forma indesejada
+- **NÃO rode `deno fmt` em arquivos Markdown** (`.md`), JSON (`.json`), YAML (`.yml`/`.yaml`) ou outros arquivos de configuração — o formatter do Deno reformata
+  esses arquivos de forma indesejada
 - Para formatar apenas os arquivos de código:
   ```bash
   deno fmt 'src/**/*.ts' 'tests/**/*.ts' 'main.ts'

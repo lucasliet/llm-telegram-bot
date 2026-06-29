@@ -1,6 +1,5 @@
 import { assertEquals } from 'asserts';
 import { MockKvStore } from '../test_helpers.ts';
-import { compressObject } from 'textcompress';
 
 const mockKv = new MockKvStore();
 const originalOpenKv = Deno.openKv;

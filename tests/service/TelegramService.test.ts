@@ -31,13 +31,6 @@ Deno.test('TelegramService', async (t) => {
 	const originalSetTimeout = globalThis.setTimeout;
 	const originalClearTimeout = globalThis.clearTimeout;
 
-	const handlers = {
-		handleOpenAI: spy(() => Promise.resolve()),
-		handlePerplexity: spy(() => Promise.resolve()),
-		handleCloudflare: spy(() => Promise.resolve()),
-		handleGemini: spy(() => Promise.resolve()),
-	};
-
 	const originalHandlers = {
 		handleOpenAI: globalThis.handleOpenAI,
 		handlePerplexity: globalThis.handlePerplexity,

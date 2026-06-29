@@ -1,7 +1,5 @@
 import { Context } from 'grammy';
 import { Audio, InputFile, PhotoSize, Voice } from 'grammy-types';
-import { getCurrentModel } from '@/repository/ChatRepository.ts';
-import OpenAiService from '@/service/openai/OpenAIService.ts';
 import CloudFlareService from '@/service/openai/CloudFlareService.ts';
 import ElevenLabsService from '@/service/ElevenLabsService.ts';
 const getToken = () => Deno.env.get('BOT_TOKEN') as string;
@@ -45,14 +43,12 @@ export const FileUtils = {
 	 * @returns Transcribed text
 	 */
 	async transcribeAudio(
-		userId: number,
-		userKey: string,
+		_userId: number,
+		_userKey: string,
 		ctx: Context,
 		audio: Voice,
 	): Promise<string> {
 		const audioUrl: string = await this.getTelegramFilesUrl(ctx, [audio])[0];
-		const isGptModelCommand = '/gpt' === await getCurrentModel(userKey);
-
 		const audioFile: Promise<Uint8Array> = this.downloadTelegramFile(audioUrl);
 
 		try {

@@ -2,7 +2,7 @@ import { CoreMessage, streamText } from 'ai';
 import { createGoogleGenerativeAI, GoogleGenerativeAIProvider } from '@ai-sdk/google';
 
 import OpenAI from 'openai';
-import { getChatHistory, addContentToChatHistory } from '@/repository/ChatRepository.ts';
+import { addContentToChatHistory, getChatHistory } from '@/repository/ChatRepository.ts';
 import { getSystemPrompt, StreamReplyResponse } from '@/util/ChatConfigUtil.ts';
 
 const getGeminiApiKey = () => Deno.env.get('GEMINI_API_KEY') as string;
@@ -57,8 +57,7 @@ export default class GeminiService {
 		const transformedStream = textStream.pipeThrough(transformStream);
 		const reader = transformedStream.getReader();
 
-		const onComplete = (completedAnswer: string) =>
-			addContentToChatHistory(historyForUpdate, originalPrompt, completedAnswer, userKey);
+		const onComplete = (completedAnswer: string) => addContentToChatHistory(historyForUpdate, originalPrompt, completedAnswer, userKey);
 
 		return { reader, onComplete };
 	}

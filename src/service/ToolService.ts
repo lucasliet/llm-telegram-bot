@@ -37,9 +37,9 @@ export default class ToolService {
 	/**
 	 * Maps function schemas to their corresponding functions.
 	 */
-	// deno-lint-ignore ban-types
 	static tools = new Map<
 		string,
+		// deno-lint-ignore ban-types
 		{ schema: OpenAi.ChatCompletionTool; fn: Function }
 	>([
 		[
@@ -620,7 +620,6 @@ export default class ToolService {
 					if (!/^[\d+\-*/().\s]+$/.test(expression)) {
 						throw new Error('Invalid characters in expression');
 					}
-					// deno-lint-ignore no-new-func
 					const result = new Function(`return ${expression}`)();
 					return String(result);
 				},

@@ -24,10 +24,10 @@ jobs:
       issues: read
       id-token: write
       actions: read # Required for Claude to read CI results on PRs
-    
+
     env:
       ANTHROPIC_BASE_URL: https://api.z.ai/api/anthropic
-      API_TIMEOUT_MS: "3000000"
+      API_TIMEOUT_MS: '3000000'
 
     steps:
       - name: Checkout repository
@@ -40,7 +40,7 @@ jobs:
         uses: anthropics/claude-code-action@v1
         with:
           anthropic_api_key: ${{ secrets.ZAI_API_KEY }}
-          
+
           # This is an optional setting that allows Claude to read CI results on PRs
           additional_permissions: |
             actions: read
@@ -52,4 +52,3 @@ jobs:
           # See https://github.com/anthropics/claude-code-action/blob/main/docs/usage.md
           # or https://docs.claude.com/en/docs/claude-code/sdk#command-line for available options
           # claude_args: '--model claude-opus-4-1-20250805 --allowed-tools Bash(gh pr:*)'
-

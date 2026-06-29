@@ -3,7 +3,6 @@ import { assertSpyCalls, spy } from 'mock';
 import '../../src/prototype/StringExtensionPrototype.ts';
 import { Context } from 'grammy';
 
-
 Deno.env.set('ADMIN_USER_IDS', '123');
 
 /**
@@ -66,7 +65,7 @@ Deno.test('replyInChunks fallback removes Markdown when reply fails', async () =
 	let first = true;
 	const calls: any[] = [];
 	const ctx = createContext({
-		replyWithQuote: spy((text: string, cfg?: any) => {
+		replyWithQuote: spy((_text: string, cfg?: any) => {
 			calls.push(cfg);
 			if (first) {
 				first = false;

@@ -81,12 +81,12 @@ export function createMockContext(options: {
 export class MockKvStore {
 	private store = new Map<string, unknown>();
 
-	async get(key: unknown): Promise<{ value: unknown }> {
+	get(key: unknown): { value: unknown } {
 		const keyStr = this.stringifyKey(key);
 		return { value: this.store.get(keyStr) };
 	}
 
-	async set(key: unknown, value: unknown, options = {}): Promise<{ ok: true }> {
+	set(key: unknown, value: unknown, _options = {}): { ok: true } {
 		const keyStr = this.stringifyKey(key);
 		this.store.set(keyStr, value);
 		return { ok: true };

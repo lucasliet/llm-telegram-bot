@@ -59,11 +59,11 @@ export default class OpenAiService {
 						this.maxTokens,
 					),
 				},
-			...geminiHistory,
-			{
-				role: 'user',
-				content: [
-					{ type: 'text', text: requestPrompt },
+				...geminiHistory,
+				{
+					role: 'user',
+					content: [
+						{ type: 'text', text: requestPrompt },
 						...urls.map(
 							(photoUrl) => ({
 								type: 'image_url',
@@ -79,8 +79,7 @@ export default class OpenAiService {
 
 		const reader = completion.toReadableStream().getReader() as ReadableStreamDefaultReader<Uint8Array>;
 
-		const onComplete = (completedAnswer: string) =>
-			addContentToChatHistory(geminiHistory, requestPrompt, completedAnswer, userKey);
+		const onComplete = (completedAnswer: string) => addContentToChatHistory(geminiHistory, requestPrompt, completedAnswer, userKey);
 
 		return { reader, onComplete, responseMap };
 	}
@@ -92,8 +91,6 @@ export default class OpenAiService {
 	): Promise<StreamReplyResponse> {
 		let geminiHistory = await getChatHistory(userKey);
 		const requestPrompt = quote ? `quote: "${quote}"\n\n${prompt}` : prompt;
-
-
 
 		const { history, didCompress } = await ContextCompressorService.compressIfNeeded(
 			geminiHistory,
@@ -122,8 +119,6 @@ export default class OpenAiService {
 
 		const onComplete = (completedAnswer: string) => addContentToChatHistory(geminiHistory, requestPrompt, completedAnswer, userKey);
 
-
-
 		return { reader, onComplete, responseMap, isCompressed: didCompress };
 	}
 
@@ -141,8 +136,6 @@ export default class OpenAiService {
 	): Promise<StreamReplyResponse> {
 		let geminiHistory = await getChatHistory(userKey);
 		const requestPrompt = quote ? `quote: "${quote}"\n\n${prompt}` : prompt;
-
-
 
 		const { history, didCompress } = await ContextCompressorService.compressIfNeeded(
 			geminiHistory,
@@ -168,8 +161,6 @@ export default class OpenAiService {
 		const reader = await this.executeAgentLoopForResponsesAPI(input, requestPrompt);
 
 		const onComplete = (completedAnswer: string) => addContentToChatHistory(geminiHistory, requestPrompt, completedAnswer, userKey);
-
-
 
 		return { reader, onComplete, responseMap: responsesResponseMap, isCompressed: didCompress };
 	}
