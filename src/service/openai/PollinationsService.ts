@@ -24,6 +24,6 @@ export default class PollinationsService extends OpenAiService {
 	public generateImageUrl(prompt: string): string {
 		const encodedPrompt = encodeURIComponent(prompt);
 		const seed = Math.floor(Math.random() * 1_000_000);
-		return `https://image.pollinations.ai/prompt/${encodedPrompt}?width=720&height=1280&seed=${seed}&enhance=true&nologo=true&model=${IMAGE_MODEL}`;
+		return `https://image.pollinations.ai/prompt/${encodedPrompt}?width=1024&height=1024&seed=${seed}&enhance=true&nologo=true&model=${IMAGE_MODEL}`;
 	}
 }
