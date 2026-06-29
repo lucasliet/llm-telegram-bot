@@ -59,7 +59,7 @@ function registerBotCommands() {
 	});
 
 	BOT.hears(
-		/^(kimi|cloudflareImage|image):/gi,
+		/^(kimi|cloudflareImage):/gi,
 		(ctx) => TelegramService.callAdminModel(ctx, TelegramService.callCloudflareModel),
 	);
 	BOT.hears(
@@ -93,13 +93,8 @@ function registerBotCommands() {
 	);
 
 	BOT.hears(
-		/^(polli):/gi,
+		/^(polli|image):/gi,
 		(ctx) => TelegramService.callAdminModel(ctx, TelegramService.callPollinationsModel),
-	);
-
-	BOT.hears(
-		/^(artaImage):/gi,
-		(ctx) => TelegramService.callAdminModel(ctx, TelegramService.callArtaModel),
 	);
 	BOT.hears(
 		/^(zai|glm|glmflash):/gi,

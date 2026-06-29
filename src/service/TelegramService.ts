@@ -7,7 +7,6 @@ import { ModelCommand, modelCommands, WHITELISTED_MODELS } from '@/config/models
 import { escapeMarkdownV1 } from '@/util/MarkdownUtils.ts';
 
 import {
-	handleArta,
 	handleCloudflare,
 	handleFala,
 	handleGemini,
@@ -259,9 +258,6 @@ Interações Premium:
 	},
 	callGeminiModel(ctx: Context, commandMessage?: string): Promise<void> {
 		return handleGemini(ctx, commandMessage);
-	},
-	callArtaModel(ctx: Context, commandMessage?: string): Promise<void> {
-		return handleArta(ctx, commandMessage);
 	},
 	callFala(ctx: Context, commandMessage?: string): Promise<void> {
 		return handleFala(ctx, new GithubCopilotService(), commandMessage);
