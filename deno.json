@@ -28,7 +28,7 @@
 		"ai": "npm:ai",
 		"@ai-sdk/google": "npm:@ai-sdk/google",
 		"fast-xml-parser": "npm:fast-xml-parser",
-		"node-html-parser": "npm:node-html-parser",
+		"node-html-parser": "npm:node-html-parser@7.0.1",
 		"@/": "./src/"
 	},
 	"lint": {
