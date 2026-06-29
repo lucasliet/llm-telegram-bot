@@ -93,6 +93,11 @@ function registerBotCommands() {
 	);
 
 	BOT.hears(
+		/^(polli):/gi,
+		(ctx) => TelegramService.callAdminModel(ctx, TelegramService.callPollinationsModel),
+	);
+
+	BOT.hears(
 		/^(artaImage):/gi,
 		(ctx) => TelegramService.callAdminModel(ctx, TelegramService.callArtaModel),
 	);

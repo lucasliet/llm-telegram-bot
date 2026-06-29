@@ -67,13 +67,13 @@ export async function overwriteChatHistory(userKey: string, history: OpenAI.Chat
 /**
  * Set user's current model preference
  */
-export async function setCurrentModel(userKey: string, model: ModelCommand = '/free'): Promise<void> {
+export async function setCurrentModel(userKey: string, model: ModelCommand = '/polli'): Promise<void> {
 	await kv.set([userKey, 'current_model'], model);
 }
 
 /**
- * Get user's current model preference (defaults to /free)
+ * Get user's current model preference (defaults to /polli)
  */
 export async function getCurrentModel(userKey: string): Promise<ModelCommand> {
-	return (await kv.get<ModelCommand>([userKey, 'current_model'])).value || '/free';
+	return (await kv.get<ModelCommand>([userKey, 'current_model'])).value || '/polli';
 }

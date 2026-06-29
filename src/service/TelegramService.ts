@@ -16,6 +16,7 @@ import {
 	handleOpenRouter,
 	handleOpenWebUI,
 	handlePerplexity,
+	handlePollinations,
 	handleVertex,
 	handleZai,
 } from '@/handlers/index.ts';
@@ -213,6 +214,7 @@ Interações Premium:
 		const currentModel = await getCurrentModel(userKey);
 
 		const modelHandlers: Record<ModelCommand, () => Promise<void>> = {
+			'/polli': () => handlePollinations(ctx, `polli: ${message}`),
 			'/gpt': () => handleGithubCopilot(ctx, `gpt: ${message}`),
 			'/kimi': () => handleCloudflare(ctx, `kimi: ${message}`),
 			'/gemini': () => handleVertex(ctx, `gemini: ${message}`),
@@ -251,6 +253,9 @@ Interações Premium:
 	},
 	callOpenWebUIModel(ctx: Context, commandMessage?: string): Promise<void> {
 		return handleOpenWebUI(ctx, commandMessage);
+	},
+	callPollinationsModel(ctx: Context, commandMessage?: string): Promise<void> {
+		return handlePollinations(ctx, commandMessage);
 	},
 	callGeminiModel(ctx: Context, commandMessage?: string): Promise<void> {
 		return handleGemini(ctx, commandMessage);

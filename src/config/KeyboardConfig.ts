@@ -6,7 +6,7 @@ import { InlineKeyboard } from 'grammy';
 const adminCommandButtons = [
 	[['Modelo Atual', '/currentmodel']],
 	[
-		['Kimi K2.7 Code', '/kimi'],
+		['Pollinations', '/polli'],
 		['Openrouter Free', '/free'],
 	],
 	[
@@ -25,7 +25,10 @@ const adminCommandButtons = [
  */
 const userCommandButtons = [
 	[['Modelo Atual', '/currentmodel']],
-	[['Free Models Router', '/free']],
+	[
+		['Pollinations', '/polli'],
+		['Free Models Router', '/free'],
+	],
 	[['Limpar Histórico', '/clear']],
 ];
 
@@ -43,6 +46,7 @@ export const userKeyboard = InlineKeyboard.from(
 export const adminHelpMessage = `*Comandos inline*:
 \\- \`cloudflareImage:\` mensagem \\- Gera imagens com __Stable Diffusion__
 \\- \`gptImage:\` mensagem \\- Gera imagens com __DALL\\-e__
+\\- \`polli:\` mensagem \\- Faz uma pergunta usando o modelo __Pollinations__
 \\- \`kimi:\` mensagem \\- Faz uma pergunta usando o modelo __Kimi K2\\.7 Code__ pela __Cloudflare__
 \\- \`gpt:\` mensagem \\- Gera texto com __GPT 5 mini__ pelo __Copilot__
 \\- \`free:\` mensagem \\- Faz uma pergunta usando o modelo gratuito do *OpenRouter*
@@ -61,6 +65,7 @@ export const adminHelpMessage = `*Comandos inline*:
  * Help message for regular users (limited commands)
  */
 export const userHelpMessage = `*Comandos inline*:
+\\- \`polli:\` mensagem \\- Faz uma pergunta usando o modelo __Pollinations__
 \\- \`free:\` mensagem \\- Faz uma pergunta usando o modelo gratuito do *OpenRouter*
 
 *Seleção de modelos de linguagem*:`;

@@ -6,6 +6,7 @@ export { handleOpenRouter } from './OpenRouterHandler.ts';
 export { handlePerplexity } from './PerplexityHandler.ts';
 export { handleGithubCopilot } from './GithubCopilotHandler.ts';
 export { handleOpenWebUI } from './OpenWebUIHandler.ts';
+export { handlePollinations } from './PollinationsHandler.ts';
 export { handleArta } from './ArtaHandler.ts';
 export { handleFala } from './ElevenlabsHandler.ts';
 export { handleZai } from './ZaiHandler.ts';

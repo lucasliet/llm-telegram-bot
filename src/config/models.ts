@@ -31,6 +31,10 @@ export const copilotModels = {
 
 export const openWebUiModels = {};
 
+export const pollinationsModels = {
+	default: 'openai',
+};
+
 export const zaiModels = {
 	flash: 'glm-5-turbo',
 	standard: 'glm-5.2',
@@ -40,6 +44,7 @@ export const zaiModels = {
  * Type definitions
  */
 export const MODEL_COMMANDS = [
+	'/polli',
 	'/gpt',
 	'/kimi',
 	'/zai',
@@ -47,7 +52,7 @@ export const MODEL_COMMANDS = [
 	'/glmflash',
 	'/free',
 	'/gemini',
-	'/geminiPro'
+	'/geminiPro',
 ] as const;
 
 /**
@@ -57,7 +62,8 @@ export type ModelCommand = typeof MODEL_COMMANDS[number];
 export const modelCommands = [...MODEL_COMMANDS] as ModelCommand[];
 
 export const WHITELISTED_MODELS: ModelCommand[] = [
-  '/free'
+	'/polli',
+	'/free',
 ];
 
 export const MODELS_USING_RESPONSES_API: string[] = [
@@ -68,5 +74,5 @@ export const MODELS_USING_RESPONSES_API: string[] = [
 	'gpt-5.2-codex',
 	'gpt-5.4',
 	'gpt-5.4-mini',
-	'gpt-5.5'
+	'gpt-5.5',
 ];
