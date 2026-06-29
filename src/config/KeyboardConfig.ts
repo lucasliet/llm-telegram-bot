@@ -44,9 +44,9 @@ export const userKeyboard = InlineKeyboard.from(
  * Help message for admin users (all commands)
  */
 export const adminHelpMessage = `*Comandos inline*:
-\- \`image:\` mensagem \- Gera imagens com __Pollinations__
-\- \`cloudflareImage:\` mensagem \- Gera imagens com __Stable Diffusion__
-\- \`gptImage:\` mensagem \- Gera imagens com __DALL\-e__
+\\- \`image:\` mensagem \\- Gera imagens com __Pollinations__
+\\- \`cloudflareImage:\` mensagem \\- Gera imagens com __Stable Diffusion__
+\\- \`gptImage:\` mensagem \\- Gera imagens com __DALL\\-e__
 \\- \`polli:\` mensagem \\- Faz uma pergunta usando o modelo __Pollinations__
 \\- \`kimi:\` mensagem \\- Faz uma pergunta usando o modelo __Kimi K2\\.7 Code__ pela __Cloudflare__
 \\- \`gpt:\` mensagem \\- Gera texto com __GPT 5 mini__ pelo __Copilot__
