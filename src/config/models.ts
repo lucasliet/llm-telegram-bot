@@ -40,6 +40,10 @@ export const zaiModels = {
 	standard: 'glm-5.2',
 };
 
+export const opencodeModels = {
+	freeModel: 'deepseek-v4-flash-free',
+};
+
 /**
  * Type definitions
  */
@@ -51,6 +55,7 @@ export const MODEL_COMMANDS = [
 	'/glm',
 	'/glmflash',
 	'/free',
+	'/opencode',
 	'/gemini',
 	'/geminiPro',
 ] as const;
@@ -64,6 +69,7 @@ export const modelCommands = [...MODEL_COMMANDS] as ModelCommand[];
 export const WHITELISTED_MODELS: ModelCommand[] = [
 	'/polli',
 	'/free',
+	'/opencode',
 ];
 
 export const MODELS_USING_RESPONSES_API: string[] = [

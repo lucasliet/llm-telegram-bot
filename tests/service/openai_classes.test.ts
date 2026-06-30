@@ -34,6 +34,8 @@ Deno.test(
 			const Cloudflare = (
 				await import('../../src/service/openai/CloudFlareService.ts')
 			).default;
+			const Opencode = (await import('../../src/service/openai/OpencodeService.ts'))
+				.default;
 
 			const g = new (Gemini as any)();
 			const w = new (OpenWebUI as any)();
@@ -41,6 +43,7 @@ Deno.test(
 			const p = new (Perplexity as any)('/perplexity');
 			const c = new (GithubCopilot as any)();
 			const cf = new (Cloudflare as any)();
+			const oc = new (Opencode as any)();
 
 			assertEquals(typeof g, 'object');
 			assertEquals(typeof w, 'object');
@@ -48,6 +51,7 @@ Deno.test(
 			assertEquals(typeof p, 'object');
 			assertEquals(typeof c, 'object');
 			assertEquals(typeof cf, 'object');
+			assertEquals(typeof oc, 'object');
 		} finally {
 			Deno.env.get = env;
 			kvCleanup();

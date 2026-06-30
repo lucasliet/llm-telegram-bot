@@ -12,6 +12,7 @@ import {
 	handleGemini,
 	handleGithubCopilot,
 	handleOpenAI,
+	handleOpencode,
 	handleOpenRouter,
 	handleOpenWebUI,
 	handlePerplexity,
@@ -222,6 +223,7 @@ Interações Premium:
 			'/glm': () => handleZai(ctx, `glm: ${message}`),
 			'/glmflash': () => handleZai(ctx, `glmflash: ${message}`),
 			'/free': () => handleOpenRouter(ctx, `free: ${message}`),
+			'/opencode': () => handleOpencode(ctx, `opencode: ${message}`),
 		};
 
 		const handler = modelHandlers[currentModel];
@@ -246,6 +248,9 @@ Interações Premium:
 	},
 	callOpenRouterModel(ctx: Context, commandMessage?: string): Promise<void> {
 		return handleOpenRouter(ctx, commandMessage);
+	},
+	callOpencodeModel(ctx: Context, commandMessage?: string): Promise<void> {
+		return handleOpencode(ctx, commandMessage);
 	},
 	callGithubCopilotModel(ctx: Context, commandMessage?: string): Promise<void> {
 		return handleGithubCopilot(ctx, commandMessage);

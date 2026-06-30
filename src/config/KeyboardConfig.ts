@@ -8,6 +8,7 @@ const adminCommandButtons = [
 	[
 		['Pollinations', '/polli'],
 		['Openrouter Free', '/free'],
+		['Opencode Free', '/opencode'],
 	],
 	[
 		['Gemini 3 Flash', '/antigravity'],
@@ -28,6 +29,7 @@ const userCommandButtons = [
 	[
 		['Pollinations', '/polli'],
 		['Free Models Router', '/free'],
+		['Opencode Free', '/opencode'],
 	],
 	[['Limpar Histórico', '/clear']],
 ];
@@ -51,6 +53,7 @@ export const adminHelpMessage = `*Comandos inline*:
 \\- \`kimi:\` mensagem \\- Faz uma pergunta usando o modelo __Kimi K2\\.7 Code__ pela __Cloudflare__
 \\- \`gpt:\` mensagem \\- Gera texto com __GPT 5 mini__ pelo __Copilot__
 \\- \`free:\` mensagem \\- Faz uma pergunta usando o modelo gratuito do *OpenRouter*
+\\- \`opencode:\` mensagem \\- Faz uma pergunta usando o modelo gratuito do *OpenCode Zen*
 \\- \`gemini:\` mensagem \\- Faz uma pergunta usando o __Gemini 2\\.5 Flash__ pelo __Vertex AI__
 \\- \`geminiPro:\` mensagem \\- Faz uma pergunta usando o __Gemini 2\\.5 Pro__ pelo __Vertex AI__
 \\- \`search:\` mensagem \\- Faz uma pergunta usando o __Sonar__ pela __Perplexity__
@@ -68,5 +71,6 @@ export const adminHelpMessage = `*Comandos inline*:
 export const userHelpMessage = `*Comandos inline*:
 \\- \`polli:\` mensagem \\- Faz uma pergunta usando o modelo __Pollinations__
 \\- \`free:\` mensagem \\- Faz uma pergunta usando o modelo gratuito do *OpenRouter*
+\\- \`opencode:\` mensagem \\- Faz uma pergunta usando o modelo gratuito do *OpenCode Zen*
 
 *Seleção de modelos de linguagem*:`;
