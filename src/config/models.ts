@@ -44,6 +44,20 @@ export const opencodeModels = {
 	freeModel: 'deepseek-v4-flash-free',
 };
 
+export const screenpipeModels = {
+	auto: 'auto',
+	claudeHaiku: 'claude-haiku-4-5',
+	geminiFlash: 'gemini-2.5-flash',
+	gemini3Flash: 'gemini-3-flash',
+	gemini31FlashLite: 'gemini-3.1-flash-lite',
+	gemini35Flash: 'gemini-3.5-flash',
+	glm47: 'glm-4.7',
+	glm5: 'glm-5',
+	kimiK25: 'kimi-k2.5',
+	qwenFlash: 'qwen/qwen3.5-flash',
+	llamaScout: 'meta-llama/llama-4-scout',
+};
+
 /**
  * Type definitions
  */
@@ -56,6 +70,7 @@ export const MODEL_COMMANDS = [
 	'/glmflash',
 	'/free',
 	'/opencode',
+	'/screenpipe',
 	'/gemini',
 	'/geminiPro',
 ] as const;
@@ -70,6 +85,7 @@ export const WHITELISTED_MODELS: ModelCommand[] = [
 	'/polli',
 	'/free',
 	'/opencode',
+	'/screenpipe',
 ];
 
 export const MODELS_USING_RESPONSES_API: string[] = [

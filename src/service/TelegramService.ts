@@ -17,6 +17,7 @@ import {
 	handleOpenWebUI,
 	handlePerplexity,
 	handlePollinations,
+	handleScreenPipe,
 	handleVertex,
 	handleZai,
 } from '@/handlers/index.ts';
@@ -224,6 +225,7 @@ Interações Premium:
 			'/glmflash': () => handleZai(ctx, `glmflash: ${message}`),
 			'/free': () => handleOpenRouter(ctx, `free: ${message}`),
 			'/opencode': () => handleOpencode(ctx, `opencode: ${message}`),
+			'/screenpipe': () => handleScreenPipe(ctx, `screenpipe: ${message}`),
 		};
 
 		const handler = modelHandlers[currentModel];
@@ -251,6 +253,9 @@ Interações Premium:
 	},
 	callOpencodeModel(ctx: Context, commandMessage?: string): Promise<void> {
 		return handleOpencode(ctx, commandMessage);
+	},
+	callScreenPipeModel(ctx: Context, commandMessage?: string): Promise<void> {
+		return handleScreenPipe(ctx, commandMessage);
 	},
 	callGithubCopilotModel(ctx: Context, commandMessage?: string): Promise<void> {
 		return handleGithubCopilot(ctx, commandMessage);

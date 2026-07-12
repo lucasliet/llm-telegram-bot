@@ -7,8 +7,11 @@ const adminCommandButtons = [
 	[['Modelo Atual', '/currentmodel']],
 	[
 		['Pollinations', '/polli'],
-		['Openrouter Free', '/free'],
 		['Opencode Free', '/opencode'],
+	],
+	[
+		['Openrouter Free', '/free'],
+		['ScreenPipe Free', '/screenpipe'],
 	],
 	[
 		['Gemini 3 Flash', '/antigravity'],
@@ -28,8 +31,11 @@ const userCommandButtons = [
 	[['Modelo Atual', '/currentmodel']],
 	[
 		['Pollinations', '/polli'],
-		['Free Models Router', '/free'],
 		['Opencode Free', '/opencode'],
+	],
+	[
+		['Free Models Router', '/free'],
+		['ScreenPipe Free', '/screenpipe'],
 	],
 	[['Limpar Histórico', '/clear']],
 ];

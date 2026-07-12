@@ -98,6 +98,11 @@ function registerBotCommands() {
 	);
 
 	BOT.hears(
+		/^(screenpipe):/gi,
+		(ctx) => TelegramService.callAdminModel(ctx, TelegramService.callScreenPipeModel),
+	);
+
+	BOT.hears(
 		/^(polli|image):/gi,
 		(ctx) => TelegramService.callAdminModel(ctx, TelegramService.callPollinationsModel),
 	);
