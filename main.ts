@@ -191,9 +191,9 @@ async function initializeApp() {
 	configureMiddleware();
 
 	if (Deno.env.get('DENO_DEPLOYMENT_ID')) {
-		Deno.cron('Configure Telegram bot webhook', '0 0 * * *', async () => {
-			await TelegramService.setWebhook();
-		});
+		// Deno.cron('Configure Telegram bot webhook', '0 0 * * *', async () => {
+		// 	await TelegramService.setWebhook();
+		// });
 
 		APP.post('/webhook', async (c) => {
 			let update;
