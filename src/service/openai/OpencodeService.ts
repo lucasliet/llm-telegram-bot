@@ -13,14 +13,13 @@ const { freeModel } = opencodeModels;
  * only header the gateway accepts.
  */
 export default class OpencodeService extends OpenAiService {
-	public constructor(model: string = freeModel, supportTools = false) {
+	public constructor(model: string = freeModel) {
 		super(
 			new OpenAi({
 				apiKey: '',
 				baseURL: 'https://opencode.ai/zen/v1',
 			}),
 			model,
-			supportTools,
 		);
 	}
 }

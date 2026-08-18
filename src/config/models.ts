@@ -1,6 +1,5 @@
 export const geminiModels = {
-	geminiPro: 'gemini-3.1-pro-preview',
-	geminiFlash: 'gemini-3.1-flash-lite-preview',
+	geminiFlash: 'gemini-3.7-flash',
 };
 
 export const perplexityModels = {
@@ -27,42 +26,23 @@ export const cloudflareModels = {
 
 export const copilotModels = {
 	gpt5mini: 'gpt-5-mini',
-};
-
-export const openWebUiModels = {};
-
-export const pollinationsModels = {
-	default: 'openai',
+	gpt5: 'gpt-5.2',
+	claude: 'claude-sonnet-4.5',
 };
 
 export const zaiModels = {
 	flash: 'glm-5-turbo',
-	standard: 'glm-5.2',
+	standard: 'glm-5.3',
 };
 
 export const opencodeModels = {
 	freeModel: 'deepseek-v4-flash-free',
 };
 
-export const screenpipeModels = {
-	auto: 'auto',
-	claudeHaiku: 'claude-haiku-4-5',
-	geminiFlash: 'gemini-2.5-flash',
-	gemini3Flash: 'gemini-3-flash',
-	gemini31FlashLite: 'gemini-3.1-flash-lite',
-	gemini35Flash: 'gemini-3.5-flash',
-	glm47: 'glm-4.7',
-	glm5: 'glm-5',
-	kimiK25: 'kimi-k2.5',
-	qwenFlash: 'qwen/qwen3.5-flash',
-	llamaScout: 'meta-llama/llama-4-scout',
-};
-
 /**
  * Type definitions
  */
 export const MODEL_COMMANDS = [
-	'/polli',
 	'/gpt',
 	'/kimi',
 	'/zai',
@@ -70,9 +50,7 @@ export const MODEL_COMMANDS = [
 	'/glmflash',
 	'/free',
 	'/opencode',
-	'/screenpipe',
 	'/gemini',
-	'/geminiPro',
 ] as const;
 
 /**
@@ -82,10 +60,8 @@ export type ModelCommand = typeof MODEL_COMMANDS[number];
 export const modelCommands = [...MODEL_COMMANDS] as ModelCommand[];
 
 export const WHITELISTED_MODELS: ModelCommand[] = [
-	'/polli',
 	'/free',
 	'/opencode',
-	'/screenpipe',
 ];
 
 export const MODELS_USING_RESPONSES_API: string[] = [

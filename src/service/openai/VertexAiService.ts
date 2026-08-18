@@ -5,7 +5,7 @@ import { decodeBase64 } from 'base64';
 
 const getVertexCredentialsBase64 = () => Deno.env.get('VERTEX_CREDENTIALS_BASE64') as string;
 const getVertexProjectId = () => Deno.env.get('VERTEX_PROJECT_ID') as string;
-const getVertexLocation = () => Deno.env.get('VERTEX_LOCATION') || 'us-central1';
+const getVertexLocation = () => Deno.env.get('VERTEX_LOCATION') || 'global';
 
 /**
  * Gets access token using refresh token (ADC credentials from gcloud CLI)

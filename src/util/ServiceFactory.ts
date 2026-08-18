@@ -30,13 +30,6 @@ export function getServiceForCommand(command: ModelCommand): ServiceInfo {
 				maxTokens: 1048576,
 			};
 
-		case '/geminiPro':
-			return {
-				service: new VertexAiService(geminiModels.geminiPro),
-				model: geminiModels.geminiPro,
-				maxTokens: 2097152,
-			};
-
 		case '/gpt':
 			return {
 				service: new GithubCopilotService(copilotModels.gpt5mini),

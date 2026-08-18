@@ -3,7 +3,6 @@ import { createVisionHandler } from './HandlerUtils.ts';
 import { geminiModels } from '@/config/models.ts';
 
 const modelMap = {
-	'geminipro': geminiModels.geminiPro,
 	'gemini': geminiModels.geminiFlash,
 };
 

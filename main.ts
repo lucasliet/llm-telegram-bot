@@ -79,7 +79,7 @@ function registerBotCommands() {
 		(ctx) => TelegramService.callAdminModel(ctx, TelegramService.callGithubCopilotModel),
 	);
 	BOT.hears(
-		/^(geminiPro|gemini):/gi,
+		/^(gemini):/gi,
 		(ctx) => TelegramService.callAdminModel(ctx, TelegramService.callVertexModel),
 	);
 	BOT.hears(
@@ -97,15 +97,6 @@ function registerBotCommands() {
 		(ctx) => TelegramService.callAdminModel(ctx, TelegramService.callOpencodeModel),
 	);
 
-	BOT.hears(
-		/^(screenpipe):/gi,
-		(ctx) => TelegramService.callAdminModel(ctx, TelegramService.callScreenPipeModel),
-	);
-
-	BOT.hears(
-		/^(polli|image):/gi,
-		(ctx) => TelegramService.callAdminModel(ctx, TelegramService.callPollinationsModel),
-	);
 	BOT.hears(
 		/^(zai|glm|glmflash):/gi,
 		(ctx) => TelegramService.callAdminModel(ctx, TelegramService.callZaiModel),

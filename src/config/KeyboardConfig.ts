@@ -5,20 +5,13 @@ import { InlineKeyboard } from 'grammy';
  */
 const adminCommandButtons = [
 	[['Modelo Atual', '/currentmodel']],
-	[
-		['Pollinations', '/polli'],
-		['Opencode Free', '/opencode'],
-	],
+	[['Opencode Free', '/opencode']],
 	[
 		['Openrouter Free', '/free'],
-		['ScreenPipe Free', '/screenpipe'],
+		['Gemini 3.7 Flash', '/gemini'],
 	],
 	[
-		['Gemini 3 Flash', '/antigravity'],
-		['Gemini 3 Pro', '/antigeminipro'],
-	],
-	[
-		['GLM 5.2', '/glm'],
+		['GLM 5.3', '/glm'],
 		['GLM 5 Turbo', '/glmflash'],
 	],
 	[['Limpar Histórico', '/clear']],
@@ -29,14 +22,8 @@ const adminCommandButtons = [
  */
 const userCommandButtons = [
 	[['Modelo Atual', '/currentmodel']],
-	[
-		['Pollinations', '/polli'],
-		['Opencode Free', '/opencode'],
-	],
-	[
-		['Free Models Router', '/free'],
-		['ScreenPipe Free', '/screenpipe'],
-	],
+	[['Opencode Free', '/opencode']],
+	[['Free Models Router', '/free']],
 	[['Limpar Histórico', '/clear']],
 ];
 
@@ -52,16 +39,13 @@ export const userKeyboard = InlineKeyboard.from(
  * Help message for admin users (all commands)
  */
 export const adminHelpMessage = `*Comandos inline*:
-\\- \`image:\` mensagem \\- Gera imagens com __Pollinations__
 \\- \`cloudflareImage:\` mensagem \\- Gera imagens com __Stable Diffusion__
 \\- \`gptImage:\` mensagem \\- Gera imagens com __DALL\\-e__
-\\- \`polli:\` mensagem \\- Faz uma pergunta usando o modelo __Pollinations__
 \\- \`kimi:\` mensagem \\- Faz uma pergunta usando o modelo __Kimi K2\\.7 Code__ pela __Cloudflare__
 \\- \`gpt:\` mensagem \\- Gera texto com __GPT 5 mini__ pelo __Copilot__
 \\- \`free:\` mensagem \\- Faz uma pergunta usando o modelo gratuito do *OpenRouter*
 \\- \`opencode:\` mensagem \\- Faz uma pergunta usando o modelo gratuito do *OpenCode Zen*
-\\- \`gemini:\` mensagem \\- Faz uma pergunta usando o __Gemini 2\\.5 Flash__ pelo __Vertex AI__
-\\- \`geminiPro:\` mensagem \\- Faz uma pergunta usando o __Gemini 2\\.5 Pro__ pelo __Vertex AI__
+\\- \`gemini:\` mensagem \\- Faz uma pergunta usando o __Gemini 3\\.7 Flash__ pelo __Vertex AI__
 \\- \`search:\` mensagem \\- Faz uma pergunta usando o __Sonar__ pela __Perplexity__
 \\- \`reasonSearch:\` mensagem \\- Faz uma pergunta usando o __Sonar Reasoning Pro__
 \\- \`zai:\` mensagem \\- Faz uma pergunta usando o __GLM 4\\.7 Flash__ pelo __Zai__
@@ -75,7 +59,6 @@ export const adminHelpMessage = `*Comandos inline*:
  * Help message for regular users (limited commands)
  */
 export const userHelpMessage = `*Comandos inline*:
-\\- \`polli:\` mensagem \\- Faz uma pergunta usando o modelo __Pollinations__
 \\- \`free:\` mensagem \\- Faz uma pergunta usando o modelo gratuito do *OpenRouter*
 \\- \`opencode:\` mensagem \\- Faz uma pergunta usando o modelo gratuito do *OpenCode Zen*
 

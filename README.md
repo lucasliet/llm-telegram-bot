@@ -18,16 +18,16 @@ esse projeto utiliza o [Deno deploy](https://deno.com/deploy) e [Deno kv](https:
 | Provedor       | Comando Inline                           | Modelo                                   | Ferramentas |
 | -------------- | ---------------------------------------- | ---------------------------------------- | ----------- |
 | OpenRouter     | `free:`                                  | Gratuito (varia)                         | Sim         |
+| OpenCode Zen   | `opencode:`                              | DeepSeek V4 Flash (gratuito)             | Sim         |
 | GitHub Copilot | `gpt:` / `gpt5:` / `claude:`             | GPT 5 mini / GPT 5.2 / Claude Sonnet 4.5 | Sim         |
 | Cloudflare     | `kimi:`                                  | Kimi K2.7 Code                           | Nao         |
-| Vertex AI      | `gemini:` / `geminiPro:`                 | Gemini 3.1 Flash Lite / Gemini 3.1 Pro   | Sim         |
+| Vertex AI      | `gemini:`                                | Gemini 3.7 Flash                         | Sim         |
 | Perplexity     | `perplexity:` / `search:`                | Sonar                                    | Nao         |
 | Perplexity     | `reasonSearch:`                          | Sonar Reasoning Pro                      | Nao         |
 | OpenWebUI      | `pgpt:` / `pgrok:` / `po3:` / `pclaude:` | PPLX models                              | Nao         |
-| Zai            | `zai:` / `glmflash:` / `glm:`            | GLM 5 Turbo / GLM 5.2                    | Sim         |
+| Zai            | `zai:` / `glmflash:` / `glm:`            | GLM 5 Turbo / GLM 5.3                    | Sim         |
 | DALL-E         | `gptImage:`                              | DALL-E 3                                 | -           |
 | Cloudflare     | `cloudflareImage:`                       | Stable Diffusion                         | -           |
-| Arta           | `artaImage:`                             | Arta                                     | -           |
 | ElevenLabs     | `fala:`                                  | TTS                                      | -           |
 
 ## Uso Local
@@ -54,7 +54,7 @@ esse projeto utiliza o [Deno deploy](https://deno.com/deploy) e [Deno kv](https:
     Copilot no [neovim](https://github.com/zbirenbaum/copilot.lua) e extraia o token do arquivo `~/.config/github-copilot/apps.json`.
   - `VERTEX_CREDENTIALS_BASE64` - credenciais do [Vertex AI](https://cloud.google.com/vertex-ai) em base64 (service account ou ADC)
   - `VERTEX_PROJECT_ID` - ID do projeto GCP para o Vertex AI
-  - `VERTEX_LOCATION` - região do Vertex AI (padrão: `us-central1`)
+  - `VERTEX_LOCATION` - região do Vertex AI (padrão: `global`)
   - `OPENWEBUI_API_KEY` - api key do [OpenWebUI](https://openwebui.com/)
 
 - crie um arquivo .env na raiz do projeto e configure as variaveis de ambiente nele, no formato `VARIAVEL=valor`
@@ -96,8 +96,6 @@ Os testes estão organizados na pasta `tests/` e seguem a mesma estrutura do có
 - `tests/service/` - Testes para os serviços que interagem com APIs externas
 - `tests/repository/` - Testes para o acesso e armazenamento de dados
 - `tests/handlers/` - Testes para os handlers que processam comandos específicos
-
-Para mais informações sobre os testes, consulte o [README dos testes](./tests/README.md).
 
 ### Integração Contínua
 

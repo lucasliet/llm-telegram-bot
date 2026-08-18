@@ -6,7 +6,7 @@ const originalOpenKv = Deno.openKv;
 Deno.openKv = () => Promise.resolve(mockKv as unknown as Deno.Kv);
 
 const userKey = 'user:12345';
-const testModel = '/polli';
+const testModel = '/free';
 
 Deno.test('ChatRepository', async (t) => {
 	const {
@@ -88,7 +88,7 @@ Deno.test('ChatRepository', async (t) => {
 			resetKv();
 
 			let model = await getCurrentModel(userKey);
-			assertEquals(model, '/polli');
+			assertEquals(model, '/free');
 
 			await setCurrentModel(userKey, testModel);
 

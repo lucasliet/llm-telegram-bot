@@ -16,8 +16,6 @@ import {
 	handleOpenRouter,
 	handleOpenWebUI,
 	handlePerplexity,
-	handlePollinations,
-	handleScreenPipe,
 	handleVertex,
 	handleZai,
 } from '@/handlers/index.ts';
@@ -215,17 +213,14 @@ Interações Premium:
 		const currentModel = await getCurrentModel(userKey);
 
 		const modelHandlers: Record<ModelCommand, () => Promise<void>> = {
-			'/polli': () => handlePollinations(ctx, `polli: ${message}`),
 			'/gpt': () => handleGithubCopilot(ctx, `gpt: ${message}`),
 			'/kimi': () => handleCloudflare(ctx, `kimi: ${message}`),
 			'/gemini': () => handleVertex(ctx, `gemini: ${message}`),
-			'/geminiPro': () => handleVertex(ctx, `geminiPro: ${message}`),
 			'/zai': () => handleZai(ctx, `zai: ${message}`),
 			'/glm': () => handleZai(ctx, `glm: ${message}`),
 			'/glmflash': () => handleZai(ctx, `glmflash: ${message}`),
 			'/free': () => handleOpenRouter(ctx, `free: ${message}`),
 			'/opencode': () => handleOpencode(ctx, `opencode: ${message}`),
-			'/screenpipe': () => handleScreenPipe(ctx, `screenpipe: ${message}`),
 		};
 
 		const handler = modelHandlers[currentModel];
@@ -254,20 +249,17 @@ Interações Premium:
 	callOpencodeModel(ctx: Context, commandMessage?: string): Promise<void> {
 		return handleOpencode(ctx, commandMessage);
 	},
-	callScreenPipeModel(ctx: Context, commandMessage?: string): Promise<void> {
-		return handleScreenPipe(ctx, commandMessage);
-	},
 	callGithubCopilotModel(ctx: Context, commandMessage?: string): Promise<void> {
 		return handleGithubCopilot(ctx, commandMessage);
 	},
 	callOpenWebUIModel(ctx: Context, commandMessage?: string): Promise<void> {
 		return handleOpenWebUI(ctx, commandMessage);
 	},
-	callPollinationsModel(ctx: Context, commandMessage?: string): Promise<void> {
-		return handlePollinations(ctx, commandMessage);
-	},
 	callGeminiModel(ctx: Context, commandMessage?: string): Promise<void> {
 		return handleGemini(ctx, commandMessage);
+	},
+	callVertexModel(ctx: Context, commandMessage?: string): Promise<void> {
+		return handleVertex(ctx, commandMessage);
 	},
 	callFala(ctx: Context, commandMessage?: string): Promise<void> {
 		return handleFala(ctx, new GithubCopilotService(), commandMessage);

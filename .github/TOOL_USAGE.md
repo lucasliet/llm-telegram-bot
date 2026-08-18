@@ -5,7 +5,7 @@ Abaixo estão as instruções para configurar e utilizar essa funcionalidade.
 
 ## Utilização
 
-1. Envie uma mensagem para o bot especificando o provedor e o modelo que deseja utilizar. Por exemplo: `duckgo: quanto está o dolar hoje?`
+1. Envie uma mensagem para o bot especificando o provedor e o modelo que deseja utilizar. Por exemplo: `gpt: quanto está o dolar hoje?`
 
 2. O bot utilizará o `searxng` para obter respostas atualizadas e retornará a resposta para você.
 
@@ -15,7 +15,7 @@ Abaixo estão as instruções para configurar e utilizar essa funcionalidade.
 - OpenRouter Service `src/service/openai/OpenrouterService.ts`
 - GitHub Service `src/service/openai/GithubService.ts`
 - OpenAI Service `src/service/openai/OpenAIService.ts`
-- Antigravity Service `src/service/openai/AntigravityService.ts` (usa formato Gemini nativo, ver [ANTIGRAVITY.md](./ANTIGRAVITY.md))
+- OpenCode Zen Service `src/service/openai/OpencodeService.ts`
 
 ## Observações
 
