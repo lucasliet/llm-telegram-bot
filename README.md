@@ -18,7 +18,7 @@ esse projeto utiliza o [Deno deploy](https://deno.com/deploy) e [Deno kv](https:
 | Provedor       | Comando Inline                           | Modelo                                   | Ferramentas |
 | -------------- | ---------------------------------------- | ---------------------------------------- | ----------- |
 | OpenRouter     | `free:`                                  | Gratuito (varia)                         | Sim         |
-| OpenCode Zen   | `opencode:`                              | DeepSeek V4 Flash (gratuito)             | Sim         |
+| OpenCode Zen   | `opencode:`                              | Mimo v2.5 (gratuito)                     | Sim         |
 | GitHub Copilot | `gpt:` / `gpt5:` / `claude:`             | GPT 5 mini / GPT 5.2 / Claude Sonnet 4.5 | Sim         |
 | Cloudflare     | `kimi:`                                  | Kimi K2.7 Code                           | Nao         |
 | Vertex AI      | `gemini:`                                | Gemini 3.7 Flash                         | Sim         |
