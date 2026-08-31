@@ -1,4 +1,5 @@
 import { assertEquals } from 'asserts';
+import { assignOpenKv } from '../stubs/kv.ts';
 import '../../src/prototype/ReadableStreamDefaultReaderPrototype.ts';
 let ToolUsageAdapter: any;
 let AdapterClass: any;
@@ -21,7 +22,7 @@ function readerFromChunks(chunks: string[]) {
 
 Deno.test('modifyMessagesWithToolInfo converts tool message and appends tools info', async () => {
 	const originalOpenKv = Deno.openKv;
-	Deno.openKv = () =>
+	assignOpenKv(() =>
 		Promise.resolve(
 			{
 				get: () => Promise.resolve({ value: undefined }),
@@ -29,7 +30,8 @@ Deno.test('modifyMessagesWithToolInfo converts tool message and appends tools in
 				delete: () => Promise.resolve({ ok: true }),
 				close: () => Promise.resolve(),
 			} as any,
-		);
+		)
+	);
 	({ default: ToolUsageAdapter, ToolUsageAdapter: AdapterClass } = await import('../../src/adapter/ToolUsageAdapter.ts'));
 	const messages = [
 		{ role: 'user', content: 'hi' } as any,
@@ -44,12 +46,12 @@ Deno.test('modifyMessagesWithToolInfo converts tool message and appends tools in
 	const lastUser = modified[modified.length - 1] as any;
 	const ok = toolMsg && typeof (toolMsg as any).content === 'string' && lastUser.content.includes('You have access to the following tools');
 	assertEquals(!!ok, true);
-	Deno.openKv = originalOpenKv;
+	assignOpenKv(originalOpenKv);
 });
 
 Deno.test('mapResponse formats as OpenAI chunk when requested', async () => {
 	const originalOpenKv = Deno.openKv;
-	Deno.openKv = () =>
+	assignOpenKv(() =>
 		Promise.resolve(
 			{
 				get: () => Promise.resolve({ value: undefined }),
@@ -57,19 +59,20 @@ Deno.test('mapResponse formats as OpenAI chunk when requested', async () => {
 				delete: () => Promise.resolve({ ok: true }),
 				close: () => Promise.resolve(),
 			} as any,
-		);
+		)
+	);
 	({ default: ToolUsageAdapter, ToolUsageAdapter: AdapterClass } = await import('../../src/adapter/ToolUsageAdapter.ts'));
 	const reader = readerFromChunks(['hello']);
 	const mapped = ToolUsageAdapter.mapResponse(reader, true);
 	const text = await (mapped as any).text();
 	const parsed = JSON.parse(text);
 	assertEquals(parsed.choices[0].delta.content, 'hello');
-	Deno.openKv = originalOpenKv;
+	assignOpenKv(originalOpenKv);
 });
 
 Deno.test('AdapterClass._createOpenAIStreamChunk behavior via mapResponse passthrough', async () => {
 	const originalOpenKv = Deno.openKv;
-	Deno.openKv = () =>
+	assignOpenKv(() =>
 		Promise.resolve(
 			{
 				get: () => Promise.resolve({ value: undefined }),
@@ -77,18 +80,19 @@ Deno.test('AdapterClass._createOpenAIStreamChunk behavior via mapResponse passth
 				delete: () => Promise.resolve({ ok: true }),
 				close: () => Promise.resolve(),
 			} as any,
-		);
+		)
+	);
 	({ default: ToolUsageAdapter, ToolUsageAdapter: AdapterClass } = await import('../../src/adapter/ToolUsageAdapter.ts'));
 	const reader = readerFromChunks(['a', 'b']);
 	const mapped = ToolUsageAdapter.mapResponse(reader, false, (s) => s.toUpperCase());
 	const text = await (mapped as any).text();
 	assertEquals(text, 'AB');
-	Deno.openKv = originalOpenKv;
+	assignOpenKv(originalOpenKv);
 });
 
 Deno.test('extractToolCallsFromStream detects tool blocks and formats adapter payload', async () => {
 	const originalOpenKv = Deno.openKv;
-	Deno.openKv = () =>
+	assignOpenKv(() =>
 		Promise.resolve(
 			{
 				get: () => Promise.resolve({ value: undefined }),
@@ -96,7 +100,8 @@ Deno.test('extractToolCallsFromStream detects tool blocks and formats adapter pa
 				delete: () => Promise.resolve({ ok: true }),
 				close: () => Promise.resolve(),
 			} as any,
-		);
+		)
+	);
 	({ default: ToolUsageAdapter, ToolUsageAdapter: AdapterClass } = await import('../../src/adapter/ToolUsageAdapter.ts'));
 	const adapter = new AdapterClass();
 	const content = 'pre ```function\n{ "name": "fetch", "arguments": {"url":"https://example.com"} }\n``` post';
@@ -105,12 +110,12 @@ Deno.test('extractToolCallsFromStream detects tool blocks and formats adapter pa
 	const text = await (extracted as any).text();
 	const hasAdapterKey = text.includes('__adapter_tool_calls');
 	assertEquals(hasAdapterKey, true);
-	Deno.openKv = originalOpenKv;
+	assignOpenKv(originalOpenKv);
 });
 
 Deno.test('formatStreamToOpenAIInterface maps adapter tool calls to OpenAI chunks', async () => {
 	const originalOpenKv = Deno.openKv;
-	Deno.openKv = () =>
+	assignOpenKv(() =>
 		Promise.resolve(
 			{
 				get: () => Promise.resolve({ value: undefined }),
@@ -118,7 +123,8 @@ Deno.test('formatStreamToOpenAIInterface maps adapter tool calls to OpenAI chunk
 				delete: () => Promise.resolve({ ok: true }),
 				close: () => Promise.resolve(),
 			} as any,
-		);
+		)
+	);
 	({ default: ToolUsageAdapter, ToolUsageAdapter: AdapterClass } = await import('../../src/adapter/ToolUsageAdapter.ts'));
 	const adapter = new AdapterClass();
 	const payload = JSON.stringify({ __adapter_tool_calls: [{ index: 0, function: { name: 'fetch', arguments: '{"url":"x"}' } }] });
@@ -127,5 +133,5 @@ Deno.test('formatStreamToOpenAIInterface maps adapter tool calls to OpenAI chunk
 	const text = await (formatted as any).text();
 	const hasToolCalls = text.includes('tool_calls');
 	assertEquals(hasToolCalls, true);
-	Deno.openKv = originalOpenKv;
+	assignOpenKv(originalOpenKv);
 });

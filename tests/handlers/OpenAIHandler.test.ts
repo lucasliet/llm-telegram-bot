@@ -1,10 +1,11 @@
 import { assertEquals } from 'asserts';
 import { spy } from 'mock';
+import { assignOpenKv } from '../stubs/kv.ts';
 import { mockDenoEnv } from '../test_helpers.ts';
 Deno.test('OpenAIHandler routes to GithubService on gpt command', async () => {
 	const originalOpenKv = Deno.openKv;
 	mockDenoEnv({ OPENAI_API_KEY: 'x', GITHUB_TOKEN: 'y' });
-	Deno.openKv = () =>
+	assignOpenKv(() =>
 		Promise.resolve(
 			{
 				get: () => Promise.resolve({ value: [] }),
@@ -12,7 +13,8 @@ Deno.test('OpenAIHandler routes to GithubService on gpt command', async () => {
 				delete: () => Promise.resolve({ ok: true }),
 				close: () => Promise.resolve(),
 			} as any,
-		);
+		)
+	);
 	try {
 		const ctx: any = {
 			replyWithMediaGroup: spy(() => Promise.resolve()),
@@ -31,14 +33,14 @@ Deno.test('OpenAIHandler routes to GithubService on gpt command', async () => {
 		await mod.handleOpenAI(ctx as any);
 		assertEquals(ctx.streamReply.calls.length, 1);
 	} finally {
-		Deno.openKv = originalOpenKv;
+		assignOpenKv(originalOpenKv);
 	}
 });
 
 Deno.test('OpenAIHandler handles gptimage path', async () => {
 	const originalOpenKv = Deno.openKv;
 	mockDenoEnv({ OPENAI_API_KEY: 'x', GITHUB_TOKEN: 'y' });
-	Deno.openKv = () =>
+	assignOpenKv(() =>
 		Promise.resolve(
 			{
 				get: () => Promise.resolve({ value: [] }),
@@ -46,7 +48,8 @@ Deno.test('OpenAIHandler handles gptimage path', async () => {
 				delete: () => Promise.resolve({ ok: true }),
 				close: () => Promise.resolve(),
 			} as any,
-		);
+		)
+	);
 	try {
 		const ctx: any = {
 			replyWithMediaGroup: spy(() => Promise.resolve()),
@@ -63,6 +66,6 @@ Deno.test('OpenAIHandler handles gptimage path', async () => {
 		await mod.handleOpenAI(ctx as any);
 		assertEquals(ctx.replyWithMediaGroup.calls.length, 1);
 	} finally {
-		Deno.openKv = originalOpenKv;
+		assignOpenKv(originalOpenKv);
 	}
 });

@@ -1,5 +1,6 @@
 import { assertEquals } from 'asserts';
 import { spy } from 'mock';
+import { assignOpenKv } from '../stubs/kv.ts';
 import { assertSpyCalls, createMockContext, MockContext, mockDenoEnv } from '../test_helpers.ts';
 
 import type { ModelCommand } from '../../src/config/models.ts';
@@ -24,7 +25,7 @@ Deno.test('TelegramService', async (t) => {
 		delete: () => Promise.resolve({ ok: true }),
 		close: () => Promise.resolve(),
 	};
-	Deno.openKv = () => Promise.resolve(mockKv);
+	assignOpenKv(() => Promise.resolve(mockKv));
 
 	const originalSetInterval = globalThis.setInterval;
 	const originalClearInterval = globalThis.clearInterval;
@@ -249,7 +250,7 @@ Deno.test('TelegramService', async (t) => {
 	});
 
 	globalThis.fetch = originalFetch;
-	Deno.openKv = originalOpenKv;
+	assignOpenKv(originalOpenKv);
 	globalThis.setInterval = originalSetInterval;
 	globalThis.clearInterval = originalClearInterval;
 	globalThis.setTimeout = originalSetTimeout;

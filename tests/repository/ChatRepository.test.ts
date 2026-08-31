@@ -1,9 +1,10 @@
 import { assertEquals } from 'asserts';
+import { assignOpenKv } from '../stubs/kv.ts';
 import { MockKvStore } from '../test_helpers.ts';
 
 const mockKv = new MockKvStore();
 const originalOpenKv = Deno.openKv;
-Deno.openKv = () => Promise.resolve(mockKv as unknown as Deno.Kv);
+assignOpenKv(() => Promise.resolve(mockKv as unknown as Deno.Kv));
 
 const userKey = 'user:12345';
 const testModel = '/free';
@@ -98,5 +99,5 @@ Deno.test('ChatRepository', async (t) => {
 	);
 
 	await mockKv.close();
-	Deno.openKv = originalOpenKv;
+	assignOpenKv(originalOpenKv);
 });

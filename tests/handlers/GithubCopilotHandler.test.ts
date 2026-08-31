@@ -1,18 +1,20 @@
 import { assertEquals } from 'asserts';
 import { spy } from 'mock';
+import { assignOpenKv } from '../stubs/kv.ts';
 import { mockDenoEnv } from '../test_helpers.ts';
 Deno.test(
 	'GithubCopilotHandler forwards to service with chosen model',
 	async () => {
 		const originalOpenKv = Deno.openKv;
 		mockDenoEnv({ OPENAI_API_KEY: 'x', COPILOT_GITHUB_TOKEN: 'z' });
-		Deno.openKv = () =>
+		assignOpenKv(() =>
 			Promise.resolve({
 				get: () => Promise.resolve({ value: [] }),
 				set: () => Promise.resolve({ ok: true }),
 				delete: () => Promise.resolve({ ok: true }),
 				close: () => Promise.resolve(),
-			} as any);
+			} as any)
+		);
 		try {
 			const ctx: any = {
 				streamReply: spy(() => Promise.resolve()),
@@ -40,7 +42,7 @@ Deno.test(
 			await mod.handleGithubCopilot(ctx as any);
 			assertEquals(ctx.streamReply.calls.length, 1);
 		} finally {
-			Deno.openKv = originalOpenKv;
+			assignOpenKv(originalOpenKv);
 		}
 	},
 );
