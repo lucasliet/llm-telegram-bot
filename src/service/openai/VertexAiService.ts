@@ -108,6 +108,12 @@ function getBaseUrl(): string {
 	return `https://aiplatform.googleapis.com/v1/projects/${getVertexProjectId()}/locations/${getVertexLocation()}/endpoints/openapi`;
 }
 
+/**
+ * Vertex AI caps maxOutputTokens at 65536 for gemini flash models; the
+ * OpenAiService default of 128000 is rejected with 400 INVALID_ARGUMENT.
+ */
+const VERTEX_MAX_TOKENS = 65536;
+
 export default class VertexAiService extends OpenAiService {
 	public constructor(model: string = 'gemini-2.5-flash-lite') {
 		super(
@@ -116,6 +122,8 @@ export default class VertexAiService extends OpenAiService {
 				baseURL: getBaseUrl(),
 			}),
 			`google/${model}`,
+			true,
+			VERTEX_MAX_TOKENS,
 		);
 
 		this.initializeAuth();
