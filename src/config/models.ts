@@ -31,7 +31,7 @@ export const copilotModels = {
 };
 
 export const zaiModels = {
-	flash: 'glm-5-turbo',
+	flash: 'glm-5.3-flash',
 	standard: 'glm-5.3',
 };
 

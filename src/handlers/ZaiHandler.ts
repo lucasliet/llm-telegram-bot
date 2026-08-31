@@ -1,5 +1,5 @@
 import ZaiService from '@/service/openai/ZaiService.ts';
-import { createTextOnlyHandler } from './HandlerUtils.ts';
+import { createVisionHandler } from './HandlerUtils.ts';
 import { zaiModels } from '@/config/models.ts';
 
 const modelMap = {
@@ -9,10 +9,11 @@ const modelMap = {
 };
 
 /**
- * Handles requests for Zai model (GLM-4.7 Flash)
+ * Handles requests for Zai models; image input is only accepted by the flash model
  */
-export const handleZai = createTextOnlyHandler({
+export const handleZai = createVisionHandler({
 	modelMap,
 	defaultCommand: 'zai',
+	visionModels: [zaiModels.flash],
 	createService: (model) => new ZaiService(model),
 });

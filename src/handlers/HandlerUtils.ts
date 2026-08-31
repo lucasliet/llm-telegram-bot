@@ -32,6 +32,7 @@ interface VisionHandlerOptions<T extends string> {
 	modelMap?: ModelMap<T>;
 	defaultCommand?: string;
 	createService: (model?: T) => VisionService;
+	visionModels?: T[];
 }
 
 interface TextOnlyHandlerOptions<T extends string> {
@@ -41,10 +42,12 @@ interface TextOnlyHandlerOptions<T extends string> {
 }
 
 /**
- * Creates a handler function for services that support both text and image input
+ * Creates a handler function for services that support both text and image input.
+ * When `visionModels` is provided, image input is only accepted for those models;
+ * any other command replies that the model does not support vision.
  */
 export function createVisionHandler<T extends string>(options: VisionHandlerOptions<T>) {
-	const { modelMap = {}, defaultCommand = 'none', createService } = options;
+	const { modelMap = {}, defaultCommand = 'none', createService, visionModels } = options;
 
 	return async function handler(ctx: Context, commandMessage?: string): Promise<void> {
 		const { userKey, contextMessage, photos, caption, quote } = await ctx.extractContextKeys();
@@ -53,6 +56,13 @@ export function createVisionHandler<T extends string>(options: VisionHandlerOpti
 		const command = message?.split(':')[0]?.toLowerCase() || defaultCommand;
 		const model = modelMap[command as keyof typeof modelMap] as T | undefined;
 		const prompt = (message || caption)?.replace(`${command}:`, '');
+
+		const supportsVision = !visionModels || (model !== undefined && visionModels.includes(model));
+
+		if (photos && caption && !supportsVision) {
+			ctx.replyWithVisionNotSupportedByModel();
+			return;
+		}
 
 		const service = createService(model);
 

@@ -11,7 +11,7 @@ esse bot utiliza o modelo gratuito do OpenRouter para responder as mensagens por
 um histórico da conversa é mantido para mensagens encadiadas, porém com expiração de 1 dia após a ultima mensagem, também pode ser apagado manualmente com o
 commando `/clear`
 
-esse projeto utiliza o [Deno deploy](https://deno.com/deploy) e [Deno kv](https://deno.com/kv) para hosting da aplicação e armazenamento persistente de chaves
+esse projeto utiliza o [Deno deploy](https://deno.com/deploy) para hosting da aplicação (nova infra, CI gerenciado pelo próprio Deno Deploy) e o [Deno kv](https://deno.com/kv) para armazenamento persistente de chaves
 
 ## Provedores e Modelos Disponíveis
 
@@ -25,7 +25,7 @@ esse projeto utiliza o [Deno deploy](https://deno.com/deploy) e [Deno kv](https:
 | Perplexity     | `perplexity:` / `search:`                | Sonar                                    | Nao         |
 | Perplexity     | `reasonSearch:`                          | Sonar Reasoning Pro                      | Nao         |
 | OpenWebUI      | `pgpt:` / `pgrok:` / `po3:` / `pclaude:` | PPLX models                              | Nao         |
-| Zai            | `zai:` / `glmflash:` / `glm:`            | GLM 5 Turbo / GLM 5.3                    | Sim         |
+| Zai            | `zai:` / `glmflash:` / `glm:`            | GLM 5.3 Flash (visão) / GLM 5.3          | Sim         |
 | DALL-E         | `gptImage:`                              | DALL-E 3                                 | -           |
 | Cloudflare     | `cloudflareImage:`                       | Stable Diffusion                         | -           |
 | ElevenLabs     | `fala:`                                  | TTS                                      | -           |
