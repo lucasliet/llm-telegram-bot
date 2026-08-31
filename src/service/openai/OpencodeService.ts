@@ -1,6 +1,7 @@
 import OpenAi from 'openai';
 import OpenAiService from './OpenAIService.ts';
 import { opencodeModels } from '@/config/models.ts';
+import { StreamReplyResponse } from '@/util/ChatConfigUtil.ts';
 
 const { freeModel } = opencodeModels;
 
@@ -20,6 +21,21 @@ export default class OpencodeService extends OpenAiService {
 				baseURL: 'https://opencode.ai/zen/v1',
 			}),
 			model,
+		);
+	}
+
+	override generateTextFromImage(
+		userKey: string,
+		quote: string | undefined,
+		photosUrl: Promise<string>[],
+		prompt: string,
+	): Promise<StreamReplyResponse> {
+		return super.generateTextFromImage(
+			userKey,
+			quote,
+			photosUrl,
+			prompt,
+			true,
 		);
 	}
 }

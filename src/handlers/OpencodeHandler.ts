@@ -1,5 +1,5 @@
 import OpencodeService from '@/service/openai/OpencodeService.ts';
-import { createTextOnlyHandler } from './HandlerUtils.ts';
+import { createVisionHandler } from './HandlerUtils.ts';
 import { opencodeModels } from '@/config/models.ts';
 
 const modelMap = {
@@ -9,7 +9,7 @@ const modelMap = {
 /**
  * Handles requests for OpenCode Zen free models
  */
-export const handleOpencode = createTextOnlyHandler({
+export const handleOpencode = createVisionHandler({
 	modelMap,
 	defaultCommand: 'opencode',
 	createService: (model) => new OpencodeService(model),

@@ -36,7 +36,7 @@ export const zaiModels = {
 };
 
 export const opencodeModels = {
-	freeModel: 'deepseek-v4-flash-free',
+	freeModel: 'mimo-v2.5-free',
 };
 
 /**
