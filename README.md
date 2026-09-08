@@ -44,6 +44,7 @@ esse projeto utiliza o [Deno deploy](https://deno.com/deploy) para hosting da ap
 - variaveis opcionais, para uso dos diferentes modelos de linguagem:
   - `CLOUDFLARE_API_KEY` - api key da [Cloudflare](https://developers.cloudflare.com/workers-ai/get-started/rest-api/) para uso do modelo gratuito
   - `CLOUDFLARE_ACCOUNT_ID` - id da conta da [Cloudflare](https://developers.cloudflare.com/workers-ai/get-started/rest-api/) para uso do modelo gratuito
+  - `OPENCODE_API_KEY` - api key opcional do [OpenCode Zen](https://opencode.ai/zen), sem ela o modelo gratuito funciona de forma anônima, porém com rate limit mais baixo
   - `GITHUB_TOKEN` - token do [Github](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens) para
     uso do modelo gpt gratuitamente
   - `OPENAI_API_KEY` - api key da [OpenAI](https://platform.openai.com/api-keys) para uso do modelo pago

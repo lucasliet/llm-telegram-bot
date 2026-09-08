@@ -7,17 +7,16 @@ const { freeModel } = opencodeModels;
 
 /**
  * Service for OpenCode Zen free OpenAI-compatible endpoint.
- * The OpenCode Zen gateway does not require an API key: it accepts the
- * `Authorization: Bearer ` header with an empty token value, and rejects
- * any non-empty token. Since the OpenAI SDK always builds
- * `Authorization: Bearer ${apiKey}`, we pass an empty string to send the
- * only header the gateway accepts.
+ * The OpenCode Zen gateway accepts the `Authorization: Bearer ` header with
+ * an empty token value, but an API key can be set via `OPENCODE_API_KEY`
+ * for authenticated usage; when unset, the empty token keeps the free
+ * behavior.
  */
 export default class OpencodeService extends OpenAiService {
 	public constructor(model: string = freeModel) {
 		super(
 			new OpenAi({
-				apiKey: '',
+				apiKey: Deno.env.get('OPENCODE_API_KEY') ?? '',
 				baseURL: 'https://opencode.ai/zen/v1',
 			}),
 			model,
