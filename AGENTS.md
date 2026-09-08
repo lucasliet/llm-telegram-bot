@@ -16,7 +16,7 @@
 ## Build, Test, and Development Commands
 
 - `deno task dev`: runs `devrun.sh` (loads `.env`, starts with `denon`, sets Telegram webhook).
-- `deno task test`: runs `run_tests.sh` (full suite + coverage).
+- `./run_tests.sh`: full suite + coverage (**run the script directly instead of `deno task test`**).
 - `deno test -A --unstable-kv --unstable-cron tests/service/TelegramService.test.ts`: run a specific test.
 - `deno fmt 'src/**/*.ts' 'tests/**/*.ts' 'main.ts'`, `deno lint`: format and lint the codebase.
 - **IMPORTANTE:** NÃO rode `deno fmt` sem argumentos. O formatter do Deno reformata arquivos `.md`, `.json` e `.yml` de forma indesejada. Use sempre globs para
@@ -33,7 +33,7 @@
 ## Testing Guidelines
 
 - Framework: Deno tests in `tests/`, mirroring `src/` structure; filenames end with `.test.ts`.
-- Run all: `deno task test`. Coverage is generated automatically.
+- Run all: `./run_tests.sh`. Coverage is generated automatically.
 - Targeted runs: use `deno test` with `-A --unstable-kv --unstable-cron` for KV- and cron-dependent tests.
 
 ## Commit & Pull Request Guidelines
