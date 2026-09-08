@@ -5,14 +5,14 @@ import { InlineKeyboard } from 'grammy';
  */
 const adminCommandButtons = [
 	[['Modelo Atual', '/currentmodel']],
-	[['Opencode Free', '/opencode']],
 	[
 		['Openrouter Free', '/free'],
-		['Gemini 3.7 Flash', '/gemini'],
+		['Opencode Free', '/opencode'],
 	],
+	[['Gemini 3.8 Flash', '/gemini']],
 	[
 		['GLM 5.3', '/glm'],
-		['GLM 5 Turbo', '/glmflash'],
+		['GLM 5.3 Flash', '/glmflash'],
 	],
 	[['Limpar Histórico', '/clear']],
 ];
@@ -45,12 +45,12 @@ export const adminHelpMessage = `*Comandos inline*:
 \\- \`gpt:\` mensagem \\- Gera texto com __GPT 5 mini__ pelo __Copilot__
 \\- \`free:\` mensagem \\- Faz uma pergunta usando o modelo gratuito do *OpenRouter*
 \\- \`opencode:\` mensagem \\- Faz uma pergunta usando o modelo gratuito do *OpenCode Zen*
-\\- \`gemini:\` mensagem \\- Faz uma pergunta usando o __Gemini 3\\.7 Flash__ pelo __Vertex AI__
+\\- \`gemini:\` mensagem \\- Faz uma pergunta usando o __Gemini 3\\.8 Flash__ pelo __Vertex AI__
 \\- \`search:\` mensagem \\- Faz uma pergunta usando o __Sonar__ pela __Perplexity__
 \\- \`reasonSearch:\` mensagem \\- Faz uma pergunta usando o __Sonar Reasoning Pro__
-\\- \`zai:\` mensagem \\- Faz uma pergunta usando o __GLM 4\\.7 Flash__ pelo __Zai__
-\\- \`glm:\` mensagem \\- Faz uma pergunta usando o __GLM 4\\.7__ pelo __Zai__
-\\- \`glmflash:\` mensagem \\- Faz uma pergunta usando o __GLM 4\\.7 Flash__ pelo __Zai__
+\\- \`zai:\` mensagem \\- Faz uma pergunta usando o __GLM 5\\.3 Flash__ pelo __Zai__
+\\- \`glm:\` mensagem \\- Faz uma pergunta usando o __GLM 5\\.3__ pelo __Zai__
+\\- \`glmflash:\` mensagem \\- Faz uma pergunta usando o __GLM 5\\.3 Flash__ pelo __Zai__
 \\- \`fala:\` mensagem \\- Faz uma pergunta usando __Elevenlabs__ para TTS
 
 *Seleção de modelos de linguagem*:`;

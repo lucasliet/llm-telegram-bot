@@ -1,5 +1,5 @@
 export const geminiModels = {
-	geminiFlash: 'gemini-3.7-flash',
+	geminiFlash: 'gemini-3.8-flash',
 };
 
 export const perplexityModels = {

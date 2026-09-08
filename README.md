@@ -21,7 +21,7 @@ esse projeto utiliza o [Deno deploy](https://deno.com/deploy) para hosting da ap
 | OpenCode Zen   | `opencode:`                              | Mimo v2.5 (gratuito)                     | Sim         |
 | GitHub Copilot | `gpt:` / `gpt5:` / `claude:`             | GPT 5 mini / GPT 5.2 / Claude Sonnet 4.5 | Sim         |
 | Cloudflare     | `kimi:`                                  | Kimi K2.7 Code                           | Nao         |
-| Vertex AI      | `gemini:`                                | Gemini 3.7 Flash                         | Sim         |
+| Vertex AI      | `gemini:`                                | Gemini 3.8 Flash                         | Sim         |
 | Perplexity     | `perplexity:` / `search:`                | Sonar                                    | Nao         |
 | Perplexity     | `reasonSearch:`                          | Sonar Reasoning Pro                      | Nao         |
 | OpenWebUI      | `pgpt:` / `pgrok:` / `po3:` / `pclaude:` | PPLX models                              | Nao         |
