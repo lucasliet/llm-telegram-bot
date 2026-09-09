@@ -1,5 +1,4 @@
-import { Context } from 'grammy';
-import { Action } from 'grammy-auto-chat-action-types';
+import { type Api, Context } from 'grammy';
 import { Audio, Message, ParseMode, PhotoSize, Voice } from 'grammy-types';
 import { transcribeAudio } from '@/service/TelegramService.ts';
 import { toTelegramMarkdown } from '@/util/MarkdownUtils.ts';
@@ -7,6 +6,8 @@ import { COMPRESSION_WARNING_MSG } from '@/service/ContextCompressorService.ts';
 import { StreamReplyResponse } from '@/util/ChatConfigUtil.ts';
 
 const MARKDOWN_ERROR_MESSAGE = 'Error on markdown parse_mode, message:';
+
+type Action = Parameters<Api['sendChatAction']>[1];
 
 declare module 'grammy' {
 	interface Context {
