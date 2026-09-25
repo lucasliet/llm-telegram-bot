@@ -3,6 +3,7 @@ import { InputMediaBuilder } from 'grammy';
 import OpenAiService from '@/service/openai/OpenAIService.ts';
 import { FileUtils } from '@/util/FileUtils.ts';
 import GithubService from '@/service/openai/GithubService.ts';
+import { DEFAULT_IMAGE_PROMPT } from './HandlerUtils.ts';
 
 /**
  * Handles requests for OpenAI models
@@ -17,14 +18,14 @@ export async function handleOpenAI(
 		.extractContextKeys();
 	const openAIService = new OpenAiService();
 
-	if (photos && caption) {
+	if (photos) {
 		const photosUrl = FileUtils.getTelegramFilesUrl(ctx, photos);
 		const response = await openAIService
 			.generateTextFromImage(
 				userKey,
 				quote,
 				photosUrl,
-				caption,
+				caption || DEFAULT_IMAGE_PROMPT,
 			);
 
 		ctx.streamReply(response);

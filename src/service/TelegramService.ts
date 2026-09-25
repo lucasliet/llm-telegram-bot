@@ -205,22 +205,23 @@ Interações Premium:
 	},
 
 	/**
-	 * Replies with text content based on the user's selected model
+	 * Replies with text content based on the user's selected model, falling back to the photo caption when the message has no text
 	 * @param ctx - Telegram context
 	 */
 	async replyTextContent(ctx: Context): Promise<void> {
-		const { userKey, contextMessage: message } = await ctx.extractContextKeys();
+		const { userKey, contextMessage: message, caption } = await ctx.extractContextKeys();
 		const currentModel = await getCurrentModel(userKey);
+		const promptText = message ?? caption;
 
 		const modelHandlers: Record<ModelCommand, () => Promise<void>> = {
-			'/gpt': () => handleGithubCopilot(ctx, `gpt: ${message}`),
-			'/kimi': () => handleCloudflare(ctx, `kimi: ${message}`),
-			'/gemini': () => handleVertex(ctx, `gemini: ${message}`),
-			'/zai': () => handleZai(ctx, `zai: ${message}`),
-			'/glm': () => handleZai(ctx, `glm: ${message}`),
-			'/glmflash': () => handleZai(ctx, `glmflash: ${message}`),
-			'/free': () => handleOpenRouter(ctx, `free: ${message}`),
-			'/opencode': () => handleOpencode(ctx, `opencode: ${message}`),
+			'/gpt': () => handleGithubCopilot(ctx, `gpt: ${promptText ?? ''}`),
+			'/kimi': () => handleCloudflare(ctx, `kimi: ${promptText ?? ''}`),
+			'/gemini': () => handleVertex(ctx, `gemini: ${promptText ?? ''}`),
+			'/zai': () => handleZai(ctx, `zai: ${promptText ?? ''}`),
+			'/glm': () => handleZai(ctx, `glm: ${promptText ?? ''}`),
+			'/glmflash': () => handleZai(ctx, `glmflash: ${promptText ?? ''}`),
+			'/free': () => handleOpenRouter(ctx, `free: ${promptText ?? ''}`),
+			'/opencode': () => handleOpencode(ctx, `opencode: ${promptText ?? ''}`),
 		};
 
 		const handler = modelHandlers[currentModel];

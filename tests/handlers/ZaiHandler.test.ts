@@ -5,6 +5,34 @@ import { setupKvStub } from '../stubs/kv.ts';
 
 const streamResponse = () => Promise.resolve({ reader: new ReadableStream().getReader(), onComplete: () => Promise.resolve(), responseMap: (s: string) => s });
 
+Deno.test('ZaiService sends images as base64 because Z.ai cannot fetch Telegram URLs', async () => {
+	mockDenoEnv({ ZHIPU_API_KEY: 'x' });
+	const restore = setupKvStub();
+
+	await import('../../src/service/TelegramService.ts');
+	const base = await import('../../src/service/openai/OpenAIService.ts');
+	const svc = await import('../../src/service/openai/ZaiService.ts');
+
+	const superGenerate = spy(streamResponse);
+	(base.default as any).prototype.generateTextFromImage = superGenerate;
+	(svc.default as any).prototype.generateText = spy(() => {
+		throw new Error('text path should not run');
+	});
+
+	await (svc.default as any).prototype.generateTextFromImage.call(
+		new (svc.default as any)(),
+		'user:1',
+		undefined,
+		[Promise.resolve('https://file/1')] as any,
+		'descreva a imagem',
+	);
+
+	assertEquals(superGenerate.calls.length, 1);
+	assertEquals(superGenerate.calls[0].args[4], true);
+
+	restore();
+});
+
 Deno.test('ZaiHandler accepts image input for vision-capable flash model', async () => {
 	mockDenoEnv({ ZHIPU_API_KEY: 'x' });
 	const restore = setupKvStub();

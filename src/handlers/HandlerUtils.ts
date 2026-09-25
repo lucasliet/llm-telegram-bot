@@ -28,6 +28,16 @@ interface VisionService extends TextService {
 
 type ModelMap<T> = Record<string, T | undefined>;
 
+export const DEFAULT_IMAGE_PROMPT = 'descreva a imagem';
+
+/**
+ * Replies listing the media types the bot can actually read
+ * @param ctx - Telegram context
+ */
+export function replyWithNothingToProcess(ctx: Context): void {
+	ctx.replyWithQuote('consigo ler apenas texto, foto ou imagem anexada como arquivo');
+}
+
 interface VisionHandlerOptions<T extends string> {
 	modelMap?: ModelMap<T>;
 	defaultCommand?: string;
@@ -43,6 +53,7 @@ interface TextOnlyHandlerOptions<T extends string> {
 
 /**
  * Creates a handler function for services that support both text and image input.
+ * Photos go to the vision path with or without a caption (falling back to a default prompt).
  * When `visionModels` is provided, image input is only accepted for those models;
  * any other command replies that the model does not support vision.
  */
@@ -55,29 +66,34 @@ export function createVisionHandler<T extends string>(options: VisionHandlerOpti
 		const message = commandMessage || contextMessage;
 		const command = message?.split(':')[0]?.toLowerCase() || defaultCommand;
 		const model = modelMap[command as keyof typeof modelMap] as T | undefined;
-		const prompt = (message || caption)?.replace(`${command}:`, '');
+		const prompt = (message || caption)?.replace(`${command}:`, '')?.trim();
 
 		const supportsVision = !visionModels || (model !== undefined && visionModels.includes(model));
 
-		if (photos && caption && !supportsVision) {
+		if (photos && !supportsVision) {
 			ctx.replyWithVisionNotSupportedByModel();
 			return;
 		}
 
 		const service = createService(model);
 
-		if (photos && caption) {
+		if (photos) {
 			const photosUrl = FileUtils.getTelegramFilesUrl(ctx, photos);
 			const response = await service.generateTextFromImage(
 				userKey,
 				quote,
 				photosUrl,
-				prompt!,
+				prompt || DEFAULT_IMAGE_PROMPT,
 			);
 			return ctx.streamReply(response);
 		}
 
-		const response = await service.generateText(userKey, quote ?? '', prompt!);
+		if (!prompt) {
+			replyWithNothingToProcess(ctx);
+			return;
+		}
+
+		const response = await service.generateText(userKey, quote ?? '', prompt);
 		return ctx.streamReply(response);
 	};
 }

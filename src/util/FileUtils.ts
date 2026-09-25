@@ -1,5 +1,5 @@
 import { Context } from 'grammy';
-import { Audio, InputFile, PhotoSize, Voice } from 'grammy-types';
+import { InputFile, Voice } from 'grammy-types';
 import CloudFlareService from '@/service/openai/CloudFlareService.ts';
 import ElevenLabsService from '@/service/ElevenLabsService.ts';
 const getToken = () => Deno.env.get('BOT_TOKEN') as string;
@@ -11,12 +11,12 @@ export const FileUtils = {
 	/**
 	 * Gets Telegram file URLs
 	 * @param ctx - Telegram context
-	 * @param files - Array of Telegram file objects
+	 * @param files - Array of Telegram file objects (photos, documents, audio)
 	 * @returns Array of promises resolving to file URLs
 	 */
 	getTelegramFilesUrl(
 		ctx: Context,
-		files: PhotoSize[] | Audio[],
+		files: { file_id: string }[],
 	): Promise<string>[] {
 		return files.map(async (file) => {
 			const fileData = await ctx.api.getFile(file.file_id);
