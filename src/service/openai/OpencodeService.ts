@@ -3,15 +3,15 @@ import OpenAiService from './OpenAIService.ts';
 import { opencodeModels } from '@/config/models.ts';
 import { StreamReplyResponse } from '@/util/ChatConfigUtil.ts';
 
-const { freeModel } = opencodeModels;
+const { mimo } = opencodeModels;
 
 /**
- * Identifica as requisições ao OpenCode Zen/Go com `User-Agent` próprio e
+ * Identifica as requisições ao OpenCode Go com `User-Agent` próprio e
  * `x-opencode-session` estável por operação lógica.
  * Port do PR akitaonrails/ai-memory#610: um ID por chamada LLM, reutilizado
  * em retries e fallbacks em vez de parecerem requests não relacionadas.
  */
-export const OPENCODE_BASE_URL = 'https://opencode.ai/zen/v1';
+export const OPENCODE_BASE_URL = 'https://opencode.ai/zen/go/v1';
 
 export const OPENCODE_SESSION_HEADER = 'x-opencode-session';
 
@@ -26,7 +26,7 @@ export function newOpencodeOperationId(): string {
 }
 
 /**
- * Monta os headers de identificação exigidos pelo OpenCode Go/Zen.
+ * Monta os headers de identificação exigidos pelo OpenCode Go.
  * @param operationId - ID estável da operação lógica atual.
  * @returns Headers a enviar em toda request OpenCode.
  */
@@ -44,18 +44,15 @@ export function buildOpencodeHeaders(operationId: string): Record<string, string
 const OPENCODE_SESSION_ID = newOpencodeOperationId();
 
 /**
- * Service for OpenCode Zen free OpenAI-compatible endpoint.
- * The OpenCode Zen gateway accepts the `Authorization: Bearer ` header with
- * an empty token value, but an API key can be set via `OPENCODE_API_KEY`
- * for authenticated usage; when unset, the empty token keeps the free
- * behavior. Every request identifies this client via `User-Agent` and sends
- * o `x-opencode-session` estável em memória (reutilizado em compressão,
- * retries e tool follow-ups).
+ * Service for OpenCode Go paid OpenAI-compatible endpoint.
+ * Toda request exige `OPENCODE_API_KEY`; identifica o client via
+ * `User-Agent` e envia o `x-opencode-session` estável em memória
+ * (reutilizado em compressão, retries e tool follow-ups).
  */
 export default class OpencodeService extends OpenAiService {
 	private operationId: string;
 
-	public constructor(model: string = freeModel, operationId: string = OPENCODE_SESSION_ID) {
+	public constructor(model: string = mimo, operationId: string = OPENCODE_SESSION_ID) {
 		super(
 			new OpenAi({
 				apiKey: Deno.env.get('OPENCODE_API_KEY') ?? '',

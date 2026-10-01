@@ -7,7 +7,8 @@ const adminCommandButtons = [
 	[['Modelo Atual', '/currentmodel']],
 	[
 		['Openrouter Free', '/free'],
-		['Opencode Free', '/opencode'],
+		['Opencode Mimo', '/opencode'],
+		['Opencode Spark', '/spark'],
 	],
 	[['Gemini 3.8 Flash', '/gemini']],
 	[
@@ -22,7 +23,6 @@ const adminCommandButtons = [
  */
 const userCommandButtons = [
 	[['Modelo Atual', '/currentmodel']],
-	[['Opencode Free', '/opencode']],
 	[['Free Models Router', '/free']],
 	[['Limpar Histórico', '/clear']],
 ];
@@ -44,7 +44,8 @@ export const adminHelpMessage = `*Comandos inline*:
 \\- \`kimi:\` mensagem \\- Faz uma pergunta usando o modelo __Kimi K2\\.7 Code__ pela __Cloudflare__
 \\- \`gpt:\` mensagem \\- Gera texto com __GPT 5 mini__ pelo __Copilot__
 \\- \`free:\` mensagem \\- Faz uma pergunta usando o modelo gratuito do *OpenRouter*
-\\- \`opencode:\` mensagem \\- Faz uma pergunta usando o modelo gratuito do *OpenCode Zen*
+\\- \`opencode:\` mensagem \\- Faz uma pergunta usando o __MiMo V2\\.6 Flash__ pelo __OpenCode Go__
+\\- \`spark:\` mensagem \\- Faz uma pergunta usando o __Muse Spark 1\\.3__ pelo __OpenCode Go__
 \\- \`gemini:\` mensagem \\- Faz uma pergunta usando o __Gemini 3\\.8 Flash__ pelo __Vertex AI__
 \\- \`search:\` mensagem \\- Faz uma pergunta usando o __Sonar__ pela __Perplexity__
 \\- \`reasonSearch:\` mensagem \\- Faz uma pergunta usando o __Sonar Reasoning Pro__
@@ -60,6 +61,5 @@ export const adminHelpMessage = `*Comandos inline*:
  */
 export const userHelpMessage = `*Comandos inline*:
 \\- \`free:\` mensagem \\- Faz uma pergunta usando o modelo gratuito do *OpenRouter*
-\\- \`opencode:\` mensagem \\- Faz uma pergunta usando o modelo gratuito do *OpenCode Zen*
 
 *Seleção de modelos de linguagem*:`;

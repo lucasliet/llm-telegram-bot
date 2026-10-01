@@ -93,7 +93,7 @@ function registerBotCommands() {
 	);
 
 	BOT.hears(
-		/^(opencode):/gi,
+		/^(opencode|spark):/gi,
 		(ctx) => TelegramService.callAdminModel(ctx, TelegramService.callOpencodeModel),
 	);
 

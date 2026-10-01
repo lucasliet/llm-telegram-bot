@@ -36,7 +36,8 @@ export const zaiModels = {
 };
 
 export const opencodeModels = {
-	freeModel: 'mimo-v2.5-free',
+	mimo: 'mimo-v2.6-flash',
+	museSpark: 'muse-spark-1.3-contributor',
 };
 
 /**
@@ -50,6 +51,7 @@ export const MODEL_COMMANDS = [
 	'/glmflash',
 	'/free',
 	'/opencode',
+	'/spark',
 	'/gemini',
 ] as const;
 
@@ -61,7 +63,6 @@ export const modelCommands = [...MODEL_COMMANDS] as ModelCommand[];
 
 export const WHITELISTED_MODELS: ModelCommand[] = [
 	'/free',
-	'/opencode',
 ];
 
 export const MODELS_USING_RESPONSES_API: string[] = [

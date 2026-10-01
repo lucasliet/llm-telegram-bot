@@ -3,11 +3,12 @@ import { createVisionHandler } from './HandlerUtils.ts';
 import { opencodeModels } from '@/config/models.ts';
 
 const modelMap = {
-	'opencode': opencodeModels.freeModel,
+	'opencode': opencodeModels.mimo,
+	'spark': opencodeModels.museSpark,
 };
 
 /**
- * Handles requests for OpenCode Zen free models
+ * Handles requests for OpenCode Go paid models
  */
 export const handleOpencode = createVisionHandler({
 	modelMap,

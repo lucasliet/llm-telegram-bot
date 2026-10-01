@@ -23,7 +23,7 @@ function stubKvWithCurrentModel(model: string): () => void {
 }
 
 Deno.test('replyTextContent forwards photo caption to vision handler when message has no text', async () => {
-	mockDenoEnv({ ZHIPU_API_KEY: 'x' });
+	mockDenoEnv({ ZHIPU_API_KEY: 'x', ADMIN_USER_IDS: '1' });
 	const restoreKv = stubKvWithCurrentModel('/zai');
 
 	const ctx: any = {
@@ -31,6 +31,7 @@ Deno.test('replyTextContent forwards photo caption to vision handler when messag
 		replyWithVisionNotSupportedByModel: spy(() => Promise.resolve()),
 		extractContextKeys: spy(() =>
 			Promise.resolve({
+				userId: 1,
 				userKey: 'user:1',
 				contextMessage: undefined,
 				photos: [{}],
@@ -68,7 +69,7 @@ Deno.test('replyTextContent forwards photo caption to vision handler when messag
 });
 
 Deno.test('replyTextContent keeps using message text for text messages', async () => {
-	mockDenoEnv({ ZHIPU_API_KEY: 'x' });
+	mockDenoEnv({ ZHIPU_API_KEY: 'x', ADMIN_USER_IDS: '1' });
 	const restoreKv = stubKvWithCurrentModel('/zai');
 
 	const ctx: any = {
@@ -76,6 +77,7 @@ Deno.test('replyTextContent keeps using message text for text messages', async (
 		replyWithVisionNotSupportedByModel: spy(() => Promise.resolve()),
 		extractContextKeys: spy(() =>
 			Promise.resolve({
+				userId: 1,
 				userKey: 'user:1',
 				contextMessage: 'me conte uma piada',
 				photos: undefined,
@@ -109,7 +111,7 @@ Deno.test('replyTextContent keeps using message text for text messages', async (
 });
 
 Deno.test('replyTextContent sends caption-less photo to vision with default prompt', async () => {
-	mockDenoEnv({ ZHIPU_API_KEY: 'x' });
+	mockDenoEnv({ ZHIPU_API_KEY: 'x', ADMIN_USER_IDS: '1' });
 	const restoreKv = stubKvWithCurrentModel('/zai');
 
 	const ctx: any = {
@@ -117,6 +119,7 @@ Deno.test('replyTextContent sends caption-less photo to vision with default prom
 		replyWithVisionNotSupportedByModel: spy(() => Promise.resolve()),
 		extractContextKeys: spy(() =>
 			Promise.resolve({
+				userId: 1,
 				userKey: 'user:1',
 				contextMessage: undefined,
 				photos: [{}],
@@ -150,6 +153,43 @@ Deno.test('replyTextContent sends caption-less photo to vision with default prom
 	restoreKv();
 });
 
+Deno.test('replyTextContent falls back to free model for non-admin with restricted model', async () => {
+	mockDenoEnv({ ZHIPU_API_KEY: 'x', ADMIN_USER_IDS: '1' });
+	const restoreKv = stubKvWithCurrentModel('/opencode');
+
+	const ctx: any = {
+		streamReply: spy(() => Promise.resolve()),
+		replyWithVisionNotSupportedByModel: spy(() => Promise.resolve()),
+		extractContextKeys: spy(() =>
+			Promise.resolve({
+				userId: 999,
+				userKey: 'user:999',
+				contextMessage: 'me conte uma piada',
+				photos: undefined,
+				caption: undefined,
+				quote: undefined,
+			})
+		),
+	};
+
+	await import('../../src/service/TelegramService.ts');
+	const openrouter = await import('../../src/service/openai/OpenrouterService.ts');
+	const generateText = spy(() => streamResponse());
+	(openrouter.default as any).prototype.generateText = generateText;
+	const opencode = await import('../../src/service/openai/OpencodeService.ts');
+	(opencode.default as any).prototype.generateText = spy(() => {
+		throw new Error('paid opencode path should not run for non-admin');
+	});
+
+	const TelegramService = (await import('../../src/service/TelegramService.ts')).default;
+	await TelegramService.replyTextContent(ctx);
+
+	assertEquals(generateText.calls.length, 1);
+	assertEquals(ctx.streamReply.calls.length, 1);
+
+	restoreKv();
+});
+
 Deno.test('extractContextKeys keeps only the largest photo size, image documents and other files', async () => {
 	const { Context } = await import('grammy');
 	await import('../../src/prototype/ContextExtensionPrototype.ts');
@@ -177,7 +217,7 @@ Deno.test('extractContextKeys keeps only the largest photo size, image documents
 });
 
 Deno.test('replyTextContent replies helpfully for media it cannot read', async () => {
-	mockDenoEnv({ ZHIPU_API_KEY: 'x' });
+	mockDenoEnv({ ZHIPU_API_KEY: 'x', ADMIN_USER_IDS: '1' });
 	const restoreKv = stubKvWithCurrentModel('/zai');
 
 	const ctx: any = {
@@ -187,6 +227,7 @@ Deno.test('replyTextContent replies helpfully for media it cannot read', async (
 		message: { sticker: { file_id: 'stkr1' } },
 		extractContextKeys: spy(() =>
 			Promise.resolve({
+				userId: 1,
 				userKey: 'user:1',
 				contextMessage: undefined,
 				photos: undefined,

@@ -209,7 +209,7 @@ Interações Premium:
 	 * @param ctx - Telegram context
 	 */
 	async replyTextContent(ctx: Context): Promise<void> {
-		const { userKey, contextMessage: message, caption } = await ctx.extractContextKeys();
+		const { userId, userKey, contextMessage: message, caption } = await ctx.extractContextKeys();
 		const currentModel = await getCurrentModel(userKey);
 		const promptText = message ?? caption;
 
@@ -222,9 +222,11 @@ Interações Premium:
 			'/glmflash': () => handleZai(ctx, `glmflash: ${promptText ?? ''}`),
 			'/free': () => handleOpenRouter(ctx, `free: ${promptText ?? ''}`),
 			'/opencode': () => handleOpencode(ctx, `opencode: ${promptText ?? ''}`),
+			'/spark': () => handleOpencode(ctx, `spark: ${promptText ?? ''}`),
 		};
 
-		const handler = modelHandlers[currentModel];
+		const isAllowed = (userId != null && getAdminUserIds().includes(userId)) || WHITELISTED_MODELS.includes(currentModel);
+		const handler = modelHandlers[isAllowed ? currentModel : '/free'];
 
 		if (handler) {
 			await handler();

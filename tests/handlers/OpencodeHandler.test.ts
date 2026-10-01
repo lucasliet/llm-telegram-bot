@@ -28,6 +28,35 @@ Deno.test('OpencodeHandler streams text path', async () => {
 	restore();
 });
 
+Deno.test('OpencodeHandler routes spark prefix to muse-spark model', async () => {
+	const restore = setupKvStub();
+	const ctx: any = {
+		streamReply: spy(() => Promise.resolve()),
+		replyWithVisionNotSupportedByModel: spy(() => Promise.resolve()),
+		extractContextKeys: spy(() =>
+			Promise.resolve({
+				userKey: 'user:1',
+				contextMessage: 'spark: hi',
+				photos: undefined,
+				caption: undefined,
+				quote: undefined,
+			})
+		),
+	};
+	await import('../../src/service/TelegramService.ts');
+	const mod = await import('../../src/handlers/OpencodeHandler.ts');
+	const svc = await import('../../src/service/openai/OpencodeService.ts');
+	const models = (await import('../../src/config/models.ts')).opencodeModels;
+	const generateText = spy(function (this: any) {
+		return Promise.resolve({ reader: new ReadableStream().getReader(), onComplete: () => Promise.resolve(), responseMap: (s: string) => s });
+	});
+	(svc.default as any).prototype.generateText = generateText;
+	await mod.handleOpencode(ctx);
+	assertEquals(ctx.streamReply.calls.length, 1);
+	assertEquals((generateText.calls[0] as any).self.model, models.museSpark);
+	restore();
+});
+
 Deno.test('OpencodeHandler streams image generation flow', async () => {
 	const restore = setupKvStub();
 	const ctx: any = {
