@@ -1,4 +1,4 @@
-import { assertEquals } from 'asserts';
+import { assertEquals, assertThrows } from 'asserts';
 import ToolService from '../../src/service/ToolService.ts';
 
 /**
@@ -15,6 +15,44 @@ Deno.test('ToolService.schemas exposes tools list', () => {
 	const ok = Array.isArray(ToolService.schemas) && ToolService.schemas.length > 0;
 	assertEquals(ok, true);
 });
+
+for (
+	const { text, encoded } of [
+		{ text: '', encoded: '' },
+		{ text: 'Hello', encoded: 'SGVsbG8=' },
+		{ text: 'Olá 🌍', encoded: 'T2zDoSDwn4yN' },
+		{ text: '\uFEFFHello', encoded: '77u/SGVsbG8=' },
+	]
+) {
+	Deno.test(`ToolService Base64 tools encode and decode ${JSON.stringify(text)}`, () => {
+		const encode = ToolService.tools.get('base64_encode')!.fn;
+		const decode = ToolService.tools.get('base64_decode')!.fn;
+
+		const encodedResult = encode({ text });
+		const decodedResult = decode({ text: encoded });
+
+		assertEquals(encodedResult, encoded);
+		assertEquals(decodedResult, text);
+	});
+}
+
+for (const text of ['!!!', 'A', '/w==']) {
+	Deno.test(`ToolService base64_decode rejects invalid Base64 or UTF-8 ${text}`, () => {
+		const decode = ToolService.tools.get('base64_decode')!.fn;
+
+		assertThrows(() => decode({ text }), Error, 'Invalid Base64 or UTF-8 text');
+	});
+}
+
+for (const name of ['base64_encode', 'base64_decode']) {
+	Deno.test(`ToolService exposes ${name} in Chat Completions and Responses schemas`, () => {
+		const chatSchema = ToolService.schemas.find((schema) => schema.type === 'function' && schema.function.name === name);
+		const responsesSchema = ToolService.responsesSchemas.find((schema) => schema.type === 'function' && schema.name === name);
+
+		assertEquals(chatSchema?.type, 'function');
+		assertEquals(responsesSchema?.type, 'function');
+	});
+}
 
 Deno.test('ToolService search_searx returns mapped results', async () => {
 	const json = {

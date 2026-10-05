@@ -1,6 +1,7 @@
 import OpenAi from 'openai';
 import { XMLParser } from 'fast-xml-parser';
 import { parse } from 'node-html-parser';
+import { decodeBase64, encodeBase64 } from 'base64';
 import { mapChatToolsToResponsesTools } from '@/util/ChatConfigUtil.ts';
 /**
  * Represents a search result from SearxNG.
@@ -42,6 +43,71 @@ export default class ToolService {
 		// deno-lint-ignore ban-types
 		{ schema: OpenAi.ChatCompletionTool; fn: Function }
 	>([
+		[
+			'base64_encode',
+			{
+				schema: {
+					type: 'function',
+					function: {
+						name: 'base64_encode',
+						description: 'Encodes UTF-8 text as Base64',
+						parameters: {
+							type: 'object',
+							properties: {
+								text: { type: 'string', description: 'UTF-8 text to encode' },
+							},
+							required: ['text'],
+							additionalProperties: false,
+						},
+						strict: true,
+					},
+				},
+				/**
+				 * Encodes UTF-8 text as Base64.
+				 * @param args - The encoding parameters.
+				 * @param args.text - The text to encode.
+				 * @returns The Base64-encoded text.
+				 */
+				fn: (args: { text: string }): string => {
+					return encodeBase64(new TextEncoder().encode(args.text));
+				},
+			},
+		],
+		[
+			'base64_decode',
+			{
+				schema: {
+					type: 'function',
+					function: {
+						name: 'base64_decode',
+						description: 'Decodes Base64 into UTF-8 text; rejects invalid Base64 or non-UTF-8 data',
+						parameters: {
+							type: 'object',
+							properties: {
+								text: { type: 'string', description: 'Base64-encoded UTF-8 text to decode' },
+							},
+							required: ['text'],
+							additionalProperties: false,
+						},
+						strict: true,
+					},
+				},
+				/**
+				 * Decodes Base64 into UTF-8 text.
+				 * @param args - The decoding parameters.
+				 * @param args.text - The Base64-encoded text.
+				 * @returns The decoded UTF-8 text.
+				 * @throws An error if the input is invalid Base64 or contains invalid UTF-8.
+				 */
+				fn: (args: { text: string }): string => {
+					try {
+						return new TextDecoder('utf-8', { fatal: true, ignoreBOM: true }).decode(decodeBase64(args.text));
+					} catch (cause) {
+						throw new Error('Invalid Base64 or UTF-8 text', { cause });
+					}
+				},
+			},
+		],
 		[
 			'search_searx',
 			{
