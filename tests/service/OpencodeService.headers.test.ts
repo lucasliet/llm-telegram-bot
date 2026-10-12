@@ -1,7 +1,6 @@
 import { assertEquals, assertMatch, assertNotEquals } from 'asserts';
 import { buildOpencodeHeaders, newOpencodeOperationId, OPENCODE_SESSION_HEADER, OPENCODE_USER_AGENT } from '../../src/service/openai/OpencodeService.ts';
 import { opencodeModels } from '../../src/config/models.ts';
-import { setupKvStub } from '../stubs/kv.ts';
 
 Deno.test('buildOpencodeHeaders identifies client and operation', () => {
 	const headers = buildOpencodeHeaders('op-123');
@@ -17,46 +16,30 @@ Deno.test('newOpencodeOperationId generates unique ids', () => {
 });
 
 Deno.test('OpencodeService defaults to the Go mimo model', async () => {
-	const restore = setupKvStub();
-	try {
-		const { default: OpencodeService } = await import('../../src/service/openai/OpencodeService.ts');
-		const service = new OpencodeService() as any;
-		assertEquals(service.model, opencodeModels.mimo);
-	} finally {
-		restore();
-	}
+	const { default: OpencodeService } = await import('../../src/service/openai/OpencodeService.ts');
+	const service = new OpencodeService() as any;
+	assertEquals(service.model, opencodeModels.mimo);
 });
 
 Deno.test('OpencodeService sends User-Agent and x-opencode-session', async () => {
-	const restore = setupKvStub();
-	try {
-		const { default: OpencodeService } = await import('../../src/service/openai/OpencodeService.ts');
-		const service = new OpencodeService('mimo-v2.6-flash', 'fixed-operation-id') as any;
-		const defaultHeaders = service.openai._options.defaultHeaders;
-		assertEquals(defaultHeaders['User-Agent'], OPENCODE_USER_AGENT);
-		assertEquals(defaultHeaders[OPENCODE_SESSION_HEADER], 'fixed-operation-id');
-		assertEquals(service.getOperationId(), 'fixed-operation-id');
-	} finally {
-		restore();
-	}
+	const { default: OpencodeService } = await import('../../src/service/openai/OpencodeService.ts');
+	const service = new OpencodeService('mimo-v2.6-flash', 'fixed-operation-id') as any;
+	const defaultHeaders = service.openai._options.defaultHeaders;
+	assertEquals(defaultHeaders['User-Agent'], OPENCODE_USER_AGENT);
+	assertEquals(defaultHeaders[OPENCODE_SESSION_HEADER], 'fixed-operation-id');
+	assertEquals(service.getOperationId(), 'fixed-operation-id');
 });
 
 Deno.test('OpencodeService.setOperationId reapplies headers', async () => {
-	const restore = setupKvStub();
-	try {
-		const { default: OpencodeService } = await import('../../src/service/openai/OpencodeService.ts');
-		const service = new OpencodeService('mimo-v2.6-flash', 'op-1') as any;
-		service.setOperationId('op-2');
-		const defaultHeaders = service.openai._options.defaultHeaders;
-		assertEquals(defaultHeaders[OPENCODE_SESSION_HEADER], 'op-2');
-		assertEquals(service.getOperationId(), 'op-2');
-	} finally {
-		restore();
-	}
+	const { default: OpencodeService } = await import('../../src/service/openai/OpencodeService.ts');
+	const service = new OpencodeService('mimo-v2.6-flash', 'op-1') as any;
+	service.setOperationId('op-2');
+	const defaultHeaders = service.openai._options.defaultHeaders;
+	assertEquals(defaultHeaders[OPENCODE_SESSION_HEADER], 'op-2');
+	assertEquals(service.getOperationId(), 'op-2');
 });
 
 Deno.test('OpencodeService.generateText reuses the stable in-memory session', async () => {
-	const restore = setupKvStub();
 	const OpenAiService = (await import('../../src/service/openai/OpenAIService.ts')).default;
 	const original = OpenAiService.prototype.generateText;
 	(OpenAiService.prototype as any).generateText = function () {
@@ -74,7 +57,6 @@ Deno.test('OpencodeService.generateText reuses the stable in-memory session', as
 		assertEquals(defaultHeaders[OPENCODE_SESSION_HEADER], after);
 	} finally {
 		OpenAiService.prototype.generateText = original;
-		restore();
 	}
 });
 

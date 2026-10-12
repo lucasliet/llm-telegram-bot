@@ -1,14 +1,11 @@
 import { assertEquals } from 'asserts';
 import { spy } from 'mock';
 import { mockDenoEnv } from '../test_helpers.ts';
-import { setupKvStub } from '../stubs/kv.ts';
 
 const streamResponse = () => Promise.resolve({ reader: new ReadableStream().getReader(), onComplete: () => Promise.resolve(), responseMap: (s: string) => s });
 
 Deno.test('ZaiService sends images as base64 because Z.ai cannot fetch Telegram URLs', async () => {
 	mockDenoEnv({ ZHIPU_API_KEY: 'x' });
-	const restore = setupKvStub();
-
 	await import('../../src/service/TelegramService.ts');
 	const base = await import('../../src/service/openai/OpenAIService.ts');
 	const svc = await import('../../src/service/openai/ZaiService.ts');
@@ -29,13 +26,10 @@ Deno.test('ZaiService sends images as base64 because Z.ai cannot fetch Telegram 
 
 	assertEquals(superGenerate.calls.length, 1);
 	assertEquals(superGenerate.calls[0].args[4], true);
-
-	restore();
 });
 
 Deno.test('ZaiHandler accepts image input for vision-capable flash model', async () => {
 	mockDenoEnv({ ZHIPU_API_KEY: 'x' });
-	const restore = setupKvStub();
 	const ctx: any = {
 		streamReply: spy(() => Promise.resolve()),
 		replyWithVisionNotSupportedByModel: spy(() => Promise.resolve()),
@@ -54,12 +48,10 @@ Deno.test('ZaiHandler accepts image input for vision-capable flash model', async
 	await mod.handleZai(ctx);
 	assertEquals(ctx.streamReply.calls.length, 1);
 	assertEquals(ctx.replyWithVisionNotSupportedByModel.calls.length, 0);
-	restore();
 });
 
 Deno.test('ZaiHandler rejects image input for text-only glm model', async () => {
 	mockDenoEnv({ ZHIPU_API_KEY: 'x' });
-	const restore = setupKvStub();
 	const ctx: any = {
 		streamReply: spy(() => Promise.resolve()),
 		replyWithVisionNotSupportedByModel: spy(() => Promise.resolve()),
@@ -74,12 +66,10 @@ Deno.test('ZaiHandler rejects image input for text-only glm model', async () => 
 	await mod.handleZai(ctx, 'glm: descreva');
 	assertEquals(ctx.replyWithVisionNotSupportedByModel.calls.length, 1);
 	assertEquals(ctx.streamReply.calls.length, 0);
-	restore();
 });
 
 Deno.test('ZaiHandler keeps text flow for text-only glm model', async () => {
 	mockDenoEnv({ ZHIPU_API_KEY: 'x' });
-	const restore = setupKvStub();
 	const ctx: any = {
 		streamReply: spy(() => Promise.resolve()),
 		replyWithVisionNotSupportedByModel: spy(() => Promise.resolve()),
@@ -92,5 +82,4 @@ Deno.test('ZaiHandler keeps text flow for text-only glm model', async () => {
 	await mod.handleZai(ctx);
 	assertEquals(ctx.streamReply.calls.length, 1);
 	assertEquals(ctx.replyWithVisionNotSupportedByModel.calls.length, 0);
-	restore();
 });

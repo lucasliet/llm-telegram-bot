@@ -1,7 +1,6 @@
 import { assertEquals } from 'asserts';
 import { spy } from 'mock';
 import { mockDenoEnv } from '../test_helpers.ts';
-import { setupKvStub } from '../stubs/kv.ts';
 
 function createCtx(msg: string) {
 	return {
@@ -14,7 +13,6 @@ function createCtx(msg: string) {
 }
 
 Deno.test('CloudflareHandler routes kimi text command to generateText', async () => {
-	const restore = setupKvStub();
 	mockDenoEnv({ CLOUDFLARE_API_KEY: 'k', CLOUDFLARE_ACCOUNT_ID: 'acc' });
 	const ctx: any = createCtx('kimi: hello');
 	await import('../../src/service/TelegramService.ts');
@@ -27,11 +25,9 @@ Deno.test('CloudflareHandler routes kimi text command to generateText', async ()
 	await mod.handleCloudflare(ctx);
 	assertEquals(ctx.streamReply.calls.length, 1);
 	assertEquals(generateTextSpy.calls.length, 1);
-	restore();
 });
 
 Deno.test('CloudflareHandler routes to image generation', async () => {
-	const restore = setupKvStub();
 	mockDenoEnv({ CLOUDFLARE_API_KEY: 'k', CLOUDFLARE_ACCOUNT_ID: 'acc' });
 	const ctx: any = {
 		replyWithPhoto: spy(() => Promise.resolve()),
@@ -48,5 +44,4 @@ Deno.test('CloudflareHandler routes to image generation', async () => {
 	await mod.handleCloudflare(ctx);
 	assertEquals(ctx.replyWithPhoto.calls.length, 1);
 	assertEquals(generateImageSpy.calls.length, 1);
-	restore();
 });

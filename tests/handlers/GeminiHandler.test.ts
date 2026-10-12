@@ -1,11 +1,9 @@
 import { assertEquals } from 'asserts';
 import { spy } from 'mock';
 import { mockDenoEnv } from '../test_helpers.ts';
-import { setupKvStub } from '../stubs/kv.ts';
 
 Deno.test('GeminiHandler streams text generation', async () => {
 	mockDenoEnv({ GEMINI_API_KEY: 'x' });
-	const restore = setupKvStub();
 	const ctx: any = {
 		streamReply: spy(() => Promise.resolve()),
 		extractContextKeys: spy(() =>
@@ -20,12 +18,10 @@ Deno.test('GeminiHandler streams text generation', async () => {
 	);
 	await mod.handleGemini(ctx);
 	assertEquals(ctx.streamReply.calls.length, 1);
-	restore();
 });
 
 Deno.test('GeminiHandler streams image generation flow', async () => {
 	mockDenoEnv({ GEMINI_API_KEY: 'x' });
-	const restore = setupKvStub();
 	const ctx: any = {
 		streamReply: spy(() => Promise.resolve()),
 		extractContextKeys: spy(() =>
@@ -42,5 +38,4 @@ Deno.test('GeminiHandler streams image generation flow', async () => {
 	);
 	await mod.handleGemini(ctx);
 	assertEquals(ctx.streamReply.calls.length, 1);
-	restore();
 });

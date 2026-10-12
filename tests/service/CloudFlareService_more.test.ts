@@ -1,10 +1,8 @@
 import { assertEquals } from 'asserts';
 import { spy } from 'mock';
 import { mockDenoEnv } from '../test_helpers.ts';
-import { setupKvStub } from '../stubs/kv.ts';
 
 Deno.test('CloudFlareService.generateImageBinary returns Uint8Array', async () => {
-	setupKvStub();
 	mockDenoEnv({ CLOUDFLARE_API_KEY: 'k', CLOUDFLARE_ACCOUNT_ID: 'acc' });
 	const { default: CloudFlareService } = await import('../../src/service/openai/CloudFlareService.ts');
 	const service = new CloudFlareService();
@@ -20,7 +18,6 @@ Deno.test('CloudFlareService.generateImageBinary returns Uint8Array', async () =
 });
 
 Deno.test('CloudFlareService.transcribeAudio returns text', async () => {
-	setupKvStub();
 	mockDenoEnv({ CLOUDFLARE_API_KEY: 'k', CLOUDFLARE_ACCOUNT_ID: 'acc' });
 	const { default: CloudFlareService } = await import('../../src/service/openai/CloudFlareService.ts');
 	const service = new CloudFlareService();
@@ -35,7 +32,6 @@ Deno.test('CloudFlareService.transcribeAudio returns text', async () => {
 });
 
 Deno.test('CloudFlareService.transcribeFile returns markdown text', async () => {
-	setupKvStub();
 	mockDenoEnv({ CLOUDFLARE_API_KEY: 'k', CLOUDFLARE_ACCOUNT_ID: 'acc' });
 	const { default: CloudFlareService } = await import('../../src/service/openai/CloudFlareService.ts');
 	const service = new CloudFlareService();
@@ -50,7 +46,6 @@ Deno.test('CloudFlareService.transcribeFile returns markdown text', async () => 
 });
 
 Deno.test('CloudFlareService.generateVisionText returns description', async () => {
-	setupKvStub();
 	mockDenoEnv({ CLOUDFLARE_API_KEY: 'k', CLOUDFLARE_ACCOUNT_ID: 'acc' });
 	const { default: CloudFlareService } = await import('../../src/service/openai/CloudFlareService.ts');
 	const service = new CloudFlareService();

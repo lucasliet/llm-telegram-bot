@@ -1,11 +1,9 @@
 import { assertEquals } from 'asserts';
 import { spy } from 'mock';
 import { mockDenoEnv } from '../test_helpers.ts';
-import { setupKvStub } from '../stubs/kv.ts';
 
 Deno.test('PerplexityHandler maps search alias and streams', async () => {
 	mockDenoEnv({ PERPLEXITY_API_KEY: 'x' });
-	const restore = setupKvStub();
 	const ctx: any = {
 		streamReply: spy(() => Promise.resolve()),
 		extractContextKeys: spy(() =>
@@ -20,5 +18,4 @@ Deno.test('PerplexityHandler maps search alias and streams', async () => {
 	);
 	await mod.handlePerplexity(ctx);
 	assertEquals(ctx.streamReply.calls.length, 1);
-	restore();
 });

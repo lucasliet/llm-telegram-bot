@@ -8,8 +8,6 @@ Deno.test('TelegramService.getUsage replies formatted for admin', async () => {
 		ADMIN_USER_IDS: '12345|678',
 		COPILOT_GITHUB_TOKEN: 'ct',
 	});
-	const { setupKvStub } = await import('../stubs/kv.ts');
-	setupKvStub();
 	const originalFetch = globalThis.fetch;
 	try {
 		globalThis.fetch = spy(() =>

@@ -1,10 +1,7 @@
 import { assertEquals } from 'asserts';
-import { setupKvStub } from '../stubs/kv.ts';
-
 Deno.test(
 	'Instantiate OpenAI-related service classes constructors',
 	async () => {
-		const kvCleanup = setupKvStub();
 		const env = Deno.env.get;
 		Deno.env.get = (k: string) =>
 			(({
@@ -54,7 +51,6 @@ Deno.test(
 			assertEquals(typeof oc, 'object');
 		} finally {
 			Deno.env.get = env;
-			kvCleanup();
 		}
 	},
 );

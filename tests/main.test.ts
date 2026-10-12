@@ -1,5 +1,4 @@
 import { assertEquals } from 'asserts';
-import { assignOpenKv } from './stubs/kv.ts';
 import { mockDenoEnv } from './test_helpers.ts';
 
 Deno.test('Key components load correctly', async () => {
@@ -8,15 +7,6 @@ Deno.test('Key components load correctly', async () => {
 		'ADMIN_USER_IDS': '12345|67890',
 		'PORT': '3333',
 	});
-
-	const originalOpenKv = Deno.openKv;
-	const mockKv = {
-		get: () => Promise.resolve({ value: '/gpt' }),
-		set: () => Promise.resolve({ ok: true }),
-		delete: () => Promise.resolve({ ok: true }),
-		close: () => Promise.resolve(),
-	};
-	assignOpenKv(() => Promise.resolve(mockKv));
 
 	try {
 		console.log('Testing key component loading...');
@@ -46,7 +36,5 @@ Deno.test('Key components load correctly', async () => {
 	} catch (err) {
 		console.error('Error loading key components:', err);
 		throw err;
-	} finally {
-		assignOpenKv(originalOpenKv);
 	}
 });

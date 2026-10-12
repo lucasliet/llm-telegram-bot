@@ -1,6 +1,5 @@
 import { assertEquals } from 'asserts';
 import { assertSpyCalls, spy } from 'mock';
-import { assignOpenKv } from '../stubs/kv.ts';
 import '../../src/prototype/StringExtensionPrototype.ts';
 import { Context } from 'grammy';
 
@@ -27,17 +26,6 @@ function createContext(overrides: Partial<any> = {}) {
 }
 
 Deno.test('replyInChunks splits large messages and calls replyWithQuote', async () => {
-	const originalOpenKv = Deno.openKv;
-	assignOpenKv(() =>
-		Promise.resolve(
-			{
-				get: () => Promise.resolve({ value: [] }),
-				set: () => Promise.resolve({ ok: true }),
-				delete: () => Promise.resolve({ ok: true }),
-				close: () => Promise.resolve(),
-			} as any,
-		)
-	);
 	const calls: any[] = [];
 	const ctx = createContext({
 		replyWithQuote: spy((text: string) => {
@@ -50,21 +38,9 @@ Deno.test('replyInChunks splits large messages and calls replyWithQuote', async 
 	await (Context.prototype as any).replyInChunks.call(ctx, big);
 	const ok = calls.length >= 2;
 	assertEquals(ok, true);
-	assignOpenKv(originalOpenKv);
 });
 
 Deno.test('replyInChunks fallback removes Markdown when reply fails', async () => {
-	const originalOpenKv = Deno.openKv;
-	assignOpenKv(() =>
-		Promise.resolve(
-			{
-				get: () => Promise.resolve({ value: [] }),
-				set: () => Promise.resolve({ ok: true }),
-				delete: () => Promise.resolve({ ok: true }),
-				close: () => Promise.resolve(),
-			} as any,
-		)
-	);
 	let first = true;
 	const calls: any[] = [];
 	const ctx = createContext({
@@ -82,21 +58,9 @@ Deno.test('replyInChunks fallback removes Markdown when reply fails', async () =
 	const attemptedMarkdown = calls[0]?.parse_mode === 'Markdown';
 	const attemptedFallback = !calls[1];
 	assertEquals(attemptedMarkdown && attemptedFallback, true);
-	assignOpenKv(originalOpenKv);
 });
 
 Deno.test('replyWithVisionNotSupportedByModel answers expected text', async () => {
-	const originalOpenKv = Deno.openKv;
-	assignOpenKv(() =>
-		Promise.resolve(
-			{
-				get: () => Promise.resolve({ value: [] }),
-				set: () => Promise.resolve({ ok: true }),
-				delete: () => Promise.resolve({ ok: true }),
-				close: () => Promise.resolve(),
-			} as any,
-		)
-	);
 	const ctx = createContext({
 		replyWithQuote: spy((text: string) => {
 			return (ctx as any).reply(text);
@@ -105,21 +69,9 @@ Deno.test('replyWithVisionNotSupportedByModel answers expected text', async () =
 	await import('../../src/prototype/ContextExtensionPrototype.ts');
 	await (Context.prototype as any).replyWithVisionNotSupportedByModel.call(ctx);
 	assertEquals(ctx.reply.calls[0].args[0], 'esse modelo não suporta leitura de foto');
-	assignOpenKv(originalOpenKv);
 });
 
 Deno.test('streamReply edits message and calls onComplete', async () => {
-	const originalOpenKv = Deno.openKv;
-	assignOpenKv(() =>
-		Promise.resolve(
-			{
-				get: () => Promise.resolve({ value: [] }),
-				set: () => Promise.resolve({ ok: true }),
-				delete: () => Promise.resolve({ ok: true }),
-				close: () => Promise.resolve(),
-			} as any,
-		)
-	);
 	const ctx = createContext({
 		replyWithQuote: spy(() => Promise.resolve({ message_id: 11 })),
 	});
@@ -136,21 +88,9 @@ Deno.test('streamReply edits message and calls onComplete', async () => {
 	await (Context.prototype as any).streamReply.call(ctx, { reader, onComplete });
 	assertEquals(ctx.api.editMessageText.calls.length > 0, true);
 	assertEquals(onComplete.calls.length, 1);
-	assignOpenKv(originalOpenKv);
 });
 
 Deno.test('extractContextKeys returns expected payload', async () => {
-	const originalOpenKv = Deno.openKv;
-	assignOpenKv(() =>
-		Promise.resolve(
-			{
-				get: () => Promise.resolve({ value: [] }),
-				set: () => Promise.resolve({ ok: true }),
-				delete: () => Promise.resolve({ ok: true }),
-				close: () => Promise.resolve(),
-			} as any,
-		)
-	);
 	const ctx = createContext({
 		message: { text: 'hello', message_id: 22 },
 	});
@@ -158,7 +98,6 @@ Deno.test('extractContextKeys returns expected payload', async () => {
 	const keys = await (Context.prototype as any).extractContextKeys.call(ctx);
 	const ok = keys.userId === 123 && keys.userKey === 'user:123' && keys.contextMessage === 'hello';
 	assertEquals(ok, true);
-	assignOpenKv(originalOpenKv);
 });
 
 Deno.test('startTypingIndicator sets chat action and returns interval', async () => {

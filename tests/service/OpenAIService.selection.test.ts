@@ -2,10 +2,8 @@ import { spy } from 'mock';
 import { assertSpyCalls } from '../test_helpers.ts';
 import OpenAiService from '../../src/service/openai/OpenAIService.ts';
 import { MODELS_USING_RESPONSES_API } from '../../src/config/models.ts';
-import { setupKvStub } from '../stubs/kv.ts';
 
 Deno.test('OpenAIService selects Responses API for configured models', async (t) => {
-	setupKvStub();
 	const modelUsingResponses = MODELS_USING_RESPONSES_API[0];
 	const userKey = 'test-user';
 	const prompt = 'hello';

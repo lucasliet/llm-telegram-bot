@@ -2,14 +2,10 @@ import { assertEquals } from 'asserts';
 import { spy } from 'mock';
 import '../../src/prototype/ReadableStreamDefaultReaderPrototype.ts';
 import '../../src/prototype/StringExtensionPrototype.ts';
-import { setupKvStub } from '../stubs/kv.ts';
 
 // Set environment variables required by FileUtils
 Deno.env.set('ADMIN_USER_IDS', '12345');
 Deno.env.set('BOT_TOKEN', 'test_token');
-
-// Setup KV stub to prevent database leaks
-setupKvStub();
 
 Deno.test('ElevenlabsHandler does nothing for non-fala command', async () => {
 	const ctx: any = {

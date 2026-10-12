@@ -11,8 +11,6 @@ function readerFromLines(lines: string[]): ReadableStreamDefaultReader<Uint8Arra
 }
 
 Deno.test('OpenAIService.executeToolCalls parses tool_calls and forwards followup', async () => {
-	const { setupKvStub } = await import('../stubs/kv.ts');
-	setupKvStub();
 	const mod = await import('../../src/service/openai/OpenAIService.ts');
 	const tools = await import('../../src/service/ToolService.ts');
 	(tools.default as any).tools.set('echo', { schema: {} as any, fn: (args: any) => ({ ok: args?.q }) });

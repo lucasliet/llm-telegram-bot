@@ -1,9 +1,7 @@
 import { assertEquals } from 'asserts';
 import { spy } from 'mock';
-import { setupKvStub } from '../stubs/kv.ts';
 
 Deno.test('OpencodeHandler streams text path', async () => {
-	const restore = setupKvStub();
 	const ctx: any = {
 		streamReply: spy(() => Promise.resolve()),
 		replyWithVisionNotSupportedByModel: spy(() => Promise.resolve()),
@@ -25,11 +23,9 @@ Deno.test('OpencodeHandler streams text path', async () => {
 	);
 	await mod.handleOpencode(ctx);
 	assertEquals(ctx.streamReply.calls.length, 1);
-	restore();
 });
 
 Deno.test('OpencodeHandler routes spark prefix to muse-spark model', async () => {
-	const restore = setupKvStub();
 	const ctx: any = {
 		streamReply: spy(() => Promise.resolve()),
 		replyWithVisionNotSupportedByModel: spy(() => Promise.resolve()),
@@ -54,11 +50,9 @@ Deno.test('OpencodeHandler routes spark prefix to muse-spark model', async () =>
 	await mod.handleOpencode(ctx);
 	assertEquals(ctx.streamReply.calls.length, 1);
 	assertEquals((generateText.calls[0] as any).self.model, models.museSpark);
-	restore();
 });
 
 Deno.test('OpencodeHandler streams image generation flow', async () => {
-	const restore = setupKvStub();
 	const ctx: any = {
 		streamReply: spy(() => Promise.resolve()),
 		replyWithVisionNotSupportedByModel: spy(() => Promise.resolve()),
@@ -77,5 +71,4 @@ Deno.test('OpencodeHandler streams image generation flow', async () => {
 	await mod.handleOpencode(ctx);
 	assertEquals(ctx.streamReply.calls.length, 1);
 	assertEquals((svc.default as any).prototype.generateTextFromImage.calls.length, 1);
-	restore();
 });

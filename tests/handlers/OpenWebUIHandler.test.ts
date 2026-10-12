@@ -1,11 +1,9 @@
 import { assertEquals } from 'asserts';
 import { spy } from 'mock';
 import { mockDenoEnv } from '../test_helpers.ts';
-import { setupKvStub } from '../stubs/kv.ts';
 
 Deno.test('OpenWebUIHandler streams text path', async () => {
 	mockDenoEnv({ OPENWEBUI_API_KEY: 'x' });
-	const restore = setupKvStub();
 	const ctx: any = {
 		streamReply: spy(() => Promise.resolve()),
 		extractContextKeys: spy(() => Promise.resolve({ userKey: 'user:1', contextMessage: 'pgpt: hi', photos: undefined, caption: undefined, quote: undefined })),
@@ -18,5 +16,4 @@ Deno.test('OpenWebUIHandler streams text path', async () => {
 	);
 	await mod.handleOpenWebUI(ctx);
 	assertEquals(ctx.streamReply.calls.length, 1);
-	restore();
 });
