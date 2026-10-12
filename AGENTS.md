@@ -21,7 +21,7 @@
 - `deno task build`: bundles `worker.ts` into `dist/worker.js` (wrangler runs it automatically on `dev:worker`/`deploy`).
 - `deno task deploy`: deploys to Cloudflare Workers (`npx wrangler@4.143.1 deploy`); `deno task dev:worker` runs it locally on workerd.
 - `./run_tests.sh`: full suite + coverage (**run the script directly instead of `deno task test`**).
-- `deno test -A --unstable-kv --unstable-cron tests/service/TelegramService.test.ts`: run a specific test.
+- `deno test -A tests/service/TelegramService.test.ts`: run a specific test.
 - `deno fmt 'src/**/*.ts' 'tests/**/*.ts' 'main.ts'`, `deno lint`: format and lint the codebase.
 - **IMPORTANTE:** NÃO rode `deno fmt` sem argumentos. O formatter do Deno reformata arquivos `.md`, `.json` e `.yml` de forma indesejada. Use sempre globs para
   formatar apenas código-fonte TypeScript.
@@ -38,7 +38,7 @@
 
 - Framework: Deno tests in `tests/`, mirroring `src/` structure; filenames end with `.test.ts`.
 - Run all: `./run_tests.sh`. Coverage is generated automatically.
-- Targeted runs: use `deno test` with `-A --unstable-kv --unstable-cron` for KV- and cron-dependent tests.
+- Targeted runs: `deno test -A <file>`.
 
 ## Commit & Pull Request Guidelines
 

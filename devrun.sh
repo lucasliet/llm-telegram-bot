@@ -17,7 +17,7 @@ if [ -f .env ]; then
   set +a
 fi
 
-export SERVER_URL=${SERVER_URL:-"https://llm-telegram-bot.lucasliet.deno.net/webhook"}
+export SERVER_URL=${SERVER_URL:-"https://llm-telegram-bot.lucasliet.workers.dev/webhook"}
 export BOT_TOKEN=${BOT_TOKEN:-$TELEGRAM_CHAT_BOT_TOKEN}
 export ADMIN_USER_IDS=${ADMIN_USER_IDS:-$TELEGRAM_USER_ID}
 export CLOUDFLARE_API_KEY=${CLOUDFLARE_API_KEY:-$CLOUDFLARE_AI_API_KEY}
@@ -30,9 +30,9 @@ if [ -f "$GCLOUD_CREDS" ]; then
 fi
 
 if [ "$1" = "copilot-login" ]; then
-  deno run --allow-env --allow-net --allow-read --allow-write --allow-import --unstable-kv --unstable-cron main.ts copilot-login
+  deno run --allow-env --allow-net --allow-read --allow-write --allow-import main.ts copilot-login
 else
-  deno run --watch --allow-env --allow-net --allow-read --allow-write --allow-import --unstable-kv --unstable-cron main.ts
+  deno run --watch --allow-env --allow-net --allow-read --allow-write --allow-import main.ts
 fi
 
 curl -X POST "https://api.telegram.org/bot$BOT_TOKEN/setWebhook" \

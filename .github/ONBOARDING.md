@@ -8,8 +8,8 @@
 
 **Frameworks:** Grammy (Telegram), Hono (HTTP Server), OpenAI SDK
 
-**Description:** A Telegram bot that integrates multiple LLM providers (GitHub Copilot, Gemini, OpenAI, etc.) with conversation history and Deno
-KV storage.
+**Description:** A Telegram bot that integrates multiple LLM providers (GitHub Copilot, Gemini, OpenAI, etc.) with conversation history and Workers
+KV storage, running on Cloudflare Workers.
 
 ---
 
@@ -45,11 +45,11 @@ LLM provider integrations, Telegram service, tool execution, and utility service
 
 ### 4. Repository Layer
 
-Deno KV storage for chat history and user model preferences with compression.
+Workers KV storage (via `KeyValueStore`) for chat history and user model preferences with compression.
 
 **Key Files:**
 
-- `src/repository/ChatRepository.ts` - Deno KV-based repository with compression
+- `src/repository/ChatRepository.ts` - Workers KV-based repository with compression
 
 ### 5. Adapter Layer
 
@@ -120,7 +120,7 @@ Explore how LLM providers are integrated with streaming and tool support.
 
 ### Step 4: Data Persistence Layer
 
-Understand how Deno KV stores chat history with compression.
+Understand how Workers KV stores chat history with compression.
 
 - `src/repository/ChatRepository.ts`
 
@@ -170,7 +170,7 @@ Explore how function calling and external tools are implemented.
 
 | File                | Purpose         | Complexity |
 | ------------------- | --------------- | ---------- |
-| `ChatRepository.ts` | Deno KV storage | Moderate   |
+| `ChatRepository.ts` | Workers KV storage | Moderate   |
 
 ### Adapter Layer
 

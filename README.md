@@ -101,7 +101,7 @@ deno task test
 Para executar um teste específico:
 
 ```bash
-deno test -A --unstable-kv --unstable-cron tests/service/TelegramService.test.ts
+deno test -A tests/service/TelegramService.test.ts
 ```
 
 ### Estrutura de testes

@@ -23,10 +23,8 @@
 				"run",
 				"--watch",
 				"--unstable",
-				"--unstable-cron",
 				"--inspect-wait",
-				"--allow-all",
-				"--unstable-kv"
+				"--allow-all"
 			],
 			"attachSimplePort": 9229
 		}

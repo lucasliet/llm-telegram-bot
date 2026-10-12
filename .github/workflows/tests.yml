@@ -28,7 +28,7 @@ jobs:
         continue-on-error: true
 
       - name: Generate coverage report
-        run: deno test --coverage=coverage --allow-all --unstable-kv --unstable-cron --no-check tests/
+        run: deno test --coverage=coverage --allow-all --no-check tests/
         env:
           ADMIN_USER_IDS: '12345|67890'
           OPENAI_API_KEY: 'sk-1234567890'
