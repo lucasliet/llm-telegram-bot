@@ -2,6 +2,7 @@ import { assertEquals } from 'asserts';
 import { spy } from 'mock';
 import { InMemoryKeyValueStore, KeyValueStore, setKeyValueStore } from '@/repository/KeyValueStore.ts';
 import { assertSpyCalls, createMockContext, MockContext, mockDenoEnv } from '../test_helpers.ts';
+import { deriveWebhookSecret } from '@/util/WebhookSecret.ts';
 
 import type { ModelCommand } from '../../src/config/models.ts';
 import { modelCommands, WHITELISTED_MODELS } from '../../src/config/models.ts';
@@ -75,7 +76,10 @@ Deno.test('TelegramService', async (t) => {
 		assertEquals(options.headers['Content-Type'], 'application/json');
 		assertEquals(
 			JSON.parse(options.body),
-			{ url: 'https://llm-telegram-bot.lucasliet.workers.dev/webhook' },
+			{
+				url: 'https://llm-telegram-bot.lucasliet.workers.dev/webhook',
+				secret_token: await deriveWebhookSecret('test_token'),
+			},
 		);
 	});
 

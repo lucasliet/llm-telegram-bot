@@ -3,6 +3,7 @@ import type { Update } from 'grammy-types';
 import worker, { UpdateQueueBatch, UpdateQueueBinding, UpdateQueueMessage, WorkerExecutionContext } from '../worker.ts';
 import { mockDenoEnv } from './test_helpers.ts';
 import { InMemoryKeyValueStore, KVNamespaceBinding, setKeyValueStore } from '@/repository/KeyValueStore.ts';
+import { deriveWebhookSecret, WEBHOOK_SECRET_HEADER } from '@/util/WebhookSecret.ts';
 
 class FakeKVNamespace implements KVNamespaceBinding {
 	get(_key: string, _type: 'json'): Promise<unknown> {
@@ -83,10 +84,12 @@ const textUpdate = {
 /**
  * Build a POST request carrying a Telegram update to the webhook route.
  * @param update - Update sent as the JSON body
+ * @param secret - Value of the Telegram secret header, omitted when undefined
  * @returns Webhook request
  */
-function webhookRequest(update: Update): Request {
-	return new Request('https://bot.example/webhook', { method: 'POST', body: JSON.stringify(update) });
+function webhookRequest(update: Update, secret?: string): Request {
+	const headers = secret === undefined ? undefined : { [WEBHOOK_SECRET_HEADER]: secret };
+	return new Request('https://bot.example/webhook', { method: 'POST', body: JSON.stringify(update), headers });
 }
 
 Deno.test('worker.ts', { sanitizeResources: false, sanitizeOps: false }, async (t) => {
@@ -96,6 +99,7 @@ Deno.test('worker.ts', { sanitizeResources: false, sanitizeOps: false }, async (
 	globalThis.fetch = createTelegramFetch(state);
 	const queue = new FakeUpdateQueue();
 	const env = { KV: new FakeKVNamespace(), UPDATES_QUEUE: queue };
+	const webhookSecret = await deriveWebhookSecret('123:test');
 
 	try {
 		await t.step('webhook enfileira o update e responde sem chamar o Telegram', async () => {
@@ -103,7 +107,7 @@ Deno.test('worker.ts', { sanitizeResources: false, sanitizeOps: false }, async (
 			state.calls.length = 0;
 
 			// When
-			const response = await worker.fetch(webhookRequest(textUpdate), env, fakeExecutionContext);
+			const response = await worker.fetch(webhookRequest(textUpdate, webhookSecret), env, fakeExecutionContext);
 
 			// Then
 			assertEquals(response.status, 200);
@@ -111,12 +115,27 @@ Deno.test('worker.ts', { sanitizeResources: false, sanitizeOps: false }, async (
 			assertEquals(state.calls, []);
 		});
 
+		await t.step('webhook rejeita update forjado sem o segredo derivado do bot token', async () => {
+			// Given
+			queue.sent.length = 0;
+			const otherBotSecret = await deriveWebhookSecret('999:other-bot');
+
+			// When
+			const withoutHeader = await worker.fetch(webhookRequest(textUpdate), env, fakeExecutionContext);
+			const withOtherBotSecret = await worker.fetch(webhookRequest(textUpdate, otherBotSecret), env, fakeExecutionContext);
+
+			// Then
+			assertEquals(withoutHeader.status, 401);
+			assertEquals(withOtherBotSecret.status, 401);
+			assertEquals(queue.sent, []);
+		});
+
 		await t.step('webhook responde 500 quando a fila falha, para o Telegram reenviar', async () => {
 			// Given
 			queue.failing = true;
 
 			// When
-			const response = await worker.fetch(webhookRequest(textUpdate), env, fakeExecutionContext);
+			const response = await worker.fetch(webhookRequest(textUpdate, webhookSecret), env, fakeExecutionContext);
 
 			// Then
 			queue.failing = false;

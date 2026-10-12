@@ -9,6 +9,7 @@ import { clearChatHistory } from '@/repository/ChatRepository.ts';
 import { handleCompress } from '@/handlers/CompressHandler.ts';
 import { modelCommands } from '@/config/models.ts';
 import { adminHelpMessage, adminKeyboard, userHelpMessage, userKeyboard } from '@/config/KeyboardConfig.ts';
+import { deriveWebhookSecret, isValidWebhookSecret, WEBHOOK_SECRET_HEADER } from '@/util/WebhookSecret.ts';
 
 import '@/prototype/StringExtensionPrototype.ts';
 import '@/prototype/ContextExtensionPrototype.ts';
@@ -172,6 +173,8 @@ export async function createBot(): Promise<Bot<MyContext>> {
 /**
  * Build the HTTP app that receives Telegram webhook updates and hands them to `enqueueUpdate`.
  * The webhook answers as soon as the update is enqueued, so slow model replies never hit Telegram's webhook timeout.
+ * Requests without the secret header derived from the bot token are rejected with 401, since the
+ * update body (including `from.id`, used for admin checks and chat history) is otherwise unauthenticated.
  * A failed enqueue returns 500 so Telegram redelivers the update.
  * @param enqueueUpdate - Persists the update for asynchronous processing (a Cloudflare Queue in production)
  * @returns Hono app with CORS, logging, webhook and setWebhook routes
@@ -182,6 +185,12 @@ export function createWebhookApp(enqueueUpdate: (update: Update) => Promise<void
 	configureMiddleware(app);
 
 	app.post('/webhook', async (c) => {
+		const expectedSecret = await deriveWebhookSecret(getToken());
+		if (!isValidWebhookSecret(c.req.header(WEBHOOK_SECRET_HEADER), expectedSecret)) {
+			console.warn('[WEBHOOK] Rejected request without a valid secret token');
+			return c.json({ ok: false, error: 'unauthorized' }, 401);
+		}
+
 		let update: Update;
 		try {
 			update = await c.req.json();

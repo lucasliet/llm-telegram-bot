@@ -35,6 +35,7 @@ else
   deno run --watch --allow-env --allow-net --allow-read --allow-write --allow-import main.ts
 fi
 
+WEBHOOK_SECRET=$(printf '%s' "$BOT_TOKEN" | shasum -a 256 | cut -d' ' -f1)
 curl -X POST "https://api.telegram.org/bot$BOT_TOKEN/setWebhook" \
   -H "Content-Type: application/json" \
-  -d "{\"url\":\"$SERVER_URL\"}"
+  -d "{\"url\":\"$SERVER_URL\",\"secret_token\":\"$WEBHOOK_SECRET\"}"

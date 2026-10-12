@@ -6,6 +6,7 @@ import { getCurrentModel, setCurrentModel } from '@/repository/ChatRepository.ts
 
 import { ModelCommand, modelCommands, WHITELISTED_MODELS } from '@/config/models.ts';
 import { escapeMarkdownV1 } from '@/util/MarkdownUtils.ts';
+import { deriveWebhookSecret } from '@/util/WebhookSecret.ts';
 
 import {
 	handleCloudflare,
@@ -35,10 +36,11 @@ const getAdminUserIds = () =>
  */
 export default {
 	/**
-	 * Sets the webhook URL for the Telegram bot
+	 * Sets the webhook URL for the Telegram bot, with a `secret_token` derived from the bot token
+	 * that Telegram echoes on every delivery so forged updates can be rejected
 	 * @returns Response from Telegram API
 	 */
-	setWebhook(): Promise<Response> {
+	async setWebhook(): Promise<Response> {
 		console.log('Setting webhook...');
 		const serverUrl = process.env.SERVER_URL || 'https://llm-telegram-bot.lucasliet.workers.dev/webhook';
 		return fetch(`https://api.telegram.org/bot${getToken()}/setWebhook`, {
@@ -48,6 +50,7 @@ export default {
 			},
 			body: JSON.stringify({
 				url: serverUrl,
+				secret_token: await deriveWebhookSecret(getToken()),
 			}),
 		});
 	},
