@@ -8,3 +8,6 @@ temp_*
 .serena
 .gemini
 .idea
+dist
+.wrangler
+.env

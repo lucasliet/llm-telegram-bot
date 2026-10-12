@@ -1,0 +1,21 @@
+{
+	"name": "llm-telegram-bot",
+	"main": "dist/worker.js",
+	"compatibility_date": "2026-09-01",
+	// nodejs_compat resolves `node:process` and populates `process.env` with vars/secrets
+	"compatibility_flags": ["nodejs_compat"],
+	"build": {
+		"command": "deno task build",
+		"watch_dir": ["src", "worker.ts"]
+	},
+	"kv_namespaces": [{ "binding": "KV", "id": "c1ad66759bae4f0b9e835d4a79336e8f" }],
+	"vars": {
+		"SERVER_URL": "https://llm-telegram-bot.lucasliet.workers.dev/webhook"
+	},
+	"assets": {
+		"directory": "./static"
+	},
+	"observability": {
+		"enabled": true
+	}
+}

@@ -1,8 +1,9 @@
+import process from 'node:process';
 import OpenAi from 'openai';
 import OpenAiService from './OpenAIService.ts';
 import { StreamReplyResponse } from '@/util/ChatConfigUtil.ts';
 
-const getCopilotGithubToken = () => Deno.env.get('COPILOT_GITHUB_TOKEN') as string;
+const getCopilotGithubToken = () => process.env.COPILOT_GITHUB_TOKEN as string;
 
 interface CopilotTokenCache {
 	token: string;

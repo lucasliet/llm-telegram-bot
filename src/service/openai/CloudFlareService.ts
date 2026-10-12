@@ -1,3 +1,4 @@
+import process from 'node:process';
 import OpenAi from 'openai';
 import OpenAiService from '@/service/openai/OpenAIService.ts';
 import { addContentToChatHistory, getChatHistory } from '@/repository/ChatRepository.ts';
@@ -5,8 +6,8 @@ import { cloudflareModels } from '@/config/models.ts';
 import { downloadTelegramFile } from '../TelegramService.ts';
 import { encodeBase64 } from 'base64';
 
-const getCloudflareAccountId = () => Deno.env.get('CLOUDFLARE_ACCOUNT_ID') as string;
-const getCloudflareApiKey = () => Deno.env.get('CLOUDFLARE_API_KEY') as string;
+const getCloudflareAccountId = () => process.env.CLOUDFLARE_ACCOUNT_ID as string;
+const getCloudflareApiKey = () => process.env.CLOUDFLARE_API_KEY as string;
 
 const { imageModel, visionTextModel, sttModel } = cloudflareModels;
 

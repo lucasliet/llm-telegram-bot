@@ -1,8 +1,9 @@
+import process from 'node:process';
 import OpenAi from 'openai';
 import OpenAiService from './OpenAIService.ts';
 import { StreamReplyResponse } from '@/util/ChatConfigUtil.ts';
 
-const getZhipuApiKey = () => Deno.env.get('ZHIPU_API_KEY') as string;
+const getZhipuApiKey = () => process.env.ZHIPU_API_KEY as string;
 
 export default class ZaiService extends OpenAiService {
 	public constructor(model = 'glm-5.3-flash') {

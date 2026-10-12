@@ -1,16 +1,29 @@
 import { compressObject, decompressObject } from 'textcompress';
 import OpenAI from 'openai';
 import { ModelCommand } from '@/config/models.ts';
-
-const kv = await Deno.openKv();
+import { getKeyValueStore } from '@/repository/KeyValueStore.ts';
 
 const THIRTY_DAYS_IN_MILLIS = 60 * 60 * 24 * 1000 * 30;
+
+/**
+ * Build the storage key for a user-scoped record.
+ */
+function userRecordKey(userKey: string, record: 'chat-history' | 'current_model'): string {
+	return `${userKey}:${record}`;
+}
+
+/**
+ * Expiration timestamp applied to every chat history write.
+ */
+function chatHistoryExpiration(): { expiresAt: Date } {
+	return { expiresAt: new Date(Date.now() + THIRTY_DAYS_IN_MILLIS) };
+}
 
 /**
  * Get chat history for a user
  */
 export async function getChatHistory(userKey: string): Promise<OpenAI.ChatCompletionMessageParam[]> {
-	const compressed = (await kv.get<string>([userKey, 'chat-history'])).value;
+	const compressed = await getKeyValueStore().get<string>(userRecordKey(userKey, 'chat-history'));
 
 	if (!compressed) {
 		return [];
@@ -42,16 +55,14 @@ export async function addContentToChatHistory(
  */
 async function saveHistoryToStorage(history: OpenAI.ChatCompletionMessageParam[], userKey: string): Promise<void> {
 	const compressed = compressObject(history);
-	await kv.set([userKey, 'chat-history'], compressed, {
-		expireIn: THIRTY_DAYS_IN_MILLIS,
-	});
+	await getKeyValueStore().set(userRecordKey(userKey, 'chat-history'), compressed, chatHistoryExpiration());
 }
 
 /**
  * Clear chat history for a user
  */
 export async function clearChatHistory(userKey: string): Promise<void> {
-	await kv.delete([userKey, 'chat-history']);
+	await getKeyValueStore().delete(userRecordKey(userKey, 'chat-history'));
 }
 
 /**
@@ -59,21 +70,19 @@ export async function clearChatHistory(userKey: string): Promise<void> {
  */
 export async function overwriteChatHistory(userKey: string, history: OpenAI.ChatCompletionMessageParam[]): Promise<void> {
 	const compressed = compressObject(history);
-	await kv.set([userKey, 'chat-history'], compressed, {
-		expireIn: THIRTY_DAYS_IN_MILLIS,
-	});
+	await getKeyValueStore().set(userRecordKey(userKey, 'chat-history'), compressed, chatHistoryExpiration());
 }
 
 /**
  * Set user's current model preference
  */
 export async function setCurrentModel(userKey: string, model: ModelCommand = '/free'): Promise<void> {
-	await kv.set([userKey, 'current_model'], model);
+	await getKeyValueStore().set(userRecordKey(userKey, 'current_model'), model);
 }
 
 /**
  * Get user's current model preference (defaults to /free)
  */
 export async function getCurrentModel(userKey: string): Promise<ModelCommand> {
-	return (await kv.get<ModelCommand>([userKey, 'current_model'])).value || '/free';
+	return (await getKeyValueStore().get<ModelCommand>(userRecordKey(userKey, 'current_model'))) || '/free';
 }

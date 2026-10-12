@@ -1,7 +1,8 @@
+import process from 'node:process';
 import OpenAi from 'openai';
 import OpenAiService from './OpenAIService.ts';
 
-const getGithubToken = () => Deno.env.get('GITHUB_TOKEN') as string;
+const getGithubToken = () => process.env.GITHUB_TOKEN as string;
 
 export default class GithubService extends OpenAiService {
 	public constructor() {

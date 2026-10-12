@@ -1,10 +1,14 @@
 import { assertEquals } from 'asserts';
-import { assignOpenKv } from '../stubs/kv.ts';
-import { MockKvStore } from '../test_helpers.ts';
+import { InMemoryKeyValueStore, KeyValueSetOptions, setKeyValueStore } from '@/repository/KeyValueStore.ts';
 
-const mockKv = new MockKvStore();
-const originalOpenKv = Deno.openKv;
-assignOpenKv(() => Promise.resolve(mockKv as unknown as Deno.Kv));
+class RecordingKeyValueStore extends InMemoryKeyValueStore {
+	readonly writes = new Map<string, KeyValueSetOptions | undefined>();
+
+	override set<T>(key: string, value: T, options?: KeyValueSetOptions): Promise<void> {
+		this.writes.set(key, options);
+		return super.set(key, value, options);
+	}
+}
 
 const userKey = 'user:12345';
 const testModel = '/free';
@@ -18,11 +22,9 @@ Deno.test('ChatRepository', async (t) => {
 		getCurrentModel,
 	} = await import('../../src/repository/ChatRepository.ts');
 
-	/** Resets the mock KV store */
+	/** Resets the KV store */
 	const resetKv = () => {
-		for (const key of (mockKv as any).store.keys()) {
-			(mockKv as any).store.delete(key);
-		}
+		setKeyValueStore(new InMemoryKeyValueStore());
 	};
 
 	await t.step(
@@ -98,6 +100,17 @@ Deno.test('ChatRepository', async (t) => {
 		},
 	);
 
-	await mockKv.close();
-	assignOpenKv(originalOpenKv);
+	await t.step('addContentToChatHistory should expire chat history in 30 days', async () => {
+		const store = new RecordingKeyValueStore();
+		setKeyValueStore(store);
+		const before = Date.now();
+
+		await addContentToChatHistory([], 'Hello', 'Hi there!', userKey);
+
+		const expiresAt = store.writes.get(`${userKey}:chat-history`)?.expiresAt?.getTime() ?? 0;
+		const thirtyDays = 30 * 24 * 60 * 60 * 1000;
+		assertEquals(expiresAt >= before + thirtyDays && expiresAt <= Date.now() + thirtyDays, true);
+	});
+
+	setKeyValueStore(new InMemoryKeyValueStore());
 });

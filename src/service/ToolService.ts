@@ -1,3 +1,4 @@
+import process from 'node:process';
 import OpenAi from 'openai';
 import { XMLParser } from 'fast-xml-parser';
 import { parse } from 'node-html-parser';
@@ -234,7 +235,7 @@ export default class ToolService {
 					query: string;
 					max_results?: number;
 				}): Promise<TavilyResult[]> => {
-					const apiKey = Deno.env.get('TAVILY_API_KEY');
+					const apiKey = process.env.TAVILY_API_KEY;
 					if (!apiKey) {
 						throw new Error('TAVILY_API_KEY environment variable is not set');
 					}

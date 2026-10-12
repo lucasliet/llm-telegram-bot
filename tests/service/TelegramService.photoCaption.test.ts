@@ -1,7 +1,7 @@
 import { assertEquals } from 'asserts';
 import { spy } from 'mock';
 import { mockDenoEnv } from '../test_helpers.ts';
-import { assignOpenKv } from '../stubs/kv.ts';
+import { InMemoryKeyValueStore, setKeyValueStore } from '@/repository/KeyValueStore.ts';
 
 const streamResponse = () =>
 	Promise.resolve({
@@ -10,16 +10,19 @@ const streamResponse = () =>
 		responseMap: (s: string) => s,
 	});
 
+class CurrentModelKeyValueStore extends InMemoryKeyValueStore {
+	constructor(private readonly model: string) {
+		super();
+	}
+
+	override get<T>(key: string): Promise<T | null> {
+		return Promise.resolve(key.endsWith(':current_model') ? this.model as T : null);
+	}
+}
+
 function stubKvWithCurrentModel(model: string): () => void {
-	const originalOpenKv = Deno.openKv;
-	const mockKv = {
-		get: (key: unknown[]) => Promise.resolve({ value: key[1] === 'current_model' ? model : undefined }),
-		set: () => Promise.resolve({ ok: true }),
-		delete: () => Promise.resolve({ ok: true }),
-		close: () => Promise.resolve(),
-	};
-	assignOpenKv(() => Promise.resolve(mockKv as unknown as Deno.Kv));
-	return () => assignOpenKv(originalOpenKv);
+	setKeyValueStore(new CurrentModelKeyValueStore(model));
+	return () => setKeyValueStore(new InMemoryKeyValueStore());
 }
 
 Deno.test('replyTextContent forwards photo caption to vision handler when message has no text', async () => {

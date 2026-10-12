@@ -1,8 +1,9 @@
+import process from 'node:process';
 import OpenAi from 'openai';
 import OpenAiService from './OpenAIService.ts';
 import { perplexityModels } from '@/config/models.ts';
 
-const getPerplexityApiKey = () => Deno.env.get('PERPLEXITY_API_KEY') as string;
+const getPerplexityApiKey = () => process.env.PERPLEXITY_API_KEY as string;
 const { textModel, reasoningModel } = perplexityModels;
 
 export default class PerplexityService extends OpenAiService {

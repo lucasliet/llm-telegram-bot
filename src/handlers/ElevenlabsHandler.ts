@@ -1,5 +1,6 @@
 import { Context } from 'grammy';
 import { StreamReplyResponse } from '../util/ChatConfigUtil.ts';
+import { textToSpeech } from '@/service/TelegramService.ts';
 
 /**
  * Handles the 'fala' command by generating text using the provided text model service,
@@ -34,7 +35,6 @@ export async function handleFala<
 		const fullText = (await reader.text()).removeThinkingChatCompletion();
 		if (onComplete) await onComplete(fullText);
 
-		const { textToSpeech } = await import('../service/TelegramService.ts');
 		await textToSpeech(ctx, fullText);
 		return;
 	}

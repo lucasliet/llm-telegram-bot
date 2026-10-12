@@ -2,11 +2,13 @@
 
 ## Project Structure & Module Organization
 
-- `main.ts`: Hono app + grammy bot bootstrap.
+- `src/app.ts`: grammy bot + Hono webhook app (runtime-agnostic, no Deno-only APIs).
+- `worker.ts`: Cloudflare Workers entrypoint (production); `wrangler.jsonc` holds the KV binding, vars and assets.
+- `main.ts`: local entrypoint (long polling) and `copilot-login`.
 - `src/`: production code
   - `handlers/`: command and model handlers (suffix `Handler`)
   - `service/`: integrations and orchestration (suffix `Service`)
-  - `repository/`: persistence via Deno KV (suffix `Repository`)
+  - `repository/`: persistence via `KeyValueStore` (Workers KV in production, in-memory locally/tests) (suffix `Repository`)
   - `adapter/`, `config/`, `prototype/`, `util/`: support modules
 - `tests/`: mirrors `src/` with `*.test.ts`
 - `resources/`: prompts and internal docs
@@ -16,6 +18,8 @@
 ## Build, Test, and Development Commands
 
 - `deno task dev`: runs `devrun.sh` (loads `.env`, starts with `denon`, sets Telegram webhook).
+- `deno task build`: bundles `worker.ts` into `dist/worker.js` (wrangler runs it automatically on `dev:worker`/`deploy`).
+- `deno task deploy`: deploys to Cloudflare Workers (`npx wrangler@4.143.1 deploy`); `deno task dev:worker` runs it locally on workerd.
 - `./run_tests.sh`: full suite + coverage (**run the script directly instead of `deno task test`**).
 - `deno test -A --unstable-kv --unstable-cron tests/service/TelegramService.test.ts`: run a specific test.
 - `deno fmt 'src/**/*.ts' 'tests/**/*.ts' 'main.ts'`, `deno lint`: format and lint the codebase.
@@ -43,6 +47,7 @@
 
 ## Security & Configuration Tips
 
+- Read env vars via `process.env` (`import process from 'node:process'`), never `Deno.*` APIs in `src/`: production runs on Workers with `nodejs_compat`.
 - Never commit secrets. Store provider keys and tokens in `.env` (e.g., `BOT_TOKEN`, `SERVER_URL`, `ADMIN_USER_IDS`, provider API keys).
 - Validate inputs and sanitize outputs when interacting with external providers.
 - **Never read env var values into context** - only check if they are filled. Use `$VAR` directly in bash commands or `Deno.env.get("VAR")` in code to avoid

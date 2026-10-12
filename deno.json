@@ -1,7 +1,10 @@
 {
 	"tasks": {
 		"test": "./run_tests.sh",
-		"dev": "./devrun.sh"
+		"dev": "./devrun.sh",
+		"build": "deno bundle --allow-import --platform=browser -o dist/worker.js worker.ts",
+		"dev:worker": "npx --yes wrangler@4.143.1 dev",
+		"deploy": "npx --yes wrangler@4.143.1 deploy"
 	},
 	"fmt": {
 		"useTabs": true,
@@ -39,9 +42,5 @@
 	},
 	"compilerOptions": {
 		"strict": true
-	},
-	"deploy": {
-		"org": "lucasliet",
-		"app": "llm-telegram-bot"
 	}
 }

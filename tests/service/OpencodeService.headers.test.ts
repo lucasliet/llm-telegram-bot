@@ -77,3 +77,23 @@ Deno.test('OpencodeService.generateText reuses the stable in-memory session', as
 		restore();
 	}
 });
+
+Deno.test('OpencodeService does not generate random values when the module is imported', async () => {
+	const originalRandomUUID = crypto.randomUUID;
+	let randomCalls = 0;
+	crypto.randomUUID = () => {
+		randomCalls++;
+		return originalRandomUUID.call(crypto);
+	};
+
+	try {
+		const freshModule = await import('../../src/service/openai/OpencodeService.ts?global-scope-check');
+
+		assertEquals(randomCalls, 0);
+		const service = new freshModule.default();
+		assertEquals(randomCalls, 1);
+		assertEquals(new freshModule.default().getOperationId(), service.getOperationId());
+	} finally {
+		crypto.randomUUID = originalRandomUUID;
+	}
+});

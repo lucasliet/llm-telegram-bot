@@ -1,3 +1,4 @@
+import process from 'node:process';
 import OpenAi from 'openai';
 import OpenAiService from './OpenAIService.ts';
 import { opencodeModels } from '@/config/models.ts';
@@ -37,11 +38,18 @@ export function buildOpencodeHeaders(operationId: string): Record<string, string
 	};
 }
 
+let opencodeSessionId: string | null = null;
+
 /**
  * Sessão estável em memória durante a vida curta da instância serverless.
  * Reutilizada em toda request para o vendor correlacionar a conversa.
+ * Gerada sob demanda porque o Workers proíbe gerar valores aleatórios no escopo global.
+ * @returns ID da sessão da instância atual.
  */
-const OPENCODE_SESSION_ID = newOpencodeOperationId();
+function getOpencodeSessionId(): string {
+	opencodeSessionId ??= newOpencodeOperationId();
+	return opencodeSessionId;
+}
 
 /**
  * Service for OpenCode Go paid OpenAI-compatible endpoint.
@@ -52,11 +60,11 @@ const OPENCODE_SESSION_ID = newOpencodeOperationId();
 export default class OpencodeService extends OpenAiService {
 	private operationId: string;
 
-	public constructor(model: string = mimo, operationId: string = OPENCODE_SESSION_ID) {
+	public constructor(model: string = mimo, operationId: string = getOpencodeSessionId()) {
 		super(
 			new OpenAi({
-				apiKey: Deno.env.get('OPENCODE_API_KEY') ?? '',
-				baseURL: Deno.env.get('OPENCODE_BASE_URL') ?? OPENCODE_BASE_URL,
+				apiKey: process.env.OPENCODE_API_KEY ?? '',
+				baseURL: process.env.OPENCODE_BASE_URL ?? OPENCODE_BASE_URL,
 				defaultHeaders: buildOpencodeHeaders(operationId),
 			}),
 			model,
@@ -89,8 +97,9 @@ export default class OpencodeService extends OpenAiService {
 	 * @returns ID da sessão estável.
 	 */
 	private beginOperation(): string {
-		this.setOperationId(OPENCODE_SESSION_ID);
-		return OPENCODE_SESSION_ID;
+		const sessionId = getOpencodeSessionId();
+		this.setOperationId(sessionId);
+		return sessionId;
 	}
 
 	override generateText(

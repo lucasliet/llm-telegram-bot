@@ -1,3 +1,4 @@
+import process from 'node:process';
 import { Context } from 'grammy';
 import { Voice } from 'grammy-types';
 
@@ -23,9 +24,9 @@ import {
 import { FileUtils } from '@/util/FileUtils.ts';
 import GithubCopilotService from './openai/GithubCopilotService.ts';
 
-const getToken = () => Deno.env.get('BOT_TOKEN') as string;
+const getToken = () => process.env.BOT_TOKEN as string;
 const getAdminUserIds = () =>
-	(Deno.env.get('ADMIN_USER_IDS') as string)
+	(process.env.ADMIN_USER_IDS as string)
 		.split('|')
 		.map((id) => parseInt(id));
 
@@ -47,7 +48,7 @@ export default {
 	 */
 	setWebhook(): Promise<Response> {
 		console.log('Setting webhook...');
-		const serverUrl = Deno.env.get('SERVER_URL') || 'https://llm-telegram-bot.lucasliet.deno.net/webhook';
+		const serverUrl = process.env.SERVER_URL || 'https://llm-telegram-bot.lucasliet.deno.net/webhook';
 		return fetch(`https://api.telegram.org/bot${getToken()}/setWebhook`, {
 			method: 'POST',
 			headers: {
@@ -299,7 +300,7 @@ export async function getUsage() {
 	const url = 'https://api.github.com/copilot_internal/user';
 	const headers: Record<string, string> = {
 		Accept: 'application/json',
-		Authorization: `token ${Deno.env.get('COPILOT_GITHUB_TOKEN')}`,
+		Authorization: `token ${process.env.COPILOT_GITHUB_TOKEN}`,
 		'Editor-Version': 'vscode/1.98.1',
 		'Editor-Plugin-Version': 'copilot-chat/0.26.7',
 		'User-Agent': 'GitHubCopilotChat/0.26.7',

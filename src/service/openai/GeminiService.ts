@@ -1,8 +1,9 @@
+import process from 'node:process';
 import OpenAi from 'openai';
 import OpenAiService from './OpenAIService.ts';
 import { StreamReplyResponse } from '../../util/ChatConfigUtil.ts';
 
-const getGeminiApiKey = () => Deno.env.get('GEMINI_API_KEY') as string;
+const getGeminiApiKey = () => process.env.GEMINI_API_KEY as string;
 
 export default class GeminiService extends OpenAiService {
 	public constructor(model: string = 'gemini-2.5-flash') {

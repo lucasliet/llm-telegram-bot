@@ -1,3 +1,4 @@
+import process from 'node:process';
 import { CoreMessage, streamText } from 'ai';
 import { createGoogleGenerativeAI, GoogleGenerativeAIProvider } from '@ai-sdk/google';
 
@@ -5,7 +6,7 @@ import OpenAI from 'openai';
 import { addContentToChatHistory, getChatHistory } from '@/repository/ChatRepository.ts';
 import { getSystemPrompt, StreamReplyResponse } from '@/util/ChatConfigUtil.ts';
 
-const getGeminiApiKey = () => Deno.env.get('GEMINI_API_KEY') as string;
+const getGeminiApiKey = () => process.env.GEMINI_API_KEY as string;
 
 /**
  * GeminiService - Provides text and image generation using Gemini models

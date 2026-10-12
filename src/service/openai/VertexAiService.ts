@@ -1,11 +1,12 @@
+import process from 'node:process';
 import OpenAi from 'openai';
 import OpenAiService from './OpenAIService.ts';
 import { StreamReplyResponse } from '@/util/ChatConfigUtil.ts';
 import { decodeBase64 } from 'base64';
 
-const getVertexCredentialsBase64 = () => Deno.env.get('VERTEX_CREDENTIALS_BASE64') as string;
-const getVertexProjectId = () => Deno.env.get('VERTEX_PROJECT_ID') as string;
-const getVertexLocation = () => Deno.env.get('VERTEX_LOCATION') || 'global';
+const getVertexCredentialsBase64 = () => process.env.VERTEX_CREDENTIALS_BASE64 as string;
+const getVertexProjectId = () => process.env.VERTEX_PROJECT_ID as string;
+const getVertexLocation = () => process.env.VERTEX_LOCATION || 'global';
 
 /**
  * Gets access token using refresh token (ADC credentials from gcloud CLI)

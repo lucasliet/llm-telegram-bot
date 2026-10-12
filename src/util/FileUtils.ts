@@ -1,8 +1,9 @@
+import process from 'node:process';
 import { Context } from 'grammy';
 import { InputFile, Voice } from 'grammy-types';
 import CloudFlareService from '@/service/openai/CloudFlareService.ts';
 import ElevenLabsService from '@/service/ElevenLabsService.ts';
-const getToken = () => Deno.env.get('BOT_TOKEN') as string;
+const getToken = () => process.env.BOT_TOKEN as string;
 
 /**
  * Utilities for file handling

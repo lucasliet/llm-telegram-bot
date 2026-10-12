@@ -1,6 +1,6 @@
 import { assertEquals } from 'asserts';
 import { spy } from 'mock';
-import { assignOpenKv } from '../stubs/kv.ts';
+import { InMemoryKeyValueStore, KeyValueStore, setKeyValueStore } from '@/repository/KeyValueStore.ts';
 import { assertSpyCalls, createMockContext, MockContext, mockDenoEnv } from '../test_helpers.ts';
 
 import type { ModelCommand } from '../../src/config/models.ts';
@@ -18,14 +18,12 @@ Deno.test('TelegramService', async (t) => {
 	const mockFetch = spy(() => Promise.resolve(new Response(JSON.stringify({ ok: true }), { status: 200 })));
 	globalThis.fetch = mockFetch;
 
-	const originalOpenKv = Deno.openKv;
 	const mockKv = {
-		get: () => Promise.resolve({ value: '/gpt' }),
-		set: spy(() => Promise.resolve({ ok: true })),
-		delete: () => Promise.resolve({ ok: true }),
-		close: () => Promise.resolve(),
+		get: () => Promise.resolve('/gpt'),
+		set: spy(() => Promise.resolve()),
+		delete: () => Promise.resolve(),
 	};
-	assignOpenKv(() => Promise.resolve(mockKv));
+	setKeyValueStore(mockKv as unknown as KeyValueStore);
 
 	const originalSetInterval = globalThis.setInterval;
 	const originalClearInterval = globalThis.clearInterval;
@@ -133,12 +131,12 @@ Deno.test('TelegramService', async (t) => {
 			'WHITELISTED_MODELS não deve conter duplicatas',
 		);
 		for (const model of WHITELISTED_MODELS) {
-			mockKv.set = spy(() => Promise.resolve({ ok: true }));
+			mockKv.set = spy(() => Promise.resolve());
 			const ctx = createMockContext({ userId: nonAdmin, message: model });
 			await originalSetCurrentModel(ctx as any);
 			assertSpyCalls(mockKv.set, 1);
 			assertSpyCalls(ctx.reply, 1);
-			const expectedKey = [`user:${nonAdmin}`, 'current_model'];
+			const expectedKey = `user:${nonAdmin}:current_model`;
 			assertEquals(mockKv.set.calls[0].args[0], expectedKey);
 			assertEquals(mockKv.set.calls[0].args[1], model);
 			assertEquals(
@@ -148,7 +146,7 @@ Deno.test('TelegramService', async (t) => {
 		}
 		const disallowed = modelCommands.filter((m) => !WHITELISTED_MODELS.includes(m));
 		for (const model of disallowed) {
-			mockKv.set = spy(() => Promise.resolve({ ok: true }));
+			mockKv.set = spy(() => Promise.resolve());
 			const ctx = createMockContext({ userId: nonAdmin, message: model });
 			await originalSetCurrentModel(ctx as any);
 			assertSpyCalls(mockKv.set, 0);
@@ -250,7 +248,7 @@ Deno.test('TelegramService', async (t) => {
 	});
 
 	globalThis.fetch = originalFetch;
-	assignOpenKv(originalOpenKv);
+	setKeyValueStore(new InMemoryKeyValueStore());
 	globalThis.setInterval = originalSetInterval;
 	globalThis.clearInterval = originalClearInterval;
 	globalThis.setTimeout = originalSetTimeout;

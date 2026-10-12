@@ -11,7 +11,21 @@ esse bot utiliza o modelo gratuito do OpenRouter para responder as mensagens por
 um histórico da conversa é mantido para mensagens encadiadas, porém com expiração de 1 dia após a ultima mensagem, também pode ser apagado manualmente com o
 commando `/clear`
 
-esse projeto utiliza o [Deno deploy](https://deno.com/deploy) para hosting da aplicação (nova infra, CI gerenciado pelo próprio Deno Deploy) e o [Deno kv](https://deno.com/kv) para armazenamento persistente de chaves
+esse projeto roda no [Cloudflare Workers](https://developers.cloudflare.com/workers/) (entrada `worker.ts`, bundle gerado com `deno bundle`) e usa o
+[Workers KV](https://developers.cloudflare.com/kv/) para armazenamento persistente de chaves. Localmente, o `main.ts` roda o bot em long polling com estado em
+memória.
+
+### Deploy (Cloudflare Workers)
+
+```bash
+npx wrangler@4.143.1 login
+npx wrangler@4.143.1 secret put BOT_TOKEN   # repita para ADMIN_USER_IDS e cada api key usada
+deno task deploy
+```
+
+- `SERVER_URL` já vem definido em `vars` no `wrangler.jsonc` (`https://llm-telegram-bot.lucasliet.workers.dev/webhook`); qualquer `GET` no worker reaplica o
+  webhook no Telegram.
+- `static/` é publicado como static assets (ex.: `/robots.txt`).
 
 ## Provedores e Modelos Disponíveis
 
