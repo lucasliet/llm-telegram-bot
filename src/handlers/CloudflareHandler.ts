@@ -26,7 +26,7 @@ export async function handleCloudflare(
 			photoUrl,
 			caption || DEFAULT_IMAGE_PROMPT,
 		);
-		ctx.replyInChunks(output);
+		await ctx.replyInChunks(output);
 		return;
 	}
 
@@ -37,7 +37,7 @@ export async function handleCloudflare(
 		const prompt = message!.replace(/^kimi:\s*/i, '');
 
 		if (!prompt) {
-			replyWithNothingToProcess(ctx);
+			await replyWithNothingToProcess(ctx);
 			return;
 		}
 
@@ -47,13 +47,13 @@ export async function handleCloudflare(
 			prompt,
 		);
 
-		ctx.streamReply(response);
+		await ctx.streamReply(response);
 		return;
 	}
 
 	if (cloudflareCommand === 'cloudflareimage' || cloudflareCommand === 'image') {
 		ctx.chatAction = 'upload_photo';
-		ctx.replyWithPhoto(
+		await ctx.replyWithPhoto(
 			new InputFile(
 				await service.generateImageBinary(message!),
 				'image/png',

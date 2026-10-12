@@ -9,6 +9,11 @@
 		"watch_dir": ["src", "worker.ts"]
 	},
 	"kv_namespaces": [{ "binding": "KV", "id": "c1ad66759bae4f0b9e835d4a79336e8f" }],
+	// the webhook only enqueues updates; the consumer runs the bot because work left after an HTTP response is cancelled
+	"queues": {
+		"producers": [{ "binding": "UPDATES_QUEUE", "queue": "llm-telegram-bot-updates" }],
+		"consumers": [{ "queue": "llm-telegram-bot-updates", "max_batch_size": 1, "max_batch_timeout": 0, "max_retries": 2 }]
+	},
 	"vars": {
 		"SERVER_URL": "https://llm-telegram-bot.lucasliet.workers.dev/webhook"
 	},

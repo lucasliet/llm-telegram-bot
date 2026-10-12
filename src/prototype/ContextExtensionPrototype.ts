@@ -20,7 +20,7 @@ declare module 'grammy' {
 
 		startTypingIndicator(): number;
 
-		replyInChunks(output: string): void;
+		replyInChunks(output: string): Promise<void>;
 
 		streamReply(
 			response: StreamReplyResponse,
@@ -75,36 +75,38 @@ Context.prototype.startTypingIndicator = function (this: Context): number {
 };
 
 /**
- * Split a large response into multiple message chunks
+ * Split a large response into multiple message chunks, sent in order
  */
-Context.prototype.replyInChunks = function (
+Context.prototype.replyInChunks = async function (
 	this: Context,
 	output: string,
-): void {
+): Promise<void> {
 	if (output.length > 4096) {
 		const outputChunks = output.match(/[\s\S]{1,4093}/g)!;
 
-		outputChunks.forEach((chunk, index) => {
+		for (const [index, chunk] of outputChunks.entries()) {
 			const isLastChunk = index === outputChunks.length - 1;
-			const chunkOutput = `${chunk}${isLastChunk ? '' : '...'}`;
-			const sanitizedOutput = toTelegramMarkdown(chunkOutput);
-
-			this.replyWithQuote(sanitizedOutput, { parse_mode: 'Markdown' })
-				.catch(() => {
-					console.warn(MARKDOWN_ERROR_MESSAGE, chunkOutput);
-					this.replyWithQuote(chunkOutput);
-				});
-		});
+			await replyWithMarkdownFallback(this, `${chunk}${isLastChunk ? '' : '...'}`);
+		}
 		return;
 	}
 
-	const sanitizedOutput = toTelegramMarkdown(output);
-	this.replyWithQuote(sanitizedOutput, { parse_mode: 'Markdown' })
-		.catch(() => {
-			console.warn(MARKDOWN_ERROR_MESSAGE, output);
-			this.replyWithQuote(output);
-		});
+	await replyWithMarkdownFallback(this, output);
 };
+
+/**
+ * Reply quoting the original message in Markdown, falling back to plain text when Telegram rejects the markdown
+ * @param ctx - Telegram context
+ * @param output - Raw text to send
+ */
+async function replyWithMarkdownFallback(ctx: Context, output: string): Promise<void> {
+	try {
+		await ctx.replyWithQuote(toTelegramMarkdown(output), { parse_mode: 'Markdown' });
+	} catch {
+		console.warn(MARKDOWN_ERROR_MESSAGE, output);
+		await ctx.replyWithQuote(output);
+	}
+}
 
 /**
  * Stream a response to the user with periodic updates
@@ -150,7 +152,7 @@ Context.prototype.streamReply = async function (
 				);
 				lastUpdate = updateResult.timestamp;
 				lastSentMessage = updateResult.lastMessage;
-				onComplete(result);
+				await onComplete(result);
 				return this.streamReply(
 					{ reader, onComplete, responseMap, isCompressed: false },
 					remainingChunk,
@@ -175,18 +177,11 @@ Context.prototype.streamReply = async function (
 	if (sanitizedResult.length > 4093) {
 		const remainingChunk = sanitizedResult.substring(4093);
 		sanitizedResult = sanitizedResult.substring(0, 4093) + '...';
-		this.replyInChunks(remainingChunk);
+		await this.replyInChunks(remainingChunk);
 	}
 
-	this.api.editMessageText(this.chat!.id, message_id, toTelegramMarkdown(sanitizedResult), {
-		parse_mode: 'Markdown',
-	})
-		.catch(() => {
-			console.warn(MARKDOWN_ERROR_MESSAGE, sanitizedResult);
-			this.api.editMessageText(this.chat!.id, message_id, sanitizedResult);
-		});
-
-	onComplete(result);
+	await editMessageWithCompletionEvery3Seconds(this, message_id, sanitizedResult, lastUpdate, lastSentMessage, true);
+	await onComplete(result);
 };
 
 /**

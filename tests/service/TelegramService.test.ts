@@ -10,7 +10,7 @@ Deno.test('TelegramService', async (t) => {
 	mockDenoEnv({
 		'BOT_TOKEN': 'test_token',
 		'ADMIN_USER_IDS': '12345|67890',
-		'SERVER_URL': 'https://llm-telegram-bot.deno.dev/webhook',
+		'SERVER_URL': 'https://llm-telegram-bot.lucasliet.workers.dev/webhook',
 		'OPENAI_API_KEY': 'test_openai_key',
 	});
 
@@ -75,7 +75,7 @@ Deno.test('TelegramService', async (t) => {
 		assertEquals(options.headers['Content-Type'], 'application/json');
 		assertEquals(
 			JSON.parse(options.body),
-			{ url: 'https://llm-telegram-bot.deno.dev/webhook' },
+			{ url: 'https://llm-telegram-bot.lucasliet.workers.dev/webhook' },
 		);
 	});
 
@@ -189,49 +189,46 @@ Deno.test('TelegramService', async (t) => {
 		},
 	);
 
-	await t.step('callModel should handle successful model calls', () => {
-		const mockSetInterval = spy(() => 123);
+	await t.step('callModel só resolve depois que a chamada ao modelo termina', async () => {
+		// Given
 		const mockClearInterval = spy();
-		globalThis.setInterval = mockSetInterval;
 		globalThis.clearInterval = mockClearInterval;
-
-		const mockSetTimeout = spy(() => 456);
-		const mockClearTimeout = spy();
-		globalThis.setTimeout = mockSetTimeout;
-		globalThis.clearTimeout = mockClearTimeout;
-
 		const ctx = createMockContext();
 		ctx.startTypingIndicator = spy(() => 456);
-		const modelFunc = spy(() => Promise.resolve());
+		let finishModelCall = () => {};
+		const modelFunc = spy(() => new Promise<void>((resolve) => finishModelCall = resolve));
+		let settled = false;
 
-		TelegramService.callModel(ctx, modelFunc);
+		// When
+		const callModelPromise = TelegramService.callModel(ctx, modelFunc).then(() => settled = true);
+		await Promise.resolve();
+		const settledBeforeModelFinished = settled;
+		finishModelCall();
+		await callModelPromise;
 
-		assertSpyCalls(modelFunc, 1);
+		// Then
+		assertEquals(settledBeforeModelFinished, false);
+		assertEquals(settled, true);
 		assertEquals(modelFunc.calls[0].args[0], ctx);
 		assertSpyCalls(ctx.startTypingIndicator, 1);
-		assertSpyCalls(mockSetInterval, 1);
+		assertEquals(mockClearInterval.calls[0].args[0], 456);
 	});
 
-	await t.step('callModel should handle errors in model calls', () => {
-		const mockSetInterval = spy(() => 123);
+	await t.step('callModel aguarda a resposta de erro quando a chamada ao modelo falha', async () => {
+		// Given
 		const mockClearInterval = spy();
-		globalThis.setInterval = mockSetInterval;
 		globalThis.clearInterval = mockClearInterval;
-
-		const mockSetTimeout = spy(() => 456);
-		const mockClearTimeout = spy();
-		globalThis.setTimeout = mockSetTimeout;
-		globalThis.clearTimeout = mockClearTimeout;
-
 		const ctx = createMockContext();
 		ctx.startTypingIndicator = spy(() => 456);
-		const error = new Error('Test error');
-		const modelFunc = spy(() => Promise.reject(error));
+		const modelFunc = spy(() => Promise.reject(new Error('Test error')));
 
-		TelegramService.callModel(ctx, modelFunc);
+		// When
+		await TelegramService.callModel(ctx, modelFunc);
 
-		assertSpyCalls(modelFunc, 1);
-		assertSpyCalls(mockSetInterval, 1);
+		// Then
+		assertSpyCalls(ctx.reply, 1);
+		assertEquals(ctx.reply.calls[0].args[0], 'Eita, algo deu errado: Test error');
+		assertSpyCalls(mockClearInterval, 1);
 	});
 
 	await t.step('service should have model-specific handler wrappers', () => {

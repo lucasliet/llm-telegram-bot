@@ -34,8 +34,8 @@ export const DEFAULT_IMAGE_PROMPT = 'descreva a imagem';
  * Replies listing the media types the bot can actually read
  * @param ctx - Telegram context
  */
-export function replyWithNothingToProcess(ctx: Context): void {
-	ctx.replyWithQuote('consigo ler apenas texto, foto ou imagem anexada como arquivo');
+export async function replyWithNothingToProcess(ctx: Context): Promise<void> {
+	await ctx.replyWithQuote('consigo ler apenas texto, foto ou imagem anexada como arquivo');
 }
 
 interface VisionHandlerOptions<T extends string> {
@@ -71,7 +71,7 @@ export function createVisionHandler<T extends string>(options: VisionHandlerOpti
 		const supportsVision = !visionModels || (model !== undefined && visionModels.includes(model));
 
 		if (photos && !supportsVision) {
-			ctx.replyWithVisionNotSupportedByModel();
+			await ctx.replyWithVisionNotSupportedByModel();
 			return;
 		}
 
@@ -89,7 +89,7 @@ export function createVisionHandler<T extends string>(options: VisionHandlerOpti
 		}
 
 		if (!prompt) {
-			replyWithNothingToProcess(ctx);
+			await replyWithNothingToProcess(ctx);
 			return;
 		}
 
@@ -110,7 +110,7 @@ export function createTextOnlyHandler<T extends string>(options: TextOnlyHandler
 		const message = commandMessage || contextMessage;
 
 		if (photos && caption) {
-			ctx.replyWithVisionNotSupportedByModel();
+			await ctx.replyWithVisionNotSupportedByModel();
 			return;
 		}
 
@@ -121,7 +121,7 @@ export function createTextOnlyHandler<T extends string>(options: TextOnlyHandler
 		const service = createService(model);
 
 		const response = await service.generateText(userKey, quote ?? '', prompt);
-		ctx.streamReply(response);
+		await ctx.streamReply(response);
 	};
 }
 
@@ -146,7 +146,7 @@ export function createHybridHandler(options: HybridHandlerOptions) {
 		const message = commandMessage || contextMessage;
 
 		if (photos && caption) {
-			ctx.replyWithVisionNotSupportedByModel();
+			await ctx.replyWithVisionNotSupportedByModel();
 			return;
 		}
 
@@ -162,6 +162,6 @@ export function createHybridHandler(options: HybridHandlerOptions) {
 		}
 
 		const response = await service.generateText(userKey, quote ?? '', prompt);
-		ctx.streamReply(response);
+		await ctx.streamReply(response);
 	};
 }

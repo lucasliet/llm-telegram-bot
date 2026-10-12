@@ -31,14 +31,6 @@ const getAdminUserIds = () =>
 		.map((id) => parseInt(id));
 
 /**
- * Helper to keep Deno job alive during long-running requests
- * @returns Interval ID
- */
-function keepDenoJobAlive(): number {
-	return setInterval(() => true, 2000);
-}
-
-/**
  * Service for handling Telegram bot interactions
  */
 export default {
@@ -48,7 +40,7 @@ export default {
 	 */
 	setWebhook(): Promise<Response> {
 		console.log('Setting webhook...');
-		const serverUrl = process.env.SERVER_URL || 'https://llm-telegram-bot.lucasliet.deno.net/webhook';
+		const serverUrl = process.env.SERVER_URL || 'https://llm-telegram-bot.lucasliet.workers.dev/webhook';
 		return fetch(`https://api.telegram.org/bot${getToken()}/setWebhook`, {
 			method: 'POST',
 			headers: {
@@ -64,50 +56,47 @@ export default {
 	 * Calls a model function if the user is an admin, otherwise defaults to text content
 	 * @param ctx - Telegram context
 	 * @param modelCallFunction - Function to call for the specific model
+	 * @returns Promise resolved once the reply was sent
 	 */
 	callAdminModel(
 		ctx: Context,
 		modelCallFunction: (ctx: Context) => Promise<void>,
-	): void {
+	): Promise<void> {
 		const userId = ctx.from?.id;
 		if (userId && getAdminUserIds().includes(userId)) {
-			this.callModel(ctx, modelCallFunction);
-		} else {
-			this.callModel(ctx, this.replyTextContent);
+			return this.callModel(ctx, modelCallFunction);
 		}
+		return this.callModel(ctx, this.replyTextContent);
 	},
 
 	/**
-	 * Generic model call handler with timeout and logging
+	 * Generic model call handler with typing indicator, logging and a user-facing error reply.
+	 * The returned promise must be awaited: Workers cancel pending work once the update handler resolves.
 	 * @param ctx - Telegram context
 	 * @param modelCallFunction - Function to call for the specific model
+	 * @returns Promise resolved once the reply (or the error message) was sent
 	 */
-	callModel(
+	async callModel(
 		ctx: Context,
 		modelCallFunction: (ctx: Context) => Promise<void>,
-	): void {
+	): Promise<void> {
 		console.info(`user: ${ctx.msg?.from?.id}, message: ${ctx.message?.text}`);
 
 		const startTime = Date.now();
-		const keepAliveId = keepDenoJobAlive();
 		const typingId = ctx.startTypingIndicator();
 
-		modelCallFunction(ctx)
-			.then(() => {
-				ctx.chatAction = undefined;
-				clearInterval(typingId);
-				clearInterval(keepAliveId);
-				console.log(`Request processed in ${Date.now() - startTime}ms`);
-			})
-			.catch((err) => {
-				ctx.chatAction = undefined;
-				clearInterval(typingId);
-				clearInterval(keepAliveId);
-				console.error(err);
-				ctx.reply(`Eita, algo deu errado: ${err.message}`, {
-					reply_to_message_id: ctx.msg?.message_id,
-				});
+		try {
+			await modelCallFunction(ctx);
+			console.log(`Request processed in ${Date.now() - startTime}ms`);
+		} catch (err) {
+			console.error(err);
+			await ctx.reply(`Eita, algo deu errado: ${(err as Error).message}`, {
+				reply_to_message_id: ctx.msg?.message_id,
 			});
+		} finally {
+			ctx.chatAction = undefined;
+			clearInterval(typingId);
+		}
 	},
 
 	/**
@@ -158,7 +147,7 @@ Interações Premium:
 • *Overage permitido*: ${premium?.overage_permitted ? 'Sim' : 'Não'}
 • *Contador de overage*: ${premium?.overage_count ?? 0}`;
 
-		ctx.reply(formatted, { parse_mode: 'Markdown' });
+		await ctx.reply(formatted, { parse_mode: 'Markdown' });
 	},
 
 	/**
@@ -202,7 +191,7 @@ Interações Premium:
 		if (!isValidCommand || !isAuthorizedUser) return;
 
 		await setCurrentModel(userKey, command);
-		ctx.reply(`Novo modelo de inteligência escolhido: ${command}`);
+		await ctx.reply(`Novo modelo de inteligência escolhido: ${command}`);
 	},
 
 	/**
@@ -232,7 +221,7 @@ Interações Premium:
 		if (handler) {
 			await handler();
 		} else {
-			ctx.reply('Modelo de inteligência não encontrado.', {
+			await ctx.reply('Modelo de inteligência não encontrado.', {
 				reply_to_message_id: ctx.message?.message_id,
 			});
 		}
@@ -286,7 +275,7 @@ export const transcribeAudio = (
 export async function textToSpeech(ctx: Context, text: string): Promise<void> {
 	const audioFile = await FileUtils.textToSpeech(text);
 
-	ctx.replyWithVoice(audioFile, {
+	await ctx.replyWithVoice(audioFile, {
 		reply_to_message_id: ctx.message?.message_id,
 	});
 }

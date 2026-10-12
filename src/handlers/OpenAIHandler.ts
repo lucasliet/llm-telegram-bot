@@ -28,7 +28,7 @@ export async function handleOpenAI(
 				caption || DEFAULT_IMAGE_PROMPT,
 			);
 
-		ctx.streamReply(response);
+		await ctx.streamReply(response);
 		return;
 	}
 
@@ -42,7 +42,7 @@ export async function handleOpenAI(
 			message!.replace('gpt:', ''),
 		);
 
-		ctx.streamReply(response);
+		await ctx.streamReply(response);
 	} else if (command === 'gptimage') {
 		ctx.chatAction = 'upload_photo';
 		const output = await openAIService.generateImage(
@@ -50,7 +50,7 @@ export async function handleOpenAI(
 			message!.replace('gptImage:', ''),
 		);
 		const mediaUrls = output.map((imageUrl) => InputMediaBuilder.photo(imageUrl));
-		ctx.replyWithMediaGroup(mediaUrls, {
+		await ctx.replyWithMediaGroup(mediaUrls, {
 			reply_to_message_id: ctx.message?.message_id,
 		});
 	}

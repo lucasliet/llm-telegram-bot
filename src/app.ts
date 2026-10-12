@@ -2,6 +2,7 @@ import process from 'node:process';
 import { Hono } from 'hono';
 import { cors } from 'hono/cors';
 import { Bot, Context, type MiddlewareFn } from 'grammy';
+import type { Update } from 'grammy-types';
 import { autoChatAction, AutoChatActionFlavor } from 'grammy-auto-chat-action';
 import TelegramService from '@/service/TelegramService.ts';
 import { clearChatHistory } from '@/repository/ChatRepository.ts';
@@ -36,7 +37,7 @@ function registerBotCommands(bot: Bot<MyContext>) {
 		const keyboard = isAdmin ? adminKeyboard : userKeyboard;
 		const message = isAdmin ? adminHelpMessage : userHelpMessage;
 
-		ctx.reply(message, { parse_mode: 'MarkdownV2', reply_markup: keyboard });
+		return ctx.reply(message, { parse_mode: 'MarkdownV2', reply_markup: keyboard });
 	});
 
 	bot.command(
@@ -51,7 +52,7 @@ function registerBotCommands(bot: Bot<MyContext>) {
 	bot.command('clear', (ctx) => clearChatHistoryHandler(ctx));
 	bot.command('compress', (ctx) => {
 		console.log('Compress command received');
-		new Promise((resolve) => handleCompress(ctx).then(resolve));
+		return handleCompress(ctx);
 	});
 
 	bot.hears(
@@ -105,17 +106,17 @@ function registerBotCommands(bot: Bot<MyContext>) {
 
 	bot.callbackQuery('/clear', async (ctx) => {
 		await clearChatHistoryHandler(ctx);
-		ctx.answerCallbackQuery();
+		await ctx.answerCallbackQuery();
 	});
 
 	bot.callbackQuery('/currentmodel', async (ctx) => {
-		ctx.reply(`Modelo atual: ${await TelegramService.getCurrentModel(ctx)}`);
-		ctx.answerCallbackQuery();
+		await ctx.reply(`Modelo atual: ${await TelegramService.getCurrentModel(ctx)}`);
+		await ctx.answerCallbackQuery();
 	});
 
 	bot.on('callback_query:data', async (ctx) => {
 		await TelegramService.setCurrentModel(ctx);
-		ctx.answerCallbackQuery();
+		await ctx.answerCallbackQuery();
 	});
 
 	bot.on(
@@ -169,17 +170,19 @@ export async function createBot(): Promise<Bot<MyContext>> {
 }
 
 /**
- * Build the HTTP app that receives Telegram webhook updates for the given bot.
- * @param bot - Initialized bot instance
+ * Build the HTTP app that receives Telegram webhook updates and hands them to `enqueueUpdate`.
+ * The webhook answers as soon as the update is enqueued, so slow model replies never hit Telegram's webhook timeout.
+ * A failed enqueue returns 500 so Telegram redelivers the update.
+ * @param enqueueUpdate - Persists the update for asynchronous processing (a Cloudflare Queue in production)
  * @returns Hono app with CORS, logging, webhook and setWebhook routes
  */
-export function createWebhookApp(bot: Bot<MyContext>): Hono {
+export function createWebhookApp(enqueueUpdate: (update: Update) => Promise<void>): Hono {
 	const app = new Hono();
 	app.use('*', cors());
 	configureMiddleware(app);
 
 	app.post('/webhook', async (c) => {
-		let update;
+		let update: Update;
 		try {
 			update = await c.req.json();
 		} catch (err) {
@@ -188,9 +191,10 @@ export function createWebhookApp(bot: Bot<MyContext>): Hono {
 		}
 
 		try {
-			await bot.handleUpdate(update);
+			await enqueueUpdate(update);
 		} catch (err) {
-			console.error('[WEBHOOK] bot.handleUpdate error:', err);
+			console.error(`[WEBHOOK] Failed to enqueue update ${update.update_id}:`, err);
+			return c.json({ ok: false, error: 'enqueue failed' }, 500);
 		}
 		return c.json({ ok: true });
 	});
