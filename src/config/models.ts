@@ -40,6 +40,10 @@ export const opencodeModels = {
 	museSpark: 'muse-spark-1.3-contributor',
 };
 
+export const luaModels = {
+	supreme: 'supreme',
+};
+
 /**
  * Type definitions
  */
@@ -53,6 +57,7 @@ export const MODEL_COMMANDS = [
 	'/opencode',
 	'/spark',
 	'/gemini',
+	'/lua',
 ] as const;
 
 /**

@@ -3,6 +3,7 @@ import { Context } from 'grammy';
 import { InputFile, Voice } from 'grammy-types';
 import CloudFlareService from '@/service/openai/CloudFlareService.ts';
 import ElevenLabsService from '@/service/ElevenLabsService.ts';
+import LuaVisionService from '@/service/LuaVisionService.ts';
 const getToken = () => process.env.BOT_TOKEN as string;
 
 /**
@@ -77,6 +78,13 @@ export const FileUtils = {
 	async textToSpeech(
 		text: string,
 	): Promise<InputFile> {
+		try {
+			const audioData = await LuaVisionService.textToSpeech(text);
+			return new InputFile(audioData, 'audio.mp3');
+		} catch (luaError) {
+			console.warn('Erro ao converter texto para áudio via LUA Vision, usando fallback ElevenLabs:', luaError);
+		}
+
 		try {
 			const audioData = await ElevenLabsService.textToSpeech(text);
 

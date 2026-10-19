@@ -10,7 +10,10 @@ const adminCommandButtons = [
 		['Opencode Mimo', '/opencode'],
 		['Opencode Spark', '/spark'],
 	],
-	[['Gemini 3.8 Flash', '/gemini']],
+	[
+		['Gemini 3.8 Flash', '/gemini'],
+		['LUA Chat', '/lua'],
+	],
 	[
 		['GLM 5.3', '/glm'],
 		['GLM 5.3 Flash', '/glmflash'],
@@ -47,12 +50,13 @@ export const adminHelpMessage = `*Comandos inline*:
 \\- \`opencode:\` mensagem \\- Faz uma pergunta usando o __MiMo V2\\.6 Flash__ pelo __OpenCode Go__
 \\- \`spark:\` mensagem \\- Faz uma pergunta usando o __Muse Spark 1\\.3__ pelo __OpenCode Go__
 \\- \`gemini:\` mensagem \\- Faz uma pergunta usando o __Gemini 3\\.8 Flash__ pelo __Vertex AI__
+\\- \`lua:\` mensagem \\- Faz uma pergunta usando o __LUA Chat__ \\(8th\\.vision\\)
 \\- \`search:\` mensagem \\- Faz uma pergunta usando o __Sonar__ pela __Perplexity__
 \\- \`reasonSearch:\` mensagem \\- Faz uma pergunta usando o __Sonar Reasoning Pro__
 \\- \`zai:\` mensagem \\- Faz uma pergunta usando o __GLM 5\\.3 Flash__ pelo __Zai__
 \\- \`glm:\` mensagem \\- Faz uma pergunta usando o __GLM 5\\.3__ pelo __Zai__
 \\- \`glmflash:\` mensagem \\- Faz uma pergunta usando o __GLM 5\\.3 Flash__ pelo __Zai__
-\\- \`fala:\` mensagem \\- Faz uma pergunta usando __Elevenlabs__ para TTS
+\\- \`fala:\` mensagem \\- Faz uma pergunta usando __LUA / Elevenlabs__ para TTS
 
 *Seleção de modelos de linguagem*:`;
 

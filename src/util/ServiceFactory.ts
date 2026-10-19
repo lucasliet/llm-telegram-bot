@@ -4,7 +4,8 @@ import VertexAiService from '@/service/openai/VertexAiService.ts';
 import GithubCopilotService from '@/service/openai/GithubCopilotService.ts';
 import ZaiService from '@/service/openai/ZaiService.ts';
 import CloudFlareService from '@/service/openai/CloudFlareService.ts';
-import { copilotModels, geminiModels, zaiModels } from '@/config/models.ts';
+import LuaVisionService from '@/service/LuaVisionService.ts';
+import { copilotModels, geminiModels, luaModels, zaiModels } from '@/config/models.ts';
 import OpenrouterService from '@/service/openai/OpenrouterService.ts';
 
 type AnyService =
@@ -13,6 +14,7 @@ type AnyService =
 	| GithubCopilotService
 	| CloudFlareService
 	| ZaiService
+	| LuaVisionService
 	| OpenrouterService;
 
 export interface ServiceInfo {
@@ -49,6 +51,13 @@ export function getServiceForCommand(command: ModelCommand): ServiceInfo {
 			return {
 				service: new ZaiService(zaiModels.standard),
 				model: zaiModels.standard,
+				maxTokens: 128000,
+			};
+
+		case '/lua':
+			return {
+				service: new LuaVisionService(luaModels.supreme),
+				model: luaModels.supreme,
 				maxTokens: 128000,
 			};
 

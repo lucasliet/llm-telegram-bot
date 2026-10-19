@@ -13,6 +13,7 @@ import {
 	handleFala,
 	handleGemini,
 	handleGithubCopilot,
+	handleLuaVision,
 	handleOpenAI,
 	handleOpencode,
 	handleOpenRouter,
@@ -216,6 +217,7 @@ Interações Premium:
 			'/free': () => handleOpenRouter(ctx, `free: ${promptText ?? ''}`),
 			'/opencode': () => handleOpencode(ctx, `opencode: ${promptText ?? ''}`),
 			'/spark': () => handleOpencode(ctx, `spark: ${promptText ?? ''}`),
+			'/lua': () => handleLuaVision(ctx, `lua: ${promptText ?? ''}`),
 		};
 
 		const isAllowed = (userId != null && getAdminUserIds().includes(userId)) || WHITELISTED_MODELS.includes(currentModel);
@@ -263,9 +265,12 @@ Interações Premium:
 	callZaiModel(ctx: Context, commandMessage?: string): Promise<void> {
 		return handleZai(ctx, commandMessage);
 	},
+	callLuaVisionModel(ctx: Context, commandMessage?: string): Promise<void> {
+		return handleLuaVision(ctx, commandMessage);
+	},
 };
 
-export const downloadTelegramFile = FileUtils.downloadTelegramFile;
+export const downloadTelegramFile = (url: string): Promise<Uint8Array> => FileUtils.downloadTelegramFile(url);
 export const transcribeAudio = (
 	userId: number,
 	userKey: string,

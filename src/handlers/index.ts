@@ -9,3 +9,4 @@ export { handleOpenWebUI } from './OpenWebUIHandler.ts';
 export { handleOpencode } from './OpencodeHandler.ts';
 export { handleFala } from './ElevenlabsHandler.ts';
 export { handleZai } from './ZaiHandler.ts';
+export { handleLuaVision } from './LuaVisionHandler.ts';

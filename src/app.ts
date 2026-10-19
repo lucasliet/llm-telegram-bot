@@ -101,6 +101,11 @@ function registerBotCommands(bot: Bot<MyContext>) {
 	);
 
 	bot.hears(
+		/^(lua):/gi,
+		(ctx) => TelegramService.callAdminModel(ctx, TelegramService.callLuaVisionModel),
+	);
+
+	bot.hears(
 		new RegExp(`^(${modelCommands.join('|')})$`),
 		async (ctx) => await TelegramService.setCurrentModel(ctx),
 	);
