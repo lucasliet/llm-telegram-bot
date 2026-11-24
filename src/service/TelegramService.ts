@@ -24,7 +24,7 @@ import {
 } from '@/handlers/index.ts';
 
 import { FileUtils } from '@/util/FileUtils.ts';
-import GithubCopilotService from './openai/GithubCopilotService.ts';
+import { getServiceForCommand } from '@/util/ServiceFactory.ts';
 
 const getToken = () => process.env.BOT_TOKEN as string;
 const getAdminUserIds = () =>
@@ -259,8 +259,11 @@ Interações Premium:
 	callVertexModel(ctx: Context, commandMessage?: string): Promise<void> {
 		return handleVertex(ctx, commandMessage);
 	},
-	callFala(ctx: Context, commandMessage?: string): Promise<void> {
-		return handleFala(ctx, new GithubCopilotService(), commandMessage);
+	async callFala(ctx: Context, commandMessage?: string): Promise<void> {
+		const userKey = `user:${ctx.from?.id}`;
+		const currentModel = await getCurrentModel(userKey);
+		const { service } = getServiceForCommand(currentModel);
+		return handleFala(ctx, service, commandMessage);
 	},
 	callZaiModel(ctx: Context, commandMessage?: string): Promise<void> {
 		return handleZai(ctx, commandMessage);
